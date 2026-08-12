@@ -1,0 +1,9 @@
+Canonical benchmark report:
+/ai/benchmarks/cold-video-comparison-20260812.md
+
+Canonical videos, in comparison order:
+1. H3 Standard — /ai/artifacts/runs/minimax-h3/minimax-h3/cold-brass-robot-standard-fp8-20_00001_.mp4
+2. H3 Turbo v4 — /ai/artifacts/runs/minimax-h3/minimax-h3/cold-brass-robot-turbo-v4-4_00001_.mp4
+3. LTX-2.5 distilled — /ai/artifacts/runs/ltx-2.5/cold-brass-robot-LTX25-native-896x512.mp4
+
+These are the default brass-robot comparison artifacts. Earlier benchmark videos were removed on 2026-08-12.

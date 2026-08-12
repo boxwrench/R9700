@@ -1,0 +1,14 @@
+id	lane	steps	state	single_variable
+A	Native INT8	20	authorized-deferred-no-further-benchmarks	control
+B	Native FP8	20	validated-single-quality-run	checkpoint precision
+C	R9700 patch + FP8	20	deferred-benchmarking-stopped	R9700 patch
+D	C + smart memory disabled	20	deferred-benchmarking-stopped	smart memory
+E	C + flex attention off	20	deferred-benchmarking-stopped	flex attention off
+F	C + flex attention on	20	deferred-benchmarking-stopped	flex attention on
+G	Spectrum	20	deferred-benchmarking-stopped	Spectrum
+H	FBC Safe	20	deferred-benchmarking-stopped	FBC Safe
+I	Turbo	8	deferred-benchmarking-stopped	Turbo 8-step schedule
+J	R9700 Turbo	4	validated-single-smoke	Turbo 4-step schedule
+K	Selected lane + TunableOp	selected	deferred-benchmarking-stopped	TunableOp
+L	Selected lane + newer ROCm	selected	deferred-benchmarking-stopped	ROCm version
+V	Unsloth Q6_K Vulkan	20	deferred-portability-lane	runtime and quantization

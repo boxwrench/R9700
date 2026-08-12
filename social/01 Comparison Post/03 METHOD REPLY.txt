@@ -1,0 +1,2 @@
+Method: fresh ComfyUI PID each run; zero cached nodes. Time = accepted prompt → saved H.264/AAC MP4. Linux filesystem/compiled-kernel caches preserved. Same positive prompt + seed; prompt enhancement off. No GPU reset, VM fault or OOM.
+

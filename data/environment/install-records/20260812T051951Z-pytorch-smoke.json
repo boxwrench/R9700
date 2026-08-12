@@ -1,0 +1,40 @@
+{
+  "torch": "2.9.1+rocm7.2.1.gitff65f5bc",
+  "hip": "7.2.53211-e1a6bc5663",
+  "devices": [
+    {
+      "index": 0,
+      "name": "Radeon RX 7900 XT"
+    },
+    {
+      "index": 1,
+      "name": "AMD Radeon AI PRO R9700"
+    }
+  ],
+  "selected": 1,
+  "selected_name": "AMD Radeon AI PRO R9700",
+  "allocation_mib_passed": [
+    256,
+    1024,
+    4096
+  ],
+  "vector_add_128mib_seconds": 0.046016,
+  "gemm_seconds": {
+    "float16": [
+      0.002155,
+      0.002009,
+      0.001994
+    ],
+    "bfloat16": [
+      0.00213,
+      0.002047,
+      0.00195
+    ]
+  },
+  "transfer_mib": 512,
+  "h2d_seconds": 0.020358,
+  "h2d_gib_s": 24.56,
+  "d2h_seconds": 0.04958,
+  "d2h_gib_s": 10.085,
+  "max_memory_allocated_mib": 4096.0
+}

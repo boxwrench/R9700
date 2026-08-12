@@ -1,0 +1,24 @@
+R9700 VIDEO BENCHMARK v1 — POSTING KIT
+
+Tracking status
+Two posts are recorded as posted: the three-model comparison and the LTX standalone. See POST TRACKER.tsv, TRACKING GUIDE.md, and each post folder's POST RECORD.md.
+
+Headline rule
+Lead with: wall time to make delivered video duration.
+Then show: wall seconds per output second.
+Put hardware/software and workload specifications in the first reply.
+Put cold-run methodology in the second reply.
+
+To post the comparison
+1. Open `01 Comparison Post`.
+2. Paste `01 HEADLINE.txt` and attach all three MP4 files in numbered order.
+3. Reply with `02 SPECS REPLY.txt`.
+4. Reply again with `03 METHOD REPLY.txt`.
+
+To post LTX by itself
+1. Open `02 LTX Standalone Post`.
+2. Paste `01 HEADLINE.txt` and attach its MP4.
+3. Reply with `02 SPECS AND METHOD REPLY.txt`.
+
+Every post/reply text file is under X's standard 280-character limit.
+

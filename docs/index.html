@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>R9700 Video Examples</title>
+  <link rel="stylesheet" href="gallery.css">
+</head>
+<body>
+<main>
+  <a href="https://github.com/boxwrench/R9700">← back to R9700 repository</a>
+  <p class="kicker">Boxwrench / Radeon AI PRO R9700</p>
+  <h1>Video examples</h1>
+  <p class="lede">Three process-cold/model-cold ComfyUI renders from the same brass-robot prompt. The headline is prompt-to-saved-artifact wall time → delivered video duration.</p>
+
+  <section class="grid" aria-label="Benchmark videos">
+    <article class="card">
+      <video controls preload="metadata" poster="assets/h3-standard-fp8.jpg">
+        <source src="https://github.com/boxwrench/R9700/releases/download/video-v1/h3-standard-fp8.mp4" type="video/mp4">
+        Your browser cannot play this video. <a href="https://github.com/boxwrench/R9700/releases/download/video-v1/h3-standard-fp8.mp4">Download it from the release.</a>
+      </video>
+      <div class="card-body">
+        <h2>MiniMax H3 Standard FP8</h2>
+        <div class="meta">261.038 s → 5.167 s · 864×480 · 124 frames · 20 steps</div>
+        <p class="hash">SHA-256: 780f9b78401fc093269bf27e5364c259ba4ffe06ca70730c8070d5f5b58f95f3</p>
+      </div>
+    </article>
+
+    <article class="card">
+      <video controls preload="metadata" poster="assets/h3-turbo-v4-fp8.jpg">
+        <source src="https://github.com/boxwrench/R9700/releases/download/video-v1/h3-turbo-v4-fp8.mp4" type="video/mp4">
+        Your browser cannot play this video. <a href="https://github.com/boxwrench/R9700/releases/download/video-v1/h3-turbo-v4-fp8.mp4">Download it from the release.</a>
+      </video>
+      <div class="card-body">
+        <h2>MiniMax H3 Turbo v4 FP8</h2>
+        <div class="meta">80.927 s → 5.167 s · 864×480 · 124 frames · 4 Turbo steps</div>
+        <p class="hash">SHA-256: abc3e2680b3ca2b188ae9f60300017faa40e0cc349f4f11c60056671a276556e</p>
+      </div>
+    </article>
+
+    <article class="card">
+      <video controls preload="metadata" poster="assets/ltx-2.5-distilled-int8.jpg">
+        <source src="https://github.com/boxwrench/R9700/releases/download/video-v1/ltx-2.5-distilled-int8.mp4" type="video/mp4">
+        Your browser cannot play this video. <a href="https://github.com/boxwrench/R9700/releases/download/video-v1/ltx-2.5-distilled-int8.mp4">Download it from the release.</a>
+      </video>
+      <div class="card-body">
+        <h2>LTX-2.5 distilled INT8</h2>
+        <div class="meta">67.035 s → 5.042 s · 896×512 · 121 frames · 8+3 steps</div>
+        <p class="hash">SHA-256: 2adeee6d0e47242b9a391e71c8e4012c6dfc1df4f1436f35c12a051e5dd10ec9</p>
+      </div>
+    </article>
+  </section>
+
+  <p class="note">The page expects the three MP4s as assets on the <code>video-v1</code> GitHub Release. The poster frames and measurement records are in the repository; the videos stay out of ordinary Git history.</p>
+  <footer><a href="https://github.com/boxwrench/R9700/blob/main/docs/methodology.md">Methodology</a> · <a href="https://github.com/boxwrench/R9700/blob/main/data/results.tsv">Normalized results</a> · <a href="https://github.com/boxwrench/R9700/releases/tag/video-v1">Release assets</a></footer>
+</main>
+</body>
+</html>

@@ -1,0 +1,18 @@
+# Intent record only. Convert to an exact lock after ROCm/PyTorch compatibility is
+# validated on this host. Do not install this file into Ubuntu's system Python.
+#
+# Target environment: /ai/environments/comfyui-h3
+# Target ROCm userspace: 7.2.1
+# Target PyTorch generation: 2.9.1 ROCm
+# Production Triton baseline: 3.5.1 from AMD's validated ROCm 7.2.1 wheels.
+# Triton 3.7.1 belongs only in the isolated flex-attention experiment lane.
+#
+# AMD wheel source: https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2.1/
+# torch==2.9.1+rocm7.2.1.lw.gitff65f5bc
+# torchvision==0.24.0+rocm7.2.1.gitb919bd0c
+# torchaudio==2.9.0+rocm7.2.1.gite3c6ee2b
+# triton==3.5.1+rocm7.2.1.gita272dfa8
+# comfy-kitchen==0.2.30
+# ComfyUI==v0.32.0 at c2bcbecd82ec5ae66594340b395c24ef0217b238
+# Install /ai/comfyui/requirements.txt only after installing the AMD wheels so
+# an unqualified dependency resolver cannot substitute CPU or unrelated wheels.

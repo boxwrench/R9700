@@ -1,0 +1,12 @@
+3d4e5f95634c6b64de65abf719ea98feada76985652e1f2006ea530ad4093f14  ./BRANDING.md
+982e37e2193928f17539c50846d9c7d30faf45e311a3165b16cdfcb5fd5d8533  ./PROMPT-CATALOG.tsv
+6786602deff82ed93c9dff18ac6f692e14dae35fc0dcb71fa21e60a8ce74256e  ./README.md
+0f338a87d083a35cc95267c7f55fcd6262aaee01ffca210f80c487c65ddd4769  ./RUN-RECORD-TEMPLATE.md
+840e33c7b56d1c05e1ef00ae2775f95549c8793d4bcc5b5175b3577341e0954f  ./STANDARD.md
+f2cd4c6288d4d99bc3d84afe3291b4b5d9be446c0f4e9a613626649ac404fe22  ./branding/boxwrench-benchmark-bug.png
+234945f2d216ff5e11c483de4f3eb14ff028038cb7156624257bcb78dee0e674  ./branding/boxwrench-benchmark-bug.svg
+90002ad43914547210547c8946ae6812c69249ea57be473401288bf23372986b  ./prompts/BX-C01-anchor-scan.md
+e27410d4e2ac412ccf6c193cd0f9de77974608243edd44d8d95805435018da1b  ./prompts/BX-C02-forge-awakening.md
+ae41266a7dd18a8cf6a0f206558a4ab724fdd1c223a83c1f56ba53e21d05f8c9  ./prompts/BX-C03-convergence-repair.md
+e845fd21b0b0abd75c180948f1043ad531fc8aeb5b2621d3b6a64c5019b796bc  ./prompts/BX-C04-call-to-past.md
+eeb4cef26a0d22ee51156e0c1332d37fb5819f94d27f508bc9ddc5f8c81b4109  ./prompts/BX-C05-last-citadel-walk.md

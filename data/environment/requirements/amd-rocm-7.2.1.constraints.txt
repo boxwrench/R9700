@@ -1,0 +1,5 @@
+torch==2.9.1+rocm7.2.1.lw.gitff65f5bc
+torchvision==0.24.0+rocm7.2.1.gitb919bd0c
+torchaudio==2.9.0+rocm7.2.1.gite3c6ee2b
+triton==3.5.1+rocm7.2.1.gita272dfa8
+comfy-kitchen==0.2.30

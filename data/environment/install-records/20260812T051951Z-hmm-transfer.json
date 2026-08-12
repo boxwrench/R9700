@@ -1,0 +1,35 @@
+{
+  "kernel": "6.17.0-42-generic",
+  "torch": "2.9.1+rocm7.2.1.gitff65f5bc",
+  "hip": "7.2.53211-e1a6bc5663",
+  "devices": [
+    "Radeon RX 7900 XT",
+    "AMD Radeon AI PRO R9700"
+  ],
+  "selected": 1,
+  "selected_name": "AMD Radeon AI PRO R9700",
+  "mib": 1024,
+  "repeats": [
+    {
+      "run": 1,
+      "h2d_seconds": 0.05691,
+      "h2d_gib_s": 17.571,
+      "d2h_seconds": 0.102953,
+      "d2h_gib_s": 9.713
+    },
+    {
+      "run": 2,
+      "h2d_seconds": 0.03796,
+      "h2d_gib_s": 26.344,
+      "d2h_seconds": 0.097232,
+      "d2h_gib_s": 10.285
+    },
+    {
+      "run": 3,
+      "h2d_seconds": 0.038323,
+      "h2d_gib_s": 26.094,
+      "d2h_seconds": 0.105533,
+      "d2h_gib_s": 9.476
+    }
+  ]
+}

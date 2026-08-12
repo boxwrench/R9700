@@ -1,0 +1,11 @@
+Positive prompt:
+
+A tiny brass robot carefully waters a glowing mushroom garden at night. Gentle rain, soft mechanical movements, warm lantern light. Audio: quiet rain, small servo sounds, and a soft bell chime. No text or logos.
+
+Negative prompt:
+
+pc game, console game, video game, cartoon, childish, ugly
+
+Prompt enhancement: disabled
+Stage-1 seed: 8112026
+Official-template stage-2 seed: 42

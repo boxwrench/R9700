@@ -1,0 +1,4 @@
+Prompt→saved MP4: 67.035s. ComfyUI startup: 3.889s; restart→artifact: 70.924s.
+
+Fresh PID, zero cached nodes; filesystem/compiled-kernel caches preserved. H.264/AAC, 896×512, 121 frames. No GPU reset, VM fault or OOM.
+

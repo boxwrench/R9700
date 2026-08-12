@@ -1,0 +1,35 @@
+# Model weights and generated media are never part of ordinary Git history.
+*.safetensors
+*.ckpt
+*.pt
+*.pth
+*.bin
+*.gguf
+*.onnx
+*.npz
+*.mp4
+*.mov
+*.mkv
+
+# Local runtime state.
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.log
+cache/
+caches/
+outputs/
+artifacts/
+
+# Desktop/editor noise.
+.DS_Store
+.idea/
+.vscode/
+
+# Keep this repository's measured run reports and TSV data visible.
+!data/
+!data/runs/

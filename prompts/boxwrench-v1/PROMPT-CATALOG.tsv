@@ -1,0 +1,6 @@
+prompt_id	version	lanes	scene	primary_stress	reference	reference_sha256	prompt_file
+BX-C01	1.0.0	i2v+t2v	Anchor Scan	identity; reflective armor; subtle motion	references/bx77-anchor.webp	8421639c2a370572fe96db02e94bb6bca32abc6d96871956716d1b047a06ba8a	prompts/BX-C01-anchor-scan.md
+BX-C02	1.0.0	i2v+t2v	Forge Awakening	full-body articulation; sparks; steam	references/forge-awakening.webp	3d476fd1464638bffa9fd6a4e2558a68c60cb166e49311fb79cb06f9ce10ddc4	prompts/BX-C02-forge-awakening.md
+BX-C03	1.0.0	i2v+t2v	Convergence Repair	hands; tool contact; rain; particles	references/convergence-wars.webp	0f3ddc6799d6171d28a67c43c520e55700dc5ee08fa26aa91de32bdb44906778	prompts/BX-C03-convergence-repair.md
+BX-C04	1.0.0	i2v+t2v	Call to the Past	rotating machinery; beam stability	references/call-to-past-signal-acquired.webp	eb828aae1b073643a0b9120c9a411113bc7f5a6a7e387cc75ebd5f13bb5c836f	prompts/BX-C04-call-to-past.md
+BX-C05	1.0.0	i2v+t2v	Last Citadel Walk	gait; tracking camera; reflections	references/last-citadel.webp	304bc79a65ef2e2e17a9951fec00ae830da3e176cc5e0fac20a6d7f3f4a29387	prompts/BX-C05-last-citadel-walk.md

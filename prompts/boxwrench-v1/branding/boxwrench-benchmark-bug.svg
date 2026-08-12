@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 180" role="img" aria-labelledby="title desc">
+  <title id="title">Boxwrench benchmark mark</title>
+  <desc id="desc">A compact brass, chrome, black, and crimson wrench-head mark beside BX-77 benchmark lettering.</desc>
+  <g stroke="#17161B" stroke-linejoin="miter">
+    <rect x="10" y="10" width="780" height="160" fill="#F4EFE4" fill-opacity="0.92" stroke-width="8"/>
+    <path d="M44 105H136V151H44Z" fill="#878D94" stroke-width="6"/>
+    <path d="M74 107H106V149H74Z" fill="#A57C33" stroke-width="4"/>
+    <circle cx="90" cy="70" r="52" fill="#A57C33" stroke-width="7"/>
+    <circle cx="90" cy="70" r="36" fill="#878D94" stroke-width="5"/>
+    <path d="M68 42H112L124 70 112 98H68L56 70Z" fill="#17161B" stroke-width="0"/>
+    <path d="M69 63H111L106 77H74Z" fill="#C33A2B" stroke-width="0"/>
+  </g>
+  <text x="174" y="82" fill="#17161B" font-family="Share Tech Mono, JetBrains Mono, monospace" font-size="58">BX-77</text>
+  <path d="M176 102H754" stroke="#A57C33" stroke-width="7"/>
+  <text x="176" y="145" fill="#5E594F" font-family="Share Tech Mono, JetBrains Mono, monospace" font-size="30">BENCHMARK</text>
+</svg>

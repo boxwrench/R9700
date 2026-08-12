@@ -1,0 +1,8 @@
+LTX-2.5 distilled INT8 on Radeon AI PRO R9700:
+
+67.035s wall time to make 5.042s synchronized A/V — 13.30s wall time per output second.
+
+121 frames • 896×512 • 24fps • 8+3 steps • process-cold
+
+Ubuntu 24.04 • ROCm 7.2.1/HIP
+

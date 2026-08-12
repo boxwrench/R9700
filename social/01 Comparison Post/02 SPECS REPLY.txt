@@ -1,0 +1,8 @@
+Specs: Ubuntu 24.04 • Linux 6.17 • ROCm 7.2.1/HIP • PyTorch 2.9.1 • ComfyUI 0.32
+
+LTX: 896×512, 121f, 24fps, 8+3 steps
+H3 Turbo: 864×480, 124f, 24fps, 4 steps
+H3 Standard: 864×480, 124f, 24fps, 20 steps
+
+All include synchronized audio.
+

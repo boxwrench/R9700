@@ -1,0 +1,5 @@
+A tiny brass robot carefully waters a glowing mushroom garden at night. Gentle rain, soft mechanical movements, warm lantern light. Audio: quiet rain, small servo sounds, and a soft bell chime. No text or logos.
+
+Prompt enhancement: disabled
+Numeric seed: 8112026
+LTX-only negative conditioning: pc game, console game, video game, cartoon, childish, ugly
