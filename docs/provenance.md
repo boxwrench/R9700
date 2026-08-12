@@ -39,3 +39,13 @@ The workflow contains the official file URLs and is kept byte-for-byte under
 - ComfyUI: [pinned upstream commit](https://github.com/Comfy-Org/ComfyUI/tree/c2bcbecd82ec5ae66594340b395c24ef0217b238)
 - LTX-2.5 native support: [ComfyUI PR 15499](https://github.com/Comfy-Org/ComfyUI/pull/15499)
 - H3 Turbo custom node: [Larryvrh/ComfyUI-MiniMax-H3-Turbo](https://github.com/Larryvrh/ComfyUI-MiniMax-H3-Turbo/tree/55fee864dd7b2976b1c4ce3c3d5f7968f181409f)
+- Dual-GPU loader: [pollockjj/ComfyUI-MultiGPU](https://github.com/pollockjj/ComfyUI-MultiGPU/tree/b51c99a525e9607e43545ee2a8b7694c74a4775a), pinned at b51c99a525e9607e43545ee2a8b7694c74a4775a; only its CLIPLoaderMultiGPU path is used in this experiment.
+
+## Dual-GPU placement
+
+The logical device order was cuda:0 = R9700 / gfx1201 and cuda:1 = RX 7900 XT
+/ gfx1100. The corrected workflow assigns the Qwen text encoder to cuda:1.
+H3 diffusion, Turbo adapter, sampling, and both VAEs remain on the R9700.
+
+No model weights, quantizations, or Hub revisions were downloaded or changed
+during the experiment.

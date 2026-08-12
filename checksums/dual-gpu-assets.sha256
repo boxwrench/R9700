@@ -1,0 +1,11 @@
+70754239ca071fae7e3c2df4a07c6991c32dd3a451f10a41b9cee1ada4e64d06  workflows/minimax-h3/MiniMax-H3-Turbo-v4-FP8-DualGPU-Qwen-on-7900XT.json
+1dd5380b0a44c0d3a1067cda6905b4ef18972f72c7c58696d493d2c00675fedf  workflows/minimax-h3/h3-dualgpu-shakedown-5s-turbo-v4-api.json
+64b57c6b8322bd55c183543eb022895e55cdfebd89095b97556f046f319db262  workflows/minimax-h3/minimax-h3-turbo-v4-4-control-api.json
+ae3e31505a1db9c8182ce2fca65f766fcb09a3ec81f0884dfaa7ab75b130d8ee  experiments/dual-gpu/README.md
+63a1b9f0d8cb2deb70a93a4bd89bc0c2a75dfa60c28961089bb3df17be77050c  experiments/dual-gpu/scripts/benchmark-residency.py
+6b4300a3c96486df8ae7e975b5ee5ba1448cc372993544fb95536a2aaec53447  experiments/dual-gpu/scripts/h3-dualgpu.sh
+930bbe45f491e611297b4499c96a158aad29616a0c88c20a2dad409c02e30c27  experiments/dual-gpu/config/dual-gpu.env.example
+52ed90ab29cee02df449ca319466d77b7ac7bccd4ce36fc936a5810d43d143d4  experiments/dual-gpu/config/comfyui-h3-dualgpu.service
+cbcf04a75a07d1cb4ea999a6f2e4c272ce8f702cf4ea89ecd1df1e07c060652b  data/runs/2026-08-12/DUAL-GPU-IMPLEMENTATION-PLAN.md
+0c46f5da7a10b078838074da7e3a2f94e9278357316fa1b65c9a527d94902812  data/runs/2026-08-12/dual-gpu-residency-comparison-20260812.md
+e5becbcbfece3ba1a179f7a7b374c5c3ae5e63193a579ac003ba21148abb70b9  docs/assets/dual-gpu-residency-contact-sheet.jpg

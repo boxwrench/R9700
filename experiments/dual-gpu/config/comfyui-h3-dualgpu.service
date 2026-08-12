@@ -1,0 +1,15 @@
+[Unit]
+Description=MiniMax H3 dual-GPU experiment (R9700 diffusion + 7900 XT encoder)
+After=graphical-session.target ai.mount
+RequiresMountsFor=/ai
+Conflicts=comfyui-h3.service
+
+[Service]
+Type=simple
+ExecStart=/ai/lab/experiments/minimax-h3/dual-gpu/bin/h3-dualgpu.sh --listen 127.0.0.1 --port 8191 --disable-auto-launch
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=30
+
+[Install]
+WantedBy=default.target

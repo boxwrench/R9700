@@ -19,6 +19,32 @@ persistent compiled-kernel caches remained warm, so “cold” here is not disk-
 The model-native LTX geometry differs from H3 and is disclosed rather than
 silently cropped in the headline.
 
+## Experimental dual-GPU residency
+
+The corrected H3 dual-GPU lane keeps H3 and sampling on the R9700 and places
+Qwen3-VL on an RX 7900 XT. It was consistently faster in one controlled
+engineering sequence, but the decisive changed-prompt gain was **7.9%**, below
+the 10% adoption threshold. Keep single-R9700 as the default; use the dual lane
+for longer sessions or when lower host-RAM pressure matters.
+
+| State | Single R9700 | Corrected dual | Gain |
+|---|---:|---:|---:|
+| Process/model-cold, prompt A | 80.673 s | **76.867 s** | 4.7% |
+| Same prompt, new seed | 70.436 s | **68.003 s** | 3.5% |
+| Changed prompt B, same seed | 75.456 s | **69.506 s** | 7.9% |
+
+The failed first attempt is worth preserving: --disable-smart-memory caused
+aggressive host offload and defeated residency. The [full dual-GPU record](docs/dual-gpu-residency.md)
+includes the corrected launcher, exact workflows, normalized rows, health
+checks, and resource observations.
+
+<img src="docs/assets/dual-gpu-residency-contact-sheet.jpg" alt="Single R9700 versus corrected dual-GPU H3 contact sheet" width="864">
+
+The two generated feasibility studies and a reconciled pursuit plan are in
+[the mixed-AMD H3 research synthesis](docs/research/mixed-amd-h3-research-synthesis.md).
+The original documents are retained beside it, with source hashes. Their
+projections are planning evidence, not measurements from this workstation.
+
 ## Hardware and backend
 
 - AMD Radeon AI PRO R9700, 32 GB VRAM, `gfx1201`

@@ -32,3 +32,13 @@ within the source's rounding precision.
 The table does not fabricate component timing, peak VRAM, peak RAM, GPU power,
 quality scores, or variance statistics. Model file hashes are `unknown` for
 LTX-2.5 because the local source did not provide them.
+
+## Experimental dual-GPU table
+
+[The experimental nine-row table](../data/experimental/dual-gpu-residency.tsv)
+records three single-R9700 controls, three initial dual-GPU runs with
+aggressive offload, and three corrected dual-GPU residency runs. It uses the
+same timing boundary and derived ratio as the canonical table, while also
+recording topology, state, model placement, and source artifact hash. These
+single-pass measurements support an engineering decision; they are not
+publication-grade variance statistics.
