@@ -5,6 +5,13 @@ video generation on an AMD Radeon AI PRO R9700. The repository is deliberately
 numbers-first: it records the time from accepted prompt to saved artifact, the
 delivered video duration, and the wall-time cost per output second.
 
+## Automation and support
+
+Almost all of this repository is generated and assembled automatically. If you
+find an error, need information or clarification, or have a testing request,
+please submit it as a [GitHub Issue](https://github.com/boxwrench/R9700/issues).
+I’ll try to address issues and requests promptly.
+
 ## Baseline: process-cold/model-cold, 2026-08-12
 
 | Lane | Prompt → saved artifact | Delivered video | Wall seconds / output second | Native workload |
