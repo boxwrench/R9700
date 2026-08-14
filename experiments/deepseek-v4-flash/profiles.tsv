@@ -1,0 +1,6 @@
+id	enabled	ctx	cpu_moe	cache_k	cache_v	draft_k	draft_v	kv_offload	threads	description
+16k_q8_gpu_kv_41	1	16384	41	q8_0	q8_0	q8_0	q8_0	1	16	16K control using the proven placement
+32k_q8_gpu_kv_41	1	32768	41	q8_0	q8_0	q8_0	q8_0	1	16	Selected precision speed and context balance
+32k_q8_gpu_kv_42	1	32768	42	q8_0	q8_0	q8_0	q8_0	1	16	Q8 KV with one more target expert in DDR5
+32k_q4_gpu_kv_41	1	32768	41	q4_0	q4_0	q4_0	q4_0	1	16	Maximum tested GPU KV compression
+32k_q8_cpu_kv_41	1	32768	41	q8_0	q8_0	q8_0	q8_0	0	16	Q8 KV in system RAM

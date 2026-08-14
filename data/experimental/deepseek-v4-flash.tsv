@@ -1,0 +1,8 @@
+run_id	date	phase	context_tokens	target_cache	draft_cache	kv_location	cpu_moe_layers	dspark_tokens	benchmark_tokens	benchmark_runs	prompt_tokens_per_second	decode_tokens_per_second	draft_acceptance	quality_score	context_probe_tokens	context_probe_pass	r9700_vram_bytes	status	notes
+dsv4-16k-q8-gpu-41-screen	2026-08-14	screening	16384	q8_0/q8_0	q8_0/q8_0	GPU	41	3	128	1	12.812805	7.624982	0.90196	5/5	0	not_run	30887473152	passed	16K control
+dsv4-32k-q8-gpu-41-screen	2026-08-14	screening	32768	q8_0/q8_0	q8_0/q8_0	GPU	41	3	128	1	14.760743	8.320437	0.90196	5/5	0	not_run	29778071552	promoted	Fastest screening profile
+dsv4-32k-q8-gpu-42-screen	2026-08-14	screening	32768	q8_0/q8_0	q8_0/q8_0	GPU	42	3	128	1	14.840318	7.370714	0.90196	5/5	0	not_run	26353315840	passed	More VRAM margin but lower decode
+dsv4-32k-q4-gpu-41-screen	2026-08-14	screening	32768	q4_0/q4_0	q4_0/q4_0	GPU	41	3	128	1	14.425747	7.988754	0.86667	5/5	0	not_run	29692903424	passed	Lower cache precision and acceptance
+dsv4-32k-q8-ram-41-screen	2026-08-14	screening	32768	q8_0/q8_0	q8_0/q8_0	RAM	41	3	128	1	13.425085	5.864895	0.84259	5/5	0	not_run	29519245312	passed	System-RAM KV capacity fallback
+dsv4-32k-q8q4-gpu-41-screen	2026-08-14	screening	32768	q8_0/q4_0	q8_0/q4_0	GPU	41	3	0	0	unknown	unknown	unknown	not_run	0	not_run	unknown	unsupported	Model requires matching K and V cache types
+dsv4-32k-q8-gpu-41-final	2026-08-14	validation	32768	q8_0/q8_0	q8_0/q8_0	GPU	41	3	256	2	11.817814	8.137178	0.78855	5/5	24603	pass	32155910144	selected	Exact retrieval passed at 24603 tokens

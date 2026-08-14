@@ -52,6 +52,33 @@ The two generated feasibility studies and a reconciled pursuit plan are in
 The original documents are retained beside it, with source hashes. Their
 projections are planning evidence, not measurements from this workstation.
 
+## DeepSeek V4 Flash local inference
+
+A separate llama.cpp/Vulkan campaign ran DeepSeek V4 Flash UD-Q4_K_XL plus the
+Q8_0 DSpark drafter on the R9700 and system DDR5. The selected configuration
+uses a 32,768-token context, Q8 target/draft KV caches on GPU, one slot, and 41
+target MoE expert layers in system RAM. The RX 7900 XT is hidden from llama.cpp.
+
+| Validation | Result |
+|---|---:|
+| Two-run mean decode | **8.14 tokens/s** |
+| DSpark acceptance, final code prompt | **78.9%** |
+| Long-context retrieval | **Pass at 24,603 input tokens** |
+| Deterministic sanity check | **5/5** |
+| R9700 allocation after full run | **32.156 GB / 34.209 GB** |
+
+The 32K Q8 GPU-KV profile was faster than Q4 GPU KV and substantially faster
+than Q8 KV in system RAM. Device isolation was essential: selecting the R9700
+for the target while both GPUs remained visible caused the DSpark shared-output
+tensor assertion. `GGML_VK_VISIBLE_DEVICES=1` exposed only the R9700 to both
+contexts and fixed the load.
+
+The [full DeepSeek V4 inference record](docs/deepseek-v4-flash-inference.md)
+documents placement, commands, screening results, the 24.6K-token retrieval
+test, limitations, and guarded crash recovery. Normalized measurements are in
+[`data/experimental/deepseek-v4-flash.tsv`](data/experimental/deepseek-v4-flash.tsv),
+with the compact profile matrix under [`experiments/deepseek-v4-flash/`](experiments/deepseek-v4-flash/).
+
 ## Hardware and backend
 
 - AMD Radeon AI PRO R9700, 32 GB VRAM, `gfx1201`

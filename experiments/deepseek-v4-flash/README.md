@@ -1,0 +1,61 @@
+# DeepSeek V4 Flash serving experiment
+
+This compact record reproduces the parameter matrix described in
+[`docs/deepseek-v4-flash-inference.md`](../../docs/deepseek-v4-flash-inference.md).
+It intentionally excludes model weights, local absolute paths, API keys, and
+large raw logs.
+
+## Selected environment
+
+```bash
+export GGML_VK_VISIBLE_DEVICES=1
+export CTX_SIZE=32768
+export CPU_MOE_LAYERS=41
+export CACHE_TYPE_K=q8_0
+export CACHE_TYPE_V=q8_0
+export DRAFT_CACHE_TYPE_K=q8_0
+export DRAFT_CACHE_TYPE_V=q8_0
+export KV_OFFLOAD=1
+export USE_DSPARK=1
+export DSPARK_TOKENS=3
+export PARALLEL=1
+export THREADS=16
+```
+
+`GGML_VK_VISIBLE_DEVICES=1` refers to this workstation's host enumeration. Always
+run `llama-server --list-devices` before applying it elsewhere.
+
+## Matrix
+
+[`profiles.tsv`](profiles.tsv) is the ordered screening matrix. Keep the target
+quant and drafter fixed while varying one resource decision at a time. Matching
+K/V cache types are required for this DeepSeek V4 build.
+
+The campaign used two result roots:
+
+- Screening: short quality and 128-token speed probes for every loadable profile
+- Final: long-context retrieval plus two 256-token speed probes for the winner
+
+Each profile should own a status file and immutable outputs. Mark it complete
+only after all requested probes are saved. On restart, skip complete profiles
+and retry `running`, `load_failed`, or `probe_failed` profiles.
+
+## Recovery contract
+
+The runner used this recovery order after every attempt:
+
+1. Read the saved PID.
+2. Verify `/proc/<pid>/cmdline` contains both `llama-server` and the expected
+   DeepSeek model name.
+3. Send TERM and wait 15 seconds.
+4. Send KILL only to that validated PID if it remains alive.
+5. Check R9700 VRAM with `rocm-smi -d 1 --showmeminfo vram`.
+6. Consider a scoped `sudo -n rocm-smi -d 1 --gpureset` only if allocations
+   remain, the card is confirmed as the R9700, and no process holds its render
+   node.
+
+Automatic reset should remain off by default. A machine reboot followed by a
+resumable run is safer than resetting a GPU with unknown users.
+
+No GPU reset was required for the recorded campaign. llama.cpp load failures
+released VRAM normally and the runner continued to the next profile.
