@@ -72,3 +72,17 @@ engine and uses a kernel-coupled quant format. It must first prove intentional
 host-expert placement rather than ROCm page migration, then pass an exact
 six-expert 32K quality/retrieval baseline before sparse prefill or four-expert
 approximate execution can be considered.
+
+## Primary agent implementation
+
+DeepSeek Harness is the primary user-facing and agent layer for every promoted
+backend. It connects to llama.cpp or Lucebox through a loopback custom
+OpenAI-compatible provider. Hermes is retained only as a migration/control
+client.
+
+Raw backend probes continue to call the HTTP API directly so Harness prompts,
+tools and retries do not contaminate tok/s, memory, retrieval, or DSpark
+measurements. Backend finalists then run through the same pinned DeepSeek
+Harness headless task suite. See [`deepseek-harness.md`](deepseek-harness.md),
+[`deepseek-harness-settings.example.yaml`](deepseek-harness-settings.example.yaml),
+and [`agent-harness-profiles.tsv`](agent-harness-profiles.tsv).

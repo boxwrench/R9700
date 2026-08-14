@@ -1,0 +1,4 @@
+id	enabled	role	harness	backend_profile	model_alias	task_suite	description
+dsh_llama_winner	0	primary	deepseek-harness	PROMOTE_BACKEND_WINNER	deepseek-v4-flash-0731-q4-dspark	agent-v1	Primary agent gate after a llama.cpp backend winner passes direct probes
+dsh_lucebox_winner	0	primary	deepseek-harness	PROMOTE_LUCEBOX_WINNER	REPLACE_WITH_LUCEBOX_ALIAS	agent-v1	Primary agent gate after Lucebox reaches exact six-expert 32K
+hermes_backend_control	0	control	hermes	PROMOTE_SAME_BACKEND	REPLACE_WITH_MATCHING_ALIAS	agent-v1	Optional migration A/B using the same backend and tasks after the dsh result

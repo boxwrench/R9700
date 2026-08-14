@@ -1,0 +1,10 @@
+# Merge into $DSH_HOME/settings.yaml only after checking the pinned dsh schema.
+# Do not configure a hosted DeepSeek API key in the experiment profile.
+llm-pi-ai:
+  providers:
+    local-deepseek:
+      apiKeyEnv: LOCAL_DEEPSEEK_API_KEY
+      api: openai-completions
+      baseURL: http://127.0.0.1:8081/v1
+      models:
+        - id: deepseek-v4-flash-0731-q4-dspark
