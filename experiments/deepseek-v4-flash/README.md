@@ -59,3 +59,16 @@ resumable run is safer than resetting a GPU with unknown users.
 
 No GPU reset was required for the recorded campaign. llama.cpp load failures
 released VRAM normally and the runner continued to the next profile.
+
+## Planned Lucebox host-RAM track
+
+[`lucebox-host-ram.md`](lucebox-host-ram.md) records a separate, disabled
+campaign for adapting Lucebox's fused DeepSeek ROCmFPX and DSpark path from
+Strix Halo unified memory to the standalone R9700 plus system DDR5. Its matrix
+is [`lucebox-host-ram-profiles.tsv`](lucebox-host-ram-profiles.tsv).
+
+This is deliberately not mixed into `profiles.tsv`: it changes the inference
+engine and uses a kernel-coupled quant format. It must first prove intentional
+host-expert placement rather than ROCm page migration, then pass an exact
+six-expert 32K quality/retrieval baseline before sparse prefill or four-expert
+approximate execution can be considered.

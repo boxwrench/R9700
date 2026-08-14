@@ -1,0 +1,13 @@
+id	enabled	stage	ctx	fill_pct	expert_top_k	prefill	spec_q	placement	quality_class	description
+luce_audit_gfx1201	0	audit	0	0	6	none	0	none	exact	Build/source audit; prove full DeepSeek gfx1201 support and an intentional host expert tier
+luce_load_host_tier	0	placement	8192	0	6	exact	0	host-cold-vram-hot	exact	Placement smoke test; managed-memory page thrashing is a failure
+luce_8k_ar_exact_k6	0	baseline	8192	90	6	exact	0	host-cold-vram-hot	exact	Target-only exact quality and throughput baseline
+luce_8k_dspark_exact_k6	0	speculation	8192	90	6	exact	4	host-cold-vram-hot	exact	Add fused DSpark q4 and measure acceptance plus total decode
+luce_8k_dspark_sparse_k6	0	prefill	8192	90	6	sparse	4	host-cold-vram-hot	approx-prefill	Add indexed sparse prefill while retaining six experts
+luce_16k_dspark_exact_k6	0	context	16384	90	6	exact	4	host-cold-vram-hot	exact	First context-capacity step
+luce_32k_dspark_exact_k6	0	context	32768	90	6	exact	4	host-cold-vram-hot	exact	Minimum regular-use candidate; primary comparison against 8.137 tok/s
+luce_32k_dspark_sparse_k6	0	prefill	32768	90	6	sparse	4	host-cold-vram-hot	approx-prefill	Measure sparse-prefill benefit only after exact 32K passes
+luce_32k_dspark_sparse_k4	0	approximate	32768	90	4	sparse	4	host-cold-vram-hot	approx-topk	Published-style speed profile; quality-changing and not the default comparison
+luce_40k_dspark_exact_k6	0	context	40960	90	6	exact	4	host-cold-vram-hot	exact	Enable only after exact 32K passes with 1.5 GiB VRAM headroom
+luce_48k_dspark_exact_k6	0	context	49152	90	6	exact	4	host-cold-vram-hot	exact	Enable only after exact 40K passes safely
+luce_64k_dspark_exact_k6	0	context	65536	90	6	exact	4	host-cold-vram-hot	exact	Stretch target; stop the ladder on the first unsafe result
