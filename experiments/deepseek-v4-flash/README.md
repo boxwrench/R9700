@@ -86,3 +86,19 @@ measurements. Backend finalists then run through the same pinned DeepSeek
 Harness headless task suite. See [`deepseek-harness.md`](deepseek-harness.md),
 [`deepseek-harness-settings.example.yaml`](deepseek-harness-settings.example.yaml),
 and [`agent-harness-profiles.tsv`](agent-harness-profiles.tsv).
+
+## RDNA HIP optimization tracks
+
+[`optimization-plan.md`](optimization-plan.md) now treats the experimental
+[`stew675/llama.cpp` `rdna-boosts`](https://github.com/stew675/llama.cpp/tree/rdna-boosts)
+branch as a pinned DeepSeek backend candidate. Its phase-4 ladder separates the
+old Vulkan control, matched upstream HIP, fork HIP, and—only when needed—a
+matched fork Vulkan build. This prevents backend, upstream, and patch-series
+changes from being credited to one another.
+
+[`rdna-boosts-experiments.md`](rdna-boosts-experiments.md) is the separate
+hardware-wide catalog. It groups reusable R9700/`gfx1201` experiments by Flash
+Attention, BF16 KV, quantized decode, MoE, SSM, IMRoPE, and graph overhead, then
+defines a distinct RX 7900 XT/`gfx1100` track. The two-GPU speculative-draft
+idea remains isolated until both cards pass independent HIP correctness and
+performance gates.
