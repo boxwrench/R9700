@@ -3,8 +3,18 @@
 llm-pi-ai:
   providers:
     local-deepseek:
+      displayName: Local DeepSeek V4 Flash
       apiKeyEnv: LOCAL_DEEPSEEK_API_KEY
       api: openai-completions
       baseURL: http://127.0.0.1:8081/v1
+      defaultInput: [text]
       models:
         - id: deepseek-v4-flash-0731-q4-dspark
+          name: DeepSeek V4 Flash 0731 Q4 + DSpark
+          contextWindow: 32768
+          maxTokens: 4096
+          reasoningEfforts: false
+
+agent-default-model:
+  provider: local-deepseek
+  model: deepseek-v4-flash-0731-q4-dspark

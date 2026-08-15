@@ -57,3 +57,17 @@ Sources:
 - <https://github.com/deepseek-ai/deepseek-harness/blob/master/docs/user/guide/providers.md>
 
 Checked 2026-08-14.
+
+## Verified workstation installation
+
+The workstation installation pins `@deepseek-ai/dsh@0.1.0-rc.6` in the local
+DeepSeek project, uses an isolated project-local `DSH_HOME`, disables Harness
+telemetry plus the hosted DeepSeek model and web-search adapters, and registers
+`local-deepseek` at `http://127.0.0.1:8081/v1` with model alias
+`deepseek-v4-flash-0731-q4-dspark`.
+
+The required `node-pty` native module was built after installation. A headless
+end-to-end request returned exactly `LOCAL_DSH_OK` through the existing local
+llama.cpp server. The Web UI returned valid HTML at `http://127.0.0.1:3080`, and
+both ports 3080 and 8081 were verified as loopback-only. No hosted DeepSeek API
+credential is stored.
