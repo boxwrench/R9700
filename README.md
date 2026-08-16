@@ -107,6 +107,14 @@ tokens/s with nothing in the logs explaining it. Separately, varying only the
 sampler seed between benchmark samples yields prompt-cache hits and a
 meaningless prefill figure; prompts must be prefixed uniquely.
 
+The quantization table above holds thinking disabled on both sides. The gateway
+that serves this host actually sends `reasoning_effort: low`, and Q4 re-measured
+in that mode decodes slightly *faster*, at 52.93 tokens/s with 74.8% draft
+acceptance, most likely because chain-of-thought text is more formulaic and the
+MTP head predicts it better. That is not a claim of faster answers: token rate
+counts thinking tokens, and reasoning mode emits more of them before the
+response begins.
+
 The [full Qwen3.8-27B record](docs/qwen3-8-27b-quant-comparison.md) covers the
 hybrid Gated DeltaNet architecture and its unusually small KV footprint, router
 preset precedence, the speculative-decoding sweep, and the null results for
