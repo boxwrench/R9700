@@ -36,6 +36,7 @@ Device isolation is mandatory on this host. Both Vulkan and HIP enumerate the
 | 9 | Divergence localization | Traced to `n_rs_seq` / GDN snapshot path | this document |
 | 10 | `n_rs_seq` sufficiency | Snapshot configuration alone is sufficient | this document |
 | 11 | K=1 vs K=3 verifier agreement | Neutral; branch closed for performance | this document |
+| 12 | Qwen3.6 vs Qwen3.8 native MTP | No proposer gap; hypothesis rejected | this document |
 
 ## 1–6. Earlier entries
 
@@ -253,11 +254,86 @@ The acceptance ceiling is therefore a property of the proposer, consistent with
 the rest of the campaign: acceptance was flat to three digits across every KV
 precision, and `n-max 2` was decisively optimal in the parameter sweep.
 
+## 12. Qwen3.6 vs Qwen3.8 native MTP control
+
+Entry 11 left intrinsic head quality as the leading explanation for the ~75%
+acceptance ceiling. This entry tests it directly on the same machine: is
+Qwen3.8's learned proposer worse than the preceding release's?
+
+Control model: `unsloth/Qwen3.6-27B-MTP-GGUF`, `Qwen3.6-27B-UD-Q4_K_XL.gguf`,
+17,909,097,600 bytes, SHA-256
+`4085665ee36d82a672a238a43f0e5643f2f0e39f2d7bd5d373f0ef10ecf53095`.
+
+A local `Qwen3.6-27B-Q6_K` was rejected rather than substituted: it has 64
+blocks, no `nextn_predict_layers`, and no MTP tensors, so it is a non-MTP build.
+
+The two releases are comparable at the layout level. Same architecture
+(`qwen35`), 65 blocks, `nextn_predict_layers = 1`, context length 262144, 24
+heads / 4 KV, key and value length 256, `full_attention_interval` 4. The MTP
+blocks are structurally identical — the same 15 `blk.64.*` tensors with the same
+shapes and the same **424,699,392** parameters — and the weight files differ by
+under 0.1%, so decode bandwidth is matched. Native MTP sets `n_rs_seq = n_max`
+for both, so both run the K=3 snapshot path and the comparison is about the
+proposer, not the runtime.
+
+Same harness as the Qwen3.8 f16 reference arm: greedy with `ignore_eos` at 256
+tokens, five repetitions after a discarded unrelated warmup, fresh server per
+arm, cache-busted prompts with `cache_prompt` disabled, ctx 163840, ubatch 512,
+n-max 2, p-min 0.3.
+
+| | Qwen3.6 | Qwen3.8 |
+|---|---:|---:|
+| base decode tok/s | 29.89 | 29.41 |
+| MTP decode tok/s | 50.95 | **53.82** |
+| MTP multiplier | 1.705 | **1.830** |
+| aggregate acceptance | 0.7435 | 0.7502 |
+| p0 | 0.8196 | **0.8566** |
+| joint-p1 | **0.6471** | 0.6365 |
+| conditional-p1 | **0.7895** | 0.7431 |
+| expected accepted drafts per round | 1.4667 | **1.4931** |
+| mean accepted length | 2.4667 | 2.4931 |
+| prefill tok/s | 713.1 | 721.3 |
+| VRAM | 27.66 GiB | 27.73 GiB |
+| verification rounds | 510 | 509 |
+| drafted / accepted | 1006 / 748 | 1013 / 760 |
+
+**No proposer gap. The hypothesis is rejected.** On the primary metric Qwen3.8
+is slightly ahead — 1.4931 expected accepted drafts per round against 1.4667 —
+and it also leads on p0 (+0.0370), aggregate acceptance, and the MTP multiplier.
+Nothing approaches a 7–10 point advantage for Qwen3.6, and the sign is reversed
+in any case. Neither positional difference is significant at n ≈ 510
+(two-proportion z = +1.60 for p0, −0.35 for joint-p1), which only reinforces the
+conclusion: no deficit was found to recover.
+
+The positional-depth characterization at n-max 1–4 was gated on Qwen3.6 clearly
+winning and was therefore not run.
+
+The one axis where Qwen3.6 leads is conditional second-position survival, 0.7895
+against 0.7431: given a correct first proposal its second is more often correct
+too. But it proposes a correct first token less often and the net favours
+Qwen3.8. The two heads trade first-position accuracy against depth robustness,
+consistent with `n-max 2` being the parameter sweep's decisive optimum.
+
+Recorded and not corrected: the MTP blocks are quantized differently — Qwen3.6
+carries `eh_proj` at Q8_0 with attention and FFN mostly Q4_K, Qwen3.8 `eh_proj`
+at Q6_K with attention and FFN mostly Q5_K and IQ4_XS. Entry 4 found no
+acceptance gain from substantially higher MTP precision, and since the measured
+difference is small and favours Qwen3.8 there is no Qwen3.6 advantage for the
+quantization mix to explain.
+
+**Consequence for the campaign.** A 74–75% acceptance ceiling appears to be the
+normal operating point for this architecture's native MTP at depth 2, not a
+Qwen3.8 defect. Head retraining is dropped as a direction. The remaining lever
+is not better proposer weights but the cost and structure of each speculative
+round — reducing per-round overhead, or changing the speculative mechanism
+itself.
+
 ## Open threads
 
-- Intrinsic quality of the 425M MTP head, now the leading explanation for the
-  acceptance ceiling. A Qwen3.6 control would establish whether the ceiling is
-  specific to this head.
+- Cost and structure of each speculative round, now the remaining lever after
+  entries 11 and 12 closed both the runtime-path and proposer-weight
+  explanations. Per-round overhead reduction or a different speculative
+  mechanism, not better head weights.
 - Which of the two K paths is closer to unquantized reference output. Requires
   a reference the campaign does not currently have.
 - Whether the ~0.2 logit perturbation is quantization-sensitive. A Q6 repeat of
@@ -271,7 +347,7 @@ precision, and `n-max 2` was decisively optimal in the parameter sweep.
 Harnesses are under [`experiments/qwen3-8-27b/`](../experiments/qwen3-8-27b/):
 `bench.py` (bucketed benchmark), `sweep.py` (parameter sweep), `kvsweep.py`
 (entry 7), `equiv_step1.py` and `equiv_localize.py` (entries 8–9),
-`rs_seq_test.py` (entry 10), `k1_vs_k3.py` (entry 11). The last four require an
-instrumented llama.cpp
+`rs_seq_test.py` (entry 10), `k1_vs_k3.py` (entry 11), `qwen36_control.py`
+(entry 12, production build). Entries 9-11 require an instrumented llama.cpp
 build; the probes they depend on are described inline in each script and are
 log-only except `LLAMA_FORCE_N_RS_SEQ`, which deliberately changes `cparams`.
