@@ -38,6 +38,7 @@ Device isolation is mandatory on this host. Both Vulkan and HIP enumerate the
 | 11 | K=1 vs K=3 verifier agreement | Neutral; branch closed for performance | this document |
 | 12 | Qwen3.6 vs Qwen3.8 native MTP | No proposer gap; hypothesis rejected | this document |
 | 13 | MTP round-cost decomposition | Verification is 89% of round cost | this document |
+| 14 | 1-token vs 3-token kernel profile | FFN matmul multi-column path is the lever | this document |
 
 ## 1–6. Earlier entries
 
@@ -399,11 +400,100 @@ with `n-max 2` being the sweep's decisive optimum, where the binding limit is
 acceptance decay rather than verification cost. A cheaper proposer at greater
 depth is the shape of any remaining win.
 
+## 14. Kernel profile of 1-token vs 3-token verification
+
+Entry 13 located the +6.9 ms marginal cost of evaluating three positions instead
+of one but did not explain it. This entry profiles it.
+
+**Microbench.** A standalone tool (`examples/vbench` in the instrumented
+worktree) removes the proposer entirely and issues single-sequence decode
+batches of N tokens at a fixed KV depth, synchronizing after each call. Both
+arms advance the same number of sequence positions from the same depth, so
+per-call times compare at matched depth. It reproduces production closely:
+
+| | V1, 1 token | V3, 3 tokens | marginal |
+|---|---:|---:|---:|
+| microbench at 1.2K | 34.287 ms | 41.256 ms | **+6.969 ms** |
+| entry 13 decomposition | 34.327 ms | 41.259 ms | +6.932 ms |
+
+**Profiling method.** The Vulkan perf logger accumulates across graph computes,
+so each arm was run at two iteration counts and differenced, cancelling prefill
+and warmup exactly. Profiling adds about 2.1 ms to both arms but preserves the
+delta (+6.83 against +6.97 unprofiled), so proportions are valid while absolute
+profiled times are not comparable to production.
+
+| family | V1 ms | V3 ms | delta ms | share of delta |
+|---|---:|---:|---:|---:|
+| **MUL_MAT** | 30.224 | 35.179 | **+4.955** | **72.6%** |
+| COPY/TRANSFORM | 1.837 | 2.267 | +0.430 | 6.3% |
+| ELEMENTWISE | 0.648 | 1.056 | +0.408 | 6.0% |
+| NORM | 1.260 | 1.626 | +0.365 | 5.4% |
+| GATED_DELTA_NET | 0.300 | 0.542 | +0.242 | 3.5% |
+| FLASH_ATTN_EXT | 0.353 | 0.432 | +0.079 | 1.2% |
+| other, activation, rope | 1.125 | 1.173 | +0.049 | 0.7% |
+| **GPU kernel total** | 35.746 | 42.276 | **+6.530** | **95.6%** |
+| unexplained | 0.677 | 0.975 | +0.299 | 4.4% |
+
+The three largest contributors are the per-layer FFN matmuls, 64 dispatches each:
+
+| operation | per dispatch, n=1 to n=3 | delta | share |
+|---|---:|---:|---:|
+| `MUL_MAT_VEC iq4_xs m=17408 k=5120` (ffn_gate) | 92.45 to 120.11 us, **x1.299** | +1.770 | 25.9% |
+| `MUL_MAT_VEC q5_K m=5120 k=17408` (ffn_down) | 103.4 to 119.9 us, x1.160 | +1.057 | 15.5% |
+| `MUL_MAT_VEC q5_K m=17408 k=5120` (ffn_up) | 109.76 to 119.63 us, x1.090 | +0.632 | 9.3% |
+
+All three converge to about 120 us at n=3 despite different quantizations, so
+`iq4_xs` loses its n=1 advantage entirely.
+
+**One implementation change at N=3, and it is a hard cliff.** The MUL_MAT+ADD
+fusion is disabled. V1 runs two fused ops totalling 7.242 ms; V3 runs none, and
+its standalone ADD dispatches rise from 96 to 176. The gate is at
+`ggml/src/ggml-vulkan/ggml-vulkan.cpp:16438`:
+
+```cpp
+// mat-vec only
+if (ggml_nrows(mul) != 1) { return false; }
+```
+
+`ggml_nrows` is ne[1]*ne[2]*ne[3], so n=3 fails outright. This is **not** a
+MMVQ-to-GEMM transition: both arms stay on `MUL_MAT_VEC`, whose shader handles
+up to `mul_mat_vec_max_cols = 8`. Only the fusion is lost.
+
+**Context sensitivity.** Repeating V1/V3 at two depths separates the two
+components:
+
+| depth | V1 | V3 | marginal |
+|---|---:|---:|---:|
+| ~1.2K | 34.138 ms | 40.788 ms | **+6.649 ms** |
+| ~25K | 36.761 ms | 44.735 ms | **+7.974 ms** |
+
+A 20x increase in KV depth raises the marginal cost only 19.9%. In the profile,
+the MUL_MAT delta does not grow with depth (+4.955 to +4.380, drifting down
+within noise) while FLASH_ATTN_EXT grows about tenfold, from +0.079 (1.2%) to
++0.773 ms (9.9%), accounting for roughly 72% of the increase. **The verification
+tax is predominantly context-independent model matmul**, with an attention
+component that is negligible at production context lengths.
+
+The 25K profile is less trustworthy in absolute terms: GPU totals explain 84.8%
+of the wall delta against 95.6% at 1.2K, and V1's residual is negative
+(-0.413 ms), meaning summed kernel time exceeds measured wall time. That is a
+profiler limitation, not a real cost. The attention-growth conclusion survives
+because it rests on an order-of-magnitude change in the FLASH_ATTN_EXT delta
+between depths, far larger than the accounting error.
+
+**Next target: the `mul_mat_vec` multi-column path, specifically `iq4_xs`.** An
+ideal bandwidth-bound kernel would cost about 1.0x going from one column to
+three, since the weights stream once either way; these cost 1.09x to 1.30x.
+`iq4_xs` is both the worst amortizer and the single largest contributor, and its
+cost is context-independent, so any gain applies at every context length. The
+fusion cliff is the more tractable fix but is worth only about 0.4 ms, 5.6% of
+the delta. Attention is explicitly not the first target at 1.2% of the marginal
+cost.
+
 ## Open threads
 
-- Whether the marginal ~6.9 ms cost of verifying three positions instead of one
-  is recoverable at the kernel level, or is irreducible compute. Entry 13
-  locates it but does not profile it.
+- A single kernel A/B on the `mul_mat_vec` multi-column path for `iq4_xs`, now
+  the identified lever. Entry 14 measured the cost; nothing has been changed.
 - Whether a cheaper proposer at greater depth beats the current n-max 2 point,
   given that verification is sublinear in batch size.
 - Which of the two K paths is closer to unquantized reference output. Requires
@@ -420,7 +510,7 @@ Harnesses are under [`experiments/qwen3-8-27b/`](../experiments/qwen3-8-27b/):
 `bench.py` (bucketed benchmark), `sweep.py` (parameter sweep), `kvsweep.py`
 (entry 7), `equiv_step1.py` and `equiv_localize.py` (entries 8–9),
 `rs_seq_test.py` (entry 10), `k1_vs_k3.py` (entry 11), `qwen36_control.py`
-(entry 12), `round_cost.py` (entry 13). Entries 9-11 require an instrumented
-llama.cpp
+(entry 12), `round_cost.py` (entry 13), `kernel_profile.py` with the `examples/vbench`
+microbench (entry 14). Entries 9-11 and 14 require an instrumented llama.cpp
 build; the probes they depend on are described inline in each script and are
 log-only except `LLAMA_FORCE_N_RS_SEQ`, which deliberately changes `cparams`.
