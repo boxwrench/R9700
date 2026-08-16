@@ -161,6 +161,46 @@ Acceptance rises with prompt length in both quantizations, from roughly 62–68%
 at 153 tokens to 70–78% at 25,868 tokens. Longer context appears to make the
 MTP head's continuations more predictable.
 
+## Reasoning effort: the production serving mode
+
+The quantization comparison above was run with `enable_thinking` disabled, which
+holds conditions constant across both quantizations but is **not** how this host
+serves the model. The hermes gateway sends `reasoning_effort: low`, so the model
+emits thinking tokens before its answer. Q4_K_XL was re-measured in that mode.
+
+| Q4_K_XL, ten-sample mean | Thinking disabled | `reasoning_effort: low` |
+|---|---:|---:|
+| Decode | 51.30 tokens/s | **52.93 tokens/s** |
+| Decode stdev | 1.48 | 1.17 |
+| Prefill | 705.99 tokens/s | 686.44 tokens/s |
+| MTP draft acceptance | 71.6% | **74.8%** |
+
+Per bucket, with reasoning low:
+
+| Bucket | Prompt tokens | Prefill | Decode | Accept |
+|---|---:|---:|---:|---:|
+| short | 181 | 321.5 | 54.92 | 75.7% |
+| medium | 1,173 | 699.8 | 54.96 | 77.0% |
+| long | 6,234 | 822.1 | 52.74 | 74.1% |
+| very long | 25,866 | 755.4 | 51.28 | 80.0% |
+| vision | 82 | — | 47.84 | — |
+
+Enabling reasoning **raises** decode throughput by 3.2% and lifts MTP acceptance
+by 3.2 points. The most plausible reading is that chain-of-thought text is more
+formulaic than final prose, so the MTP head predicts it better and more drafted
+tokens survive. That mechanism was not isolated and this is a single ten-sample
+run, so treat it as an observation rather than a characterized effect.
+
+**Higher decode throughput here does not mean faster answers.** Tokens per
+second counts thinking tokens, and reasoning mode generates additional tokens
+before the response begins. Time to a finished answer is longer even though the
+token rate is higher. This benchmark caps generation at 256 tokens and does not
+measure time-to-first-content or total tokens per completed answer, so it cannot
+quantify that tradeoff.
+
+Vision decode moves the other way, 53.53 to 47.84 tokens/s. With only one image
+prompt at 82 tokens this is a single observation, not a characterized result.
+
 ## Speculative decoding tuning
 
 `--spec-draft-p-min` was swept at 0.0, 0.2, 0.3, and 0.75 on Q4.
@@ -231,7 +271,11 @@ regress on the closely related Qwen3.6-27B and was not pursued.
 The harness is [`experiments/qwen3-8-27b/bench.py`](../experiments/qwen3-8-27b/bench.py).
 
 ```bash
+# Quantization comparison: thinking disabled, conditions held constant.
 NONCE=run1 MODEL=Qwen3.8-27B-UD-Q4_K_XL python3 bench.py
+
+# Production serving mode, matching the hermes gateway.
+NONCE=low1 REASONING=low MODEL=Qwen3.8-27B-UD-Q4_K_XL python3 bench.py
 ```
 
 It drives the OpenAI-compatible `/v1/chat/completions` endpoint and reads
@@ -250,6 +294,11 @@ Both quantizations were driven through the same router process with
 ## Limitations
 
 - Speed only. No quality, perplexity, or accuracy measurement was attempted.
+- The Q4-versus-Q6 comparison holds `enable_thinking` disabled on both sides.
+  Q6 was **not** measured under `reasoning_effort: low`, so the reasoning
+  results are a Q4-only observation and should not be assumed to transfer.
+- Token rate under reasoning counts thinking tokens. Time to a finished answer,
+  time to first content, and tokens per completed answer were not measured.
 - The two quantizations run at different context sizes because Q6 weights leave
   too little VRAM for 163,840 tokens. Decode is nearly flat across prompt length
   in both, so the comparison is not obviously distorted, but it is not a

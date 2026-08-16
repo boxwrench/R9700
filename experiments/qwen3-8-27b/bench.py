@@ -8,6 +8,7 @@ import base64, json, os, statistics, sys, urllib.request
 URL = "http://127.0.0.1:8080/v1/chat/completions"
 KEY = open("/ai/pi/config/llama-api-key").read().strip()
 MODEL = os.environ["MODEL"]
+REASONING = os.environ.get("REASONING", "")
 SCRATCH = os.path.dirname(os.path.abspath(__file__))
 
 FILLER = ("The quick brown fox jumps over the lazy dog while the diligent engineer "
@@ -29,8 +30,14 @@ def run(prompt_text, max_tokens=256, image=None, seed=42):
     else:
         content = prompt_text
     body = {"model": MODEL, "messages": [{"role": "user", "content": content}],
-            "max_tokens": max_tokens, "temperature": 0.6, "seed": seed,
-            "chat_template_kwargs": {"enable_thinking": False}}
+            "max_tokens": max_tokens, "temperature": 0.6, "seed": seed}
+    # REASONING unset reproduces the thinking-disabled baseline. Setting it to a
+    # reasoning_effort level ("low") reproduces how the hermes gateway actually
+    # serves this model, which emits thinking tokens before the answer.
+    if REASONING:
+        body["reasoning_effort"] = REASONING
+    else:
+        body["chat_template_kwargs"] = {"enable_thinking": False}
     r = post(body)
     t = r.get("timings", {})
     return {
