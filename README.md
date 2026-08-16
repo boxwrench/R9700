@@ -178,6 +178,26 @@ Qwen3.8-27B experiment in this campaign, including two retracted conclusions and
 the controls that overturned them. KV measurements are in
 [`data/experimental/qwen3-8-27b-kv-cache.tsv`](data/experimental/qwen3-8-27b-kv-cache.tsv).
 
+## Qwen3.8-27B MTP verification and proposer optimization
+
+A multi-stage optimization campaign targeted the 46.3 ms end-to-end MTP round (41.3 ms verification, 5.06 ms proposer forward) on R9700/Vulkan.
+
+| Phase / Investigation | Strategy & Scope | Measured Result | Status |
+|---|---|---|---|
+| **IQ4_XS Dequant Reuse** | Eliminating redundant SPIR-V dequantization in FFN down | Kernel −2.4% (−0.18 ms), in-graph wall time flat (<0.2 ms) | Closed |
+| **IQ4_XS Occupancy Variant** | Halving rows-per-workgroup (`ROWS=2`) for 24 subgroups/SIMD | +3.6% kernel regression from doubled dispatch overhead | Closed |
+| **Tiny-N MUL_MAT + ADD Fusion** | Generalizing `mm_add_ok` predicate to multi-column $N=2..8$ | Eliminates 80 dispatches (−277 µs), but offset by +219 µs bias fetch | Closed |
+| **MTP Proposer Decomposition** | Full kernel & tensor breakdown across 556 rounds | Proposer scales linearly at 2.70 ms/token (5.24 ms/round at depth 2) | Complete |
+
+The proposer decomposition revealed that **69.2% of proposer GPU execution** (0.99 ms / step, 1.92 ms / round) is concentrated in the single 1.04 GB `output.weight` full-vocabulary LM Head (`Q6_K`, $M=248320, K=5120$), while the entire 8-matmul transformer block takes only 0.32 ms. Proposer execution scales strictly linearly with draft depth (depth 1: 2.94 ms, depth 2: 5.61 ms, depth 3: 7.54 ms, depth 4: 10.09 ms).
+
+Normalized proposer measurements are in
+[`data/experimental/qwen3-8-27b-mtp-proposer.tsv`](data/experimental/qwen3-8-27b-mtp-proposer.tsv),
+pipeline and path metrics are in
+[`data/experimental/qwen3-8-27b-iq4xs-pipeline-stats.tsv`](data/experimental/qwen3-8-27b-iq4xs-pipeline-stats.tsv) and
+[`data/experimental/qwen3-8-27b-iq4xs-path.tsv`](data/experimental/qwen3-8-27b-iq4xs-path.tsv),
+with full narrative logs in [`docs/qwen3-8-27b-experiment-log.md`](docs/qwen3-8-27b-experiment-log.md).
+
 ## Hardware and backend
 
 - AMD Radeon AI PRO R9700, 32 GB VRAM, `gfx1201`

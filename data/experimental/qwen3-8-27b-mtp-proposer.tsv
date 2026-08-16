@@ -1,0 +1,6 @@
+run_id	date	backend	model	draft_depth	p_min	rounds	dur_g_ms	ms_per_round	ms_per_draft_token	gen_tokens	acc_tokens	acceptance	lm_head_gpu_us	mtp_block_gpu_us	status	notes
+qwen38-proposer-n1	2026-08-16	vulkan	Qwen3.8-27B-UD-Q4_K_XL	1	0.0	73	214.39	2.9369	2.9369	73	61	0.8356	989.54	319.40	passed	Depth 1 proposer isolation sweep
+qwen38-proposer-n2-p0	2026-08-16	vulkan	Qwen3.8-27B-UD-Q4_K_XL	2	0.0	52	291.88	5.6131	2.8065	104	72	0.6923	1979.08	638.80	passed	Depth 2 (greedy) proposer isolation sweep
+qwen38-proposer-n3	2026-08-16	vulkan	Qwen3.8-27B-UD-Q4_K_XL	3	0.0	41	309.03	7.5373	2.5540	121	78	0.6446	2968.62	958.20	passed	Depth 3 proposer isolation sweep
+qwen38-proposer-n4	2026-08-16	vulkan	Qwen3.8-27B-UD-Q4_K_XL	4	0.0	42	423.72	10.0886	2.5222	168	94	0.5595	3958.16	1277.60	passed	Depth 4 proposer isolation sweep
+qwen38-proposer-n2-p03-556r	2026-08-16	vulkan	Qwen3.8-27B-UD-Q4_K_XL	2	0.3	556	2913.78	5.2406	2.7027	1078	734	0.6809	1918.71	619.32	passed	Production n-max=2 p-min=0.3 isolation over 556 rounds (5 reps)

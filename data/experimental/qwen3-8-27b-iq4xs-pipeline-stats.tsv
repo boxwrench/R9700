@@ -9,3 +9,5 @@ q5k-stats-n2	2026-08-16	r9700-vulkan1	mul_mat_vec_q5_k_f32_f32	2	128	84	0	7520	1
 q5k-stats-n3	2026-08-16	r9700-vulkan1	mul_mat_vec_q5_k_f32_f32	3	128	108	0	9492	14	Occupancy falls faster than iq4_xs; decoded weights held in registers
 q5k-stats-n4	2026-08-16	r9700-vulkan1	mul_mat_vec_q5_k_f32_f32	4	128	144	0	11420	10	VGPR pressure dominates
 q5k-stats-n5	2026-08-16	r9700-vulkan1	mul_mat_vec_q5_k_f32_f32	5	128	192	0	13412	8	Occupancy down to 8 subgroups per SIMD
+iq4xs-tinyn-stats-n3	2026-08-16	r9700-vulkan1	mul_mat_vec_iq4_xs_f32_f32_tinyn	3	128	72	0	48868	20	TINYN_REUSE=1 default rows=4; code size reduced by ~40%
+iq4xs-rows2-stats-n3	2026-08-16	r9700-vulkan1	mul_mat_vec_iq4_xs_f32_f32_tinyn	3	128	60	0	27704	24	TINYN_REUSE=1 ROWS=2; occupancy 20->24 but 2x workgroup count
