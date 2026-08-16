@@ -124,6 +124,39 @@ measurements are in
 with the harness and preset under
 [`experiments/qwen3-8-27b/`](experiments/qwen3-8-27b/).
 
+## Qwen3.8-27B runtime parameter sweep
+
+Twenty-nine configurations were measured against the production Qwen3.8-27B
+UD-Q4_K_XL profile. **None beat it.** The production point measured 50.91
+tokens/s across five repeats (sd 0.22), confirming it sits on a real local
+optimum rather than merely appearing fast.
+
+| Parameter | Optimum | Result |
+|---|---|---|
+| `spec-draft-n-max` | **2** | Decisive; 44.46 at depth 1 and 28.41 at depth 8 |
+| `spec-draft-p-min` | 0.3 | Flat 0.0–0.3, monotonic decline above |
+| `ctx-size` | 163840 | Flat; free for decode |
+| `ubatch-size` | 512 | Flat for decode, but 25% of prefill below 384 |
+
+The instructive result is that acceptance rate moves *opposite* to throughput.
+Draft depth 1 has the highest acceptance in the study at 0.811 and nearly the
+worst decode; confidence gating at 0.8 reaches 0.886 acceptance and is 12%
+slower. Acceptance is a diagnostic of the proposer, not a tuning target. The
+production point's 0.7068 cannot be improved with ordinary llama.cpp knobs.
+
+A ROCm/HIP build at the same commit was measured against Vulkan on identical
+weights: prefill **+41.6%**, decode **−11.6%**. Backend choice depends on
+workload shape, and this host serves short-prompt/long-answer agent traffic,
+so Vulkan is retained. HIP additionally required `HIP_VISIBLE_DEVICES` to load
+at all — the same device-isolation requirement already recorded for Vulkan in
+the DeepSeek campaign.
+
+The [full parameter sweep record](docs/qwen3-8-27b-parameter-sweep.md) includes
+per-stage tables, positional draft-acceptance survival curves for depths 1
+through 8, the metric definitions, the HIP backtrace, and limitations.
+Normalized measurements are in
+[`data/experimental/qwen3-8-27b-sweep.tsv`](data/experimental/qwen3-8-27b-sweep.tsv).
+
 ## Hardware and backend
 
 - AMD Radeon AI PRO R9700, 32 GB VRAM, `gfx1201`
