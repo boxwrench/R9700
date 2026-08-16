@@ -5,7 +5,7 @@ Usage: MODEL=<model-id> python3 bench.py
 """
 import base64, json, os, statistics, sys, urllib.request
 
-URL = "http://127.0.0.1:8080/v1/chat/completions"
+URL = os.environ.get("BENCH_URL", "http://127.0.0.1:8080") + "/v1/chat/completions"
 KEY = open("/ai/pi/config/llama-api-key").read().strip()
 MODEL = os.environ["MODEL"]
 REASONING = os.environ.get("REASONING", "")
