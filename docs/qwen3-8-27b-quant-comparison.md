@@ -30,7 +30,8 @@ between these quantizations on quality grounds will not find that evidence here.
 - AMD Radeon RX 7900 XT and a `gfx1036` iGPU present but not selected
 - AMD Ryzen 7 9800X3D, 8 cores / 16 threads; 188 GiB host RAM
 - Ubuntu 24.04.4 LTS; ROCm 7.2.1
-- llama.cpp Vulkan/RADV backend, build `10448`, commit `ad1de39`
+- llama.cpp Vulkan/RADV backend, build `b10448`, commit `ad1de39`
+  (`GGML_VULKAN=ON`, `GGML_HIP=OFF`; every measurement here is Vulkan, not ROCm/HIP)
 - [`unsloth/Qwen3.8-27B-GGUF`](https://huggingface.co/unsloth/Qwen3.8-27B-GGUF), `UD-Q4_K_XL` and `UD-Q6_K_XL`
 - Vision projector: `mmproj-F16.gguf`, 927,607,488 bytes, shared by both
 
@@ -160,6 +161,42 @@ cost of Q6 buys weight precision only; it returns nothing through speculation.
 Acceptance rises with prompt length in both quantizations, from roughly 62–68%
 at 153 tokens to 70–78% at 25,868 tokens. Longer context appears to make the
 MTP head's continuations more predictable.
+
+### The MTP head is quantized differently between the two files
+
+Both files declare `nextn_predict_layers = 1` and carry one extra block,
+`blk.64`, with identical tensor shapes. Unsloth quantized that block
+differently in each. Dumped with `gguf-py/gguf/scripts/gguf_dump.py`:
+
+| Tensor | Parameters | UD-Q4_K_XL | UD-Q6_K_XL |
+|---|---:|---|---|
+| `blk.64.attn_q.weight` | 62,914,560 | Q5_K | Q8_0 |
+| `blk.64.attn_k.weight` | 5,242,880 | Q5_K | Q8_0 |
+| `blk.64.attn_v.weight` | 5,242,880 | Q6_K | Q8_0 |
+| `blk.64.attn_output.weight` | 31,457,280 | Q5_K | Q8_0 |
+| `blk.64.ffn_down.weight` | 89,128,960 | Q5_K | Q8_0 |
+| `blk.64.ffn_gate.weight` | 89,128,960 | IQ4_XS | Q6_K |
+| `blk.64.ffn_up.weight` | 89,128,960 | Q5_K | Q6_K |
+| `blk.64.nextn.eh_proj.weight` | 52,428,800 | Q6_K | Q8_0 |
+| norms (5 tensors) | 20,736 | F32 | F32 |
+| **total** | **424,699,392** | mixed 4–6 bit | uniform 6–8 bit |
+
+The draft head is a 425M-parameter attention-plus-FFN block with a 52.4M
+`eh_proj`, sharing the base model's embedding and output head. It is a
+substantial drafter in its own right, which is why MTP performs here without a
+separate checkpoint.
+
+Q6's head is uniformly higher precision — every tensor Q8_0 or Q6_K, against
+Q4's Q5_K/Q6_K mix with `ffn_gate` down at IQ4_XS. Measured acceptance was
+71.6% for Q4 and 70.4% for Q6.
+
+With 2,076 and 2,093 drafted tokens, the binomial standard error on each rate is
+about one point, so a 1.2-point gap is **not distinguishable from zero**. The
+supportable claim is no detectable difference, not that Q4's head is better.
+Even so, that is a useful negative: quantizing this MTP head down to 4–5 bits
+does not measurably degrade draft acceptance, and the extra precision in the Q6
+file buys nothing on this workload. Sourcing a higher-precision MTP head is
+therefore not an available tuning lever.
 
 ## Reasoning effort: the production serving mode
 
