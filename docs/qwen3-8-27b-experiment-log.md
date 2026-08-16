@@ -602,20 +602,174 @@ would confine the blast radius.
 - llama.cpp reports `logprob = 0.0` for MTP-committed tokens, which would
   mislead anyone scoring outputs from that path.
 
+## 16. IQ4_XS tiny-N dequant-reuse and occupancy evaluation
+
+Entry 15 identified redundant dequantization in generic `mul_mat_vec.comp` as the
+primary source of code bloat across columns and hypothesized that hoisting dequant
+above the `NUM_COLS` loop, combined with workgroup accumulator sizing (`ROWS=2`),
+could recover N=3 amortization.
+
+This entry evaluates two experimental variants implemented in the scratch probe:
+1. **Tiny-N dequant-reuse (`TINYN_REUSE=1`, default rows=4):** hoists decoded weight
+   fragments (`dequantize4`) out of the column loop so each fragment is decoded once
+   and consumed across all active columns.
+2. **Tiny-N dequant-reuse with reduced row tile (`GGML_VK_IQ4XS_ROWS=2`):** halves
+   the row accumulator array per workgroup to reduce VGPR pressure and increase
+   occupancy from 20 to 24 subgroups/SIMD.
+
+### Correctness and shader resource statistics
+
+All experimental variants passed the CPU-reference correctness gate (`16/16 OK` on
+`test-backend-ops test -b Vulkan1 -o MUL_MAT`).
+
+RADV pipeline statistics on GFX1201 (N=3, `m=17408, k=5120`):
+
+| Variant | SGPR | VGPR | Code size | Occupancy (subgroups/SIMD) | Notes |
+|---|---:|---:|---:|---:|---|
+| Incumbent (`TINYN=0`) | 128 | 72 | 81,228 B | 20 | Dequant inside column loop |
+| Default Tiny-N Reuse (`TINYN=1, ROWS=4`) | 128 | 72 | 48,868 B | 20 | Code size -39.8%, duplicate dequant eliminated |
+| Occupancy Variant (`TINYN=1, ROWS=2`) | 128 | 60 | 27,704 B | 24 | Code size -65.9%, VGPR -12, occupancy +20% |
+
+### Authoritative in-graph V3 wall-time measurement
+
+Measured using `llama-vbench` on Qwen3.8-27B-UD-Q4_K_XL at matched conditions
+(`dev=1 (R9700)`, `n_prefill=1200`, `n_iter=200`, `n_rs_seq=2`, `batch_n=3`, 5 clean repetitions):
+
+| Arm / Config | Rep 1 (ms) | Rep 2 (ms) | Rep 3 (ms) | Rep 4 (ms) | Rep 5 (ms) | Mean (ms) | Stdev (ms) | Median (ms) | p10 (ms) | p90 (ms) |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| **Incumbent (`TINYN=0`)** | 41.2308 | 41.2311 | 41.2274 | 41.2412 | 41.2420 | **41.2345** | 0.0066 | 41.2311 | 41.2274 | 41.2420 |
+| **Default Tiny-N Reuse** | 41.0076 | 41.0471 | 41.0475 | 41.0697 | 41.0817 | **41.0507** | 0.0283 | 41.0475 | 41.0076 | 41.0817 |
+| **Occupancy Variant (`ROWS=2`)** | 40.9908 | 41.1096 | 41.2567 | 41.4036 | 41.5970 | **41.2715** | 0.2391 | 41.2567 | 40.9908 | 41.5970 |
+
+- Default Tiny-N reuse reduced V3 wall time by **0.1838 ms** (below the 0.2 ms minimum gate).
+- The `ROWS=2` occupancy variant was **0.0370 ms slower** than incumbent and **0.2208 ms slower** than default Tiny-N reuse.
+
+### Isolated kernel profiling (differenced 100 vs 200 iterations)
+
+| Arm / Config | IQ4_XS `ffn_gate` (us/dsp) | 64-dsp total (us) | Total MUL_MAT (ms) | Wall time (ms) |
+|---|---:|---:|---:|---:|
+| Incumbent (`TINYN=0`) | 118.454 | 7,581.040 | 34.767 | 42.702 |
+| Default Tiny-N Reuse | 115.661 | 7,402.283 | 34.813 | 42.702 |
+| Occupancy Variant (`ROWS=2`) | 122.716 | 7,853.852 | 35.391 | 43.401 |
+
+- Default Tiny-N reuse shaved only **2.793 us/dispatch** (-2.4%, ~0.179 ms total over 64 layers).
+- `ROWS=2` degraded kernel dispatch time to **122.716 us/dispatch** (+3.6% slower than incumbent, +6.1% slower than default Tiny-N reuse).
+
+### Statistical and architectural interpretation
+
+1. **Dequant arithmetic is not the bottleneck:** Removing redundant dequantization in SPIR-V
+   collapsed code size from 81.2 KB to 48.9 KB but yielded only a 1.7–2.4% kernel-level delta.
+   In full graph execution streaming 64 layers of cold weights from DRAM, the kernel is
+   predominantly DRAM bandwidth and latency bound.
+2. **Why `ROWS=2` failed despite higher occupancy:** Halving rows-per-workgroup reduced VGPR
+   and unlocked 24 subgroups/SIMD, but doubled the total number of workgroups dispatched
+   ($M=17408$ requires 8,704 workgroups instead of 4,352). On R9700/RADV, the increased command
+   processor / workgroup scheduling overhead and reduced per-workgroup arithmetic amortization
+   more than wiped out the occupancy gain.
+
+### Gate decision
+
+Both variants fail the $\ge 0.2\text{ ms}$ wall-time threshold ($0.18\text{ ms}$ and $-0.04\text{ ms}$).
+
+**Decision:**
+```text
+ABANDON IQ4_XS AS PRIMARY TARGET → START MUL_MAT+ADD FUSION
+```
+
+No further workgroup/row tuning will be pursued on `mul_mat_vec_iq4_xs`. The project moves directly to the `ffn_down` `MUL_MAT + ADD` fusion cliff (`ggml-vulkan.cpp:16505`), where $N=3$ currently drops fusion because `ggml_nrows(mul) != 1`.
+
+## 17. Tiny-N MUL_MAT + ADD fusion evaluation
+
+Entry 16 pivoted to the `ffn_down` ($Q5\_K, M=5120, K=17408$) `MUL_MAT + ADD` fusion cliff,
+where $N=3$ verification dropped fusion due to the legacy `ggml_nrows(mul) == 1` predicate
+in `ggml-vulkan.cpp:16505`.
+
+### Source/path audit
+
+1. **Root cause:** The restriction was host-side predicate-only. When multi-column batching
+   ($N=2..8$) was originally added to `mul_mat_vec`, the underlying SPIR-V shaders (`mul_mat_vec_base.glsl`)
+   and C++ push constant dispatch (`ggml_vk_mul_mat_vec_q_f16`) were already parameterized with
+   `NUM_COLS` and `batch_stride_d` to index `data_fuse0[j * p.batch_stride_d + d_offset + first_row + n]`.
+   The fusion validator `mm_add_ok()` had retained the older 1D constraint `ggml_nrows(mul) == 1`.
+2. **Implementation:** Generalized `mm_add_ok()` under `GGML_VK_MM_ADD_TINYN=1` to allow
+   multi-column shapes satisfying `mul_mat_vec` eligibility ($N \le 8, \text{ne2} \times \text{ne3} == 1$).
+
+### Correctness verification
+
+Passed CPU-reference correctness suite across all matrix widths $N=1..8$ (`21/21 OK` on
+`test-backend-ops test -b Vulkan1 -o MUL_MAT -p ".*type_a=q5_K.*"`).
+
+### Direct cliff & dispatch measurement ($N=1..5$)
+
+Profiling the full graph across sequence widths under incumbent vs tiny-N fusion:
+
+| $N$ | Fused (Incumbent) | Fused (Tiny-N) | Incumbent Total ADDs | Tiny-N Total ADDs | ADD Dispatches Eliminated |
+|---|---|---|---|---|---|
+| 1 | True | True | 96 dsp / 0.348 ms | 96 dsp / 0.346 ms | 0 (already fused) |
+| 2 | False | **True** | 176 dsp / 0.641 ms | **96 dsp / 0.370 ms** | **-80 dispatches** |
+| 3 | False | **True** | 176 dsp / 0.703 ms | **96 dsp / 0.440 ms** | **-80 dispatches** |
+| 4 | False | **True** | 176 dsp / 0.748 ms | **96 dsp / 0.457 ms** | **-80 dispatches** |
+| 5 | False | **True** | 176 dsp / 0.735 ms | **96 dsp / 0.458 ms** | **-80 dispatches** |
+
+At $N=3$, enabling fusion eliminates 80 separate ADD dispatches (64 `ffn_down` residual ADDs + 16 other layers)
+and reduces raw elementwise ADD GPU time from 0.703 ms to 0.440 ms (-0.263 ms).
+
+### Authoritative in-graph $V_3$ A/B (5 Repetitions)
+
+Measured using `llama-vbench` on Qwen3.8-27B-UD-Q4_K_XL (`batch_n=3`, `n_prefill=1200`, `n_iter=200`, `n_rs_seq=2`):
+
+| Arm / Config | Rep 1 (ms) | Rep 2 (ms) | Rep 3 (ms) | Rep 4 (ms) | Rep 5 (ms) | Mean (ms) | Stdev (ms) | Median (ms) | p10 (ms) | p90 (ms) |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| **Incumbent (`TINYN=0`)** | 40.7516 | 40.9065 | 41.0050 | 41.0985 | 41.2168 | **40.9957** | 0.1782 | 41.0050 | 40.7516 | 41.2168 |
+| **Tiny-N Fused (`TINYN=1`)** | 41.0515 | 41.0711 | 41.1229 | 41.1186 | 41.1381 | **41.1004** | 0.0371 | 41.1186 | 41.0515 | 41.1381 |
+
+- Mean $\Delta = \mathbf{-0.1048\text{ ms}}$ (Fused is within noise / ~0.10 ms slower than incumbent).
+- Median $\Delta = \mathbf{-0.1136\text{ ms}}$.
+
+### Kernel family delta analysis ($N=3$)
+
+Differenced 100 vs 200 iterations under `GGML_VK_PERF_LOGGER=1`:
+
+| Kernel Family | Incumbent | Fused | Delta |
+|---|---|---|---|
+| **ELEMENTWISE** | 288 dsp / 1035.52 us | 208 dsp / 758.37 us | **-277.15 us** (-80 dispatches) |
+| **MUL_MAT** | 497 dsp / 35030.73 us | 497 dsp / 35249.40 us | **+218.67 us** (+3.4 us/layer bias fetch) |
+| NORM / OTHER | 465 dsp / 2001.25 us | 465 dsp / 1879.90 us | -121.35 us |
+| ALL OTHERS | 256 dsp / 4015.52 us | 256 dsp / 4043.21 us | +27.69 us |
+| **TOTAL GPU TIME** | 1506 dsp / 42083.02 us | 1426 dsp / 41930.88 us | **-152.14 us (-0.152 ms)** |
+
+### Architectural interpretation
+
+While fusion eliminates 80 dispatches and saves 277 us of standalone elementwise execution,
+the fused `mul_mat_vec` kernel must now perform uncoalesced/streamed reads of the bias tensor
+`data_fuse0` ($M=5120, N=3$) from memory inside `reduce_result`, adding +218 us across the 64 layers.
+The net GPU saving is only ~0.15 ms, which translates to a flat/negligible graph wall-time difference (<0.1 ms).
+
+### Gate decision & recommendation
+
+The measured wall-time saving is $<0.1\text{ ms}$, failing the $\ge 0.2\text{ ms}$ threshold for MTP deployment.
+
+**Recommendation:**
+```text
+CLOSE FUSION BRANCH
+```
+
+Tiny-N `MUL_MAT + ADD` fusion is technically correct and successfully removes 80 dispatches, but does not provide
+meaningful throughput acceleration due to the offsetting bias fetch overhead in `mul_mat_vec`.
+
+## Open threads
+
+- Whether a cheaper proposer at greater depth beats the current n-max 2 point,
+  given that verification is sublinear in batch size.
+- Which of the two K paths is closer to unquantized reference output.
+- Whether the ~0.2 logit perturbation is quantization-sensitive.
+- Why prompt-cache reuse alters greedy output in serial decode.
+- llama.cpp reports `logprob = 0.0` for MTP-committed tokens.
+
 ## Reproduction
 
 Harnesses are under [`experiments/qwen3-8-27b/`](../experiments/qwen3-8-27b/):
-`bench.py` (bucketed benchmark), `sweep.py` (parameter sweep), `kvsweep.py`
-(entry 7), `equiv_step1.py` and `equiv_localize.py` (entries 8–9),
-`rs_seq_test.py` (entry 10), `k1_vs_k3.py` (entry 11), `qwen36_control.py`
-(entry 12), `round_cost.py` (entry 13), `kernel_profile.py` with the `examples/vbench`
-microbench (entry 14), and entry 15's data under
-[`data/experimental/`](../data/experimental/) as `qwen3-8-27b-iq4xs-path.tsv` and
-`qwen3-8-27b-iq4xs-pipeline-stats.tsv`, reproduced with
-`test-backend-ops perf -b Vulkan1 -o MUL_MAT` against Qwen3.8 FFN shapes added to
-both case lists, plus `GGML_VK_PIPELINE_STATS` and `GGML_VK_FORCE_MUL_MM`.
-Entries 9-11 and 14-15 require an instrumented llama.cpp
-build; the probes they depend on are described inline in each script and are
-log-only except `LLAMA_FORCE_N_RS_SEQ`, which deliberately changes `cparams`, and
-`GGML_VK_FORCE_MUL_MM`, which deliberately changes Vulkan path selection. Both
-default to off and neither exists in the production tree.
+`bench.py`, `kvsweep.py`, `round_cost.py`, `kernel_profile.py`, and `examples/vbench`
+microbench. Data files are under [`data/experimental/`](../data/experimental/):
+`qwen3-8-27b-iq4xs-path.tsv`, `qwen3-8-27b-iq4xs-pipeline-stats.tsv`, `qwen3-8-27b-kv-cache.tsv`.
+
