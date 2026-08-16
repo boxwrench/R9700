@@ -157,6 +157,27 @@ through 8, the metric definitions, the HIP backtrace, and limitations.
 Normalized measurements are in
 [`data/experimental/qwen3-8-27b-sweep.tsv`](data/experimental/qwen3-8-27b-sweep.tsv).
 
+## Qwen3.8-27B KV-cache precision and speculative-decoding equivalence
+
+Quantizing the KV cache does not buy throughput on this card, but it buys a lot
+of memory. Against f16, `q8_0` frees 4.69 GiB for 2.3% decode and `q4_0` frees
+7.19 GiB — 21% of the card — for 2.6%. Draft acceptance is flat to three digits
+across all three, so KV precision does not touch the proposer. KV precision is
+closed as a throughput lever and retained as a memory lever.
+
+The correctness gate in that experiment surfaced a larger finding. MTP
+speculative decoding changes greedy output relative to ordinary decode, while
+n-gram speculation on the same target is bit-identical. The cause is neither the
+acceptance rule nor speculative batch shape: selecting a model-based draft type
+sets `n_rs_seq = n_max`, which routes Gated DeltaNet through a recurrent-state
+snapshot kernel for every token. Forcing that configuration with no drafter at
+all reproduces the divergence.
+
+The [running experiment log](docs/qwen3-8-27b-experiment-log.md) indexes every
+Qwen3.8-27B experiment in this campaign, including two retracted conclusions and
+the controls that overturned them. KV measurements are in
+[`data/experimental/qwen3-8-27b-kv-cache.tsv`](data/experimental/qwen3-8-27b-kv-cache.tsv).
+
 ## Hardware and backend
 
 - AMD Radeon AI PRO R9700, 32 GB VRAM, `gfx1201`
