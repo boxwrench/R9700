@@ -1,0 +1,11 @@
+run_id	date	device	shader	num_cols	sgpr	vgpr	spilled_vgpr	code_bytes	subgroups_per_simd	notes
+iq4xs-stats-n1	2026-08-16	r9700-vulkan1	mul_mat_vec_iq4_xs_f32_f32	1	128	48	0	38192	32	Generic mul_mat_vec.comp; dequant inside the NUM_COLS loop
+iq4xs-stats-n2	2026-08-16	r9700-vulkan1	mul_mat_vec_iq4_xs_f32_f32	2	128	72	0	59516	20	Code grows 21324 B for one extra column
+iq4xs-stats-n3	2026-08-16	r9700-vulkan1	mul_mat_vec_iq4_xs_f32_f32	3	128	72	0	81228	20	Production width; 21712 B added
+iq4xs-stats-n4	2026-08-16	r9700-vulkan1	mul_mat_vec_iq4_xs_f32_f32	4	128	84	0	102752	18	21524 B added
+iq4xs-stats-n5	2026-08-16	r9700-vulkan1	mul_mat_vec_iq4_xs_f32_f32	5	128	84	0	124292	18	21540 B added; growth is linear in columns
+q5k-stats-n1	2026-08-16	r9700-vulkan1	mul_mat_vec_q5_k_f32_f32	1	128	60	0	5440	24	Specialized shader; dequant hoisted above the NUM_COLS loop
+q5k-stats-n2	2026-08-16	r9700-vulkan1	mul_mat_vec_q5_k_f32_f32	2	128	84	0	7520	18	Code grows only 2080 B per column
+q5k-stats-n3	2026-08-16	r9700-vulkan1	mul_mat_vec_q5_k_f32_f32	3	128	108	0	9492	14	Occupancy falls faster than iq4_xs; decoded weights held in registers
+q5k-stats-n4	2026-08-16	r9700-vulkan1	mul_mat_vec_q5_k_f32_f32	4	128	144	0	11420	10	VGPR pressure dominates
+q5k-stats-n5	2026-08-16	r9700-vulkan1	mul_mat_vec_q5_k_f32_f32	5	128	192	0	13412	8	Occupancy down to 8 subgroups per SIMD

@@ -1,0 +1,23 @@
+run_id	date	device	tensor	type	m	k	n	path	iso_us	graph_us	iso_gbs	graph_gbs	correctness	notes
+iq4xs-gate-n1	2026-08-16	r9700-vulkan1	ffn_gate	iq4_xs	17408	5120	1	mul_mat_vec NUM_COLS=1	76.49	92.40	619	512	incumbent	Second pass; first absorbs GPU clock ramp
+iq4xs-gate-n2	2026-08-16	r9700-vulkan1	ffn_gate	iq4_xs	17408	5120	2	mul_mat_vec NUM_COLS=2	94.31		502		incumbent	Second pass
+iq4xs-gate-n3	2026-08-16	r9700-vulkan1	ffn_gate	iq4_xs	17408	5120	3	mul_mat_vec NUM_COLS=3	106.92	120.10	443	394	incumbent	Largest single contributor to the verification tax
+iq4xs-gate-n4	2026-08-16	r9700-vulkan1	ffn_gate	iq4_xs	17408	5120	4	mul_mat_vec NUM_COLS=4	123.59		383		incumbent	Second pass
+iq4xs-gate-n5	2026-08-16	r9700-vulkan1	ffn_gate	iq4_xs	17408	5120	5	mul_mat_vec NUM_COLS=5	138.44		342		incumbent	Second pass
+q5k-up-n1	2026-08-16	r9700-vulkan1	ffn_up	q5_K	17408	5120	1	mul_mat_vec_q5_k NUM_COLS=1	61.64	109.80	994	558	incumbent	994 GB/s is 154 pct of DRAM peak; Infinity Cache resident
+q5k-up-n2	2026-08-16	r9700-vulkan1	ffn_up	q5_K	17408	5120	2	mul_mat_vec_q5_k NUM_COLS=2	85.44		717		incumbent	Second pass
+q5k-up-n3	2026-08-16	r9700-vulkan1	ffn_up	q5_K	17408	5120	3	mul_mat_vec_q5_k NUM_COLS=3	107.42	119.60	570	512	incumbent	Converges with iq4_xs at N=3
+q5k-up-n4	2026-08-16	r9700-vulkan1	ffn_up	q5_K	17408	5120	4	mul_mat_vec_q5_k NUM_COLS=4	137.62		445		incumbent	Second pass
+q5k-up-n5	2026-08-16	r9700-vulkan1	ffn_up	q5_K	17408	5120	5	mul_mat_vec_q5_k NUM_COLS=5	168.15		364		incumbent	Second pass
+q5k-down-n1	2026-08-16	r9700-vulkan1	ffn_down	q5_K	5120	17408	1	mul_mat_vec_q5_k NUM_COLS=1 ADD-fused	62.36	103.40	983	593	incumbent	Only shape whose fusion state changes with N
+q5k-down-n2	2026-08-16	r9700-vulkan1	ffn_down	q5_K	5120	17408	2	mul_mat_vec_q5_k NUM_COLS=2	86.87		705		incumbent	Fusion lost at N>1
+q5k-down-n3	2026-08-16	r9700-vulkan1	ffn_down	q5_K	5120	17408	3	mul_mat_vec_q5_k NUM_COLS=3	106.71	119.90	574	511	incumbent	Fusion lost
+q5k-down-n4	2026-08-16	r9700-vulkan1	ffn_down	q5_K	5120	17408	4	mul_mat_vec_q5_k NUM_COLS=4	134.80		455		incumbent	Fusion lost
+q5k-down-n5	2026-08-16	r9700-vulkan1	ffn_down	q5_K	5120	17408	5	mul_mat_vec_q5_k NUM_COLS=5	164.64		372		incumbent	Fusion lost
+alt-gate-n1	2026-08-16	r9700-vulkan1	ffn_gate	iq4_xs	17408	5120	1	mul_mm forced	274.11				passed	GGML_VK_FORCE_MUL_MM=1; NMSE gate 5e-4 vs CPU reference
+alt-gate-n2	2026-08-16	r9700-vulkan1	ffn_gate	iq4_xs	17408	5120	2	mul_mm forced	279.52				passed	Alternate path loses at every width
+alt-gate-n3	2026-08-16	r9700-vulkan1	ffn_gate	iq4_xs	17408	5120	3	mul_mm forced	277.14				passed	2.59x slower than incumbent at the production width
+alt-gate-n4	2026-08-16	r9700-vulkan1	ffn_gate	iq4_xs	17408	5120	4	mul_mm forced	273.96				passed	Alternate path loses
+alt-gate-n5	2026-08-16	r9700-vulkan1	ffn_gate	iq4_xs	17408	5120	5	mul_mm forced	286.50				passed	Alternate path loses
+alt-up-n3	2026-08-16	r9700-vulkan1	ffn_up	q5_K	17408	5120	3	mul_mm forced	295.65				passed	Alternate path loses
+alt-down-n3	2026-08-16	r9700-vulkan1	ffn_down	q5_K	5120	17408	3	mul_mm forced	530.97				passed	Alternate path loses

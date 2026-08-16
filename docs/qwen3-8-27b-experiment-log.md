@@ -39,6 +39,7 @@ Device isolation is mandatory on this host. Both Vulkan and HIP enumerate the
 | 12 | Qwen3.6 vs Qwen3.8 native MTP | No proposer gap; hypothesis rejected | this document |
 | 13 | MTP round-cost decomposition | Verification is 89% of round cost | this document |
 | 14 | 1-token vs 3-token kernel profile | FFN matmul multi-column path is the lever | this document |
+| 15 | IQ4_XS tiny-column path A/B | No existing alternate wins; redundant dequant identified | this document |
 
 ## 1–6. Earlier entries
 
@@ -490,10 +491,107 @@ fusion cliff is the more tractable fix but is worth only about 0.4 ms, 5.6% of
 the delta. Attention is explicitly not the first target at 1.2% of the marginal
 cost.
 
+## 15. IQ4_XS tiny-column path A/B
+
+Entry 14 named `iq4_xs m=17408 k=5120` (ffn_gate) the largest single contributor
+to the verification tax, at 25.9%. This entry asks whether N=3 selects the wrong
+Vulkan path and whether an already-implemented alternate is faster. It changes
+no production behaviour.
+
+**Path selection is identical at both widths.** Both arms reach
+`ggml_vk_mul_mat_vec_q_f16` and differ only in a specialization constant:
+
+| tensor / shape | N=1 | N=3 |
+|---|---|---|
+| ffn_gate `iq4_xs m=17408 k=5120` | `mul_mat_vec_iq4_xs_f32_f32` NUM_COLS=1 | same shader, NUM_COLS=3 |
+| ffn_up `q5_K m=17408 k=5120` | `mul_mat_vec_q5_k_f32_f32` NUM_COLS=1 | same, NUM_COLS=3 |
+| ffn_down `q5_K m=5120 k=17408` | NUM_COLS=1, fused MUL_MAT+ADD | NUM_COLS=3, fusion lost |
+
+The branch is `ggml-vulkan.cpp:10042` (`dst->ne[1] <= mul_mat_vec_max_cols`,
+which is 8); the pipeline is indexed `[dmmv_wg][a_type][num_cols-1]` at
+`:7839`. Workgroup is `DMMV_WG_SIZE_SUBGROUP`, 64 invocations — the
+larger-workgroup heuristic at `:7818` is gated to NVIDIA and Intel, so AMD never
+takes it. `IQ4_XS` is absent from the Q8_1 type list at `:7761`, but that is not
+operative here: the R9700 under RADV reports `int dot: 0`, so
+`integer_dot_product` is false and no type uses MMVQ on this device.
+
+**No cliff at N=2–5.** Isolated `test-backend-ops perf` on Vulkan1, each case
+emitted twice with the second pass read (the first absorbs GPU clock ramp, worth
+40% on the leading case and under 2% everywhere else):
+
+| N | iq4_xs us | ratio | per column | q5_K up us | ratio | per column |
+|---|---:|---:|---:|---:|---:|---:|
+| 1 | 76.49 | 1.000 | 1.000 | 61.64 | 1.000 | 1.000 |
+| 2 | 94.31 | 1.233 | 0.617 | 85.44 | 1.386 | 0.693 |
+| 3 | 106.92 | 1.398 | 0.466 | 107.42 | 1.743 | 0.581 |
+| 4 | 123.59 | 1.616 | 0.404 | 137.62 | 2.233 | 0.558 |
+| 5 | 138.44 | 1.810 | 0.362 | 168.15 | 2.728 | 0.546 |
+
+Scaling is smooth and `iq4_xs` amortizes *better* than `q5_K`, inverting entry
+14's in-graph ordering. **The isolated benchmark is not a valid proxy for this
+question.** Isolated `q5_K` at N=1 reaches 994 GB/s, 154% of the R9700's
+644.6 GB/s DRAM peak: both weight matrices (47.35 and 61.28 MB) fit Navi 48's
+64 MB Infinity Cache, so the isolated bench is cache-resident while the
+production graph streams 64 layers of cold weights from DRAM. Entry 14's
+in-graph delta profile remains the only valid measurement of the tax, and any
+future fix must be validated in-graph rather than here.
+
+**The one existing alternate loses decisively.** With MMVQ unavailable and
+`KHR_coopmat` present, `mul_mm` was the only real candidate. An env-gated
+override (`GGML_VK_FORCE_MUL_MM`, worktree only) routes the same shapes through
+dequant+GEMM. Correctness passed 10/10 against the CPU reference at the
+NMSE 5e-4 gate for both types at N=1–5.
+
+| path, iq4_xs N=3 | us | vs incumbent |
+|---|---:|---:|
+| `mul_mat_vec` (incumbent) | 107.03 | — |
+| `mul_mm` (dequant + GEMM, coopmat) | 277.14 | 2.59x slower |
+
+Per the validation chain, no V3 or MTP run followed: there was no isolated
+improvement to propagate, so no throughput projection is claimed.
+
+**Redundant dequantization is the mechanism.** RADV pipeline statistics, no
+spills and SGPR 128 throughout:
+
+| NUM_COLS | iq4_xs VGPR / code / occupancy | q5_K VGPR / code / occupancy |
+|---|---|---|
+| 1 | 48 / 38192 B / 32 | 60 / 5440 B / 24 |
+| 3 | 72 / 81228 B / 20 | 108 / 9492 B / 14 |
+| 5 | 84 / 124292 B / 18 | 192 / 13412 B / 8 |
+
+`iq4_xs` code grows about 21.5 KB per column against `q5_K`'s 2.0 KB. In
+`vulkan-shaders/mul_mat_vec.comp:47-78` the column loop is the *outer* loop and
+`dequantize4()` sits inside it, so a full dequant — including the
+`kvalues_iq4nl[]` LDS gathers — is emitted per column even though `ib` and `iqs`
+are column-invariant. The specialized `mul_mat_vec_q5_k.comp:14-78` inverts the
+nesting, decoding once per row before looping columns.
+
+The two shaders sit at opposite ends of one tradeoff and land together at N=3:
+`iq4_xs` pays redundant dequant but holds occupancy (32 to 20), `q5_K` hoists the
+dequant into registers and collapses occupancy (24 to 14). Neither is near
+optimal.
+
+**Headroom, measured in-graph where it is real.** `iq4_xs` at N=3 runs at
+394 GB/s against 512 GB/s at N=1. Bytes read are identical at both widths, so a
+kernel that amortized properly would cost the same at N=3 as at N=1 — worth
+1.77 ms per round, with a DRAM-bound floor of 2.98 ms. Both clear the >1.0 ms
+high-value threshold.
+
+The recommended change is a loop interchange in the generic `mul_mat_vec.comp`,
+hoisting IQ-type dequantization out of the `NUM_COLS` loop and staging it through
+LDS rather than registers, so it does not inherit the VGPR blowup that costs
+`q5_K` its occupancy. Two caveats: it must be A/B'd in-graph with `vbench`, since
+the isolated bench cannot validate it either; and it touches a shader shared by
+every IQ type on every backend, so scoping it behind a specialization constant
+would confine the blast radius.
+
 ## Open threads
 
-- A single kernel A/B on the `mul_mat_vec` multi-column path for `iq4_xs`, now
-  the identified lever. Entry 14 measured the cost; nothing has been changed.
+- The loop-interchange A/B on `mul_mat_vec.comp` for IQ types, validated
+  in-graph. Entry 15 identified the mechanism and bounded the win at
+  1.77-2.98 ms per round; nothing has been changed.
+- The MUL_MAT+ADD fusion cliff at `ggml-vulkan.cpp:16438`, worth about 0.4 ms —
+  smaller than the dequant fix but lower risk, and the fallback if it stalls.
 - Whether a cheaper proposer at greater depth beats the current n-max 2 point,
   given that verification is sublinear in batch size.
 - Which of the two K paths is closer to unquantized reference output. Requires
@@ -511,6 +609,13 @@ Harnesses are under [`experiments/qwen3-8-27b/`](../experiments/qwen3-8-27b/):
 (entry 7), `equiv_step1.py` and `equiv_localize.py` (entries 8–9),
 `rs_seq_test.py` (entry 10), `k1_vs_k3.py` (entry 11), `qwen36_control.py`
 (entry 12), `round_cost.py` (entry 13), `kernel_profile.py` with the `examples/vbench`
-microbench (entry 14). Entries 9-11 and 14 require an instrumented llama.cpp
+microbench (entry 14), and entry 15's data under
+[`data/experimental/`](../data/experimental/) as `qwen3-8-27b-iq4xs-path.tsv` and
+`qwen3-8-27b-iq4xs-pipeline-stats.tsv`, reproduced with
+`test-backend-ops perf -b Vulkan1 -o MUL_MAT` against Qwen3.8 FFN shapes added to
+both case lists, plus `GGML_VK_PIPELINE_STATS` and `GGML_VK_FORCE_MUL_MM`.
+Entries 9-11 and 14-15 require an instrumented llama.cpp
 build; the probes they depend on are described inline in each script and are
-log-only except `LLAMA_FORCE_N_RS_SEQ`, which deliberately changes `cparams`.
+log-only except `LLAMA_FORCE_N_RS_SEQ`, which deliberately changes `cparams`, and
+`GGML_VK_FORCE_MUL_MM`, which deliberately changes Vulkan path selection. Both
+default to off and neither exists in the production tree.
