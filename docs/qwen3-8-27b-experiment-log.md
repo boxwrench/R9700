@@ -35,6 +35,7 @@ Device isolation is mandatory on this host. Both Vulkan and HIP enumerate the
 | 8 | Speculative-vs-serial equivalence | MTP changes greedy output; n-gram does not | this document |
 | 9 | Divergence localization | Traced to `n_rs_seq` / GDN snapshot path | this document |
 | 10 | `n_rs_seq` sufficiency | Snapshot configuration alone is sufficient | this document |
+| 11 | K=1 vs K=3 verifier agreement | Neutral; branch closed for performance | this document |
 
 ## 1–6. Earlier entries
 
@@ -192,8 +193,71 @@ Two limits on the claim. `n_rs_seq > 0` also changes ubatch splitting
 rather than the `K` value alone. And neither arm is ground truth — this shows
 the paths differ, not which is more accurate.
 
+## 11. K=1 vs K=3 verifier agreement
+
+Entries 9 and 10 established that the snapshot path shifts target logits by
+about 0.2 at a divergent prefix. This entry asks the question that matters for
+performance: does that shift explain the MTP acceptance ceiling?
+
+Method: production MTP ran once over four prompts, and every speculative round
+was captured with its exact committed prefix, both proposals, and the
+accept/reject outcome — 414 rounds. The proposals were then **frozen** and
+re-scored under two target contexts, V1 (`n_rs_seq=0`, K=1) and V3 (forced
+`n_rs_seq=2`, K=3, no drafter). Neither verifier was permitted to generate a
+continuation. Scoring reads the target distribution at an exact token prefix
+with `cache_prompt` disabled, since prompt-cache restoration is known on this
+model to alter recurrent state. Position 1 was scored at `prefix + d0`
+regardless of whether d0 would have been rejected, separating proposal-position
+quality from joint survival.
+
+The offline V3 scorer reproduced production's decisions on **249/250** rounds
+(99.6%) at position 0 and 215/216 at position 1. The residual is expected
+rather than a fault: production evaluates a position inside a 3-token
+verification batch while offline scoring evaluates it as a single-token
+continuation. Both verifiers are scored identically, so the comparison holds
+batch shape constant and isolates `n_rs_seq`.
+
+| metric | K=1 | K=3 |
+|---|---:|---:|
+| P0 | 0.8800 | 0.8600 |
+| P1-counterfactual | 0.7440 | 0.7440 |
+| Joint-2 | 0.6680 | 0.6520 |
+| Conditional-P1 | 0.7591 | 0.7581 |
+| expected accepted drafts per round | 1.5480 | 1.5120 |
+| mean target margin, position 0 | 4.3288 | 4.3436 |
+| mean target margin, position 1 | 4.2904 | 4.3440 |
+
+Only 7 of 250 rounds disagree at position 0 — K=3 breaks six K=1 acceptances
+and rescues one; joint survival splits 5 against 1 the same way. Every
+disagreement sits at a near-tie: K=1 margin averages 0.060 and K=3 margin 0.169
+on those rounds, against an overall mean margin of 4.33. The ~0.12 median
+\|Δlogit\| on the proposed token only flips outcomes in the thin tail where the
+margin is below roughly 0.2.
+
+**Neutral. The branch is closed for the performance project.** Per-token
+acceptance is 0.7740 under K=1 against 0.7560 under K=3 — 1.8 points, 2.4%
+relative. Measured production acceptance is 0.75–0.77 against a ceiling of 1.0,
+so the snapshot path accounts for about 2 of roughly 23 missing points, under a
+tenth of the gap. The K=1/K=3 divergence remains a real correctness and
+numerical-equivalence question, but it is not the performance lever.
+
+The study is deliberately underpowered and was not extended. McNemar exact on
+the discordant pairs gives p = 0.125 at position 0 and p = 0.219 for joint
+survival, so a small real effect is bounded rather than excluded; the direction
+is consistently against K=3. Resolving 2 points would need roughly 1,500–2,000
+rounds against the 250 scored here. That was judged not worth the GPU time,
+because the conclusion does not depend on it — even taking the point estimate
+at face value, the effect is under a tenth of the gap.
+
+The acceptance ceiling is therefore a property of the proposer, consistent with
+the rest of the campaign: acceptance was flat to three digits across every KV
+precision, and `n-max 2` was decisively optimal in the parameter sweep.
+
 ## Open threads
 
+- Intrinsic quality of the 425M MTP head, now the leading explanation for the
+  acceptance ceiling. A Qwen3.6 control would establish whether the ceiling is
+  specific to this head.
 - Which of the two K paths is closer to unquantized reference output. Requires
   a reference the campaign does not currently have.
 - Whether the ~0.2 logit perturbation is quantization-sensitive. A Q6 repeat of
@@ -207,6 +271,7 @@ the paths differ, not which is more accurate.
 Harnesses are under [`experiments/qwen3-8-27b/`](../experiments/qwen3-8-27b/):
 `bench.py` (bucketed benchmark), `sweep.py` (parameter sweep), `kvsweep.py`
 (entry 7), `equiv_step1.py` and `equiv_localize.py` (entries 8–9),
-`rs_seq_test.py` (entry 10). The last three require an instrumented llama.cpp
+`rs_seq_test.py` (entry 10), `k1_vs_k3.py` (entry 11). The last four require an
+instrumented llama.cpp
 build; the probes they depend on are described inline in each script and are
 log-only except `LLAMA_FORCE_N_RS_SEQ`, which deliberately changes `cparams`.

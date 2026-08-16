@@ -1,0 +1,39 @@
+{
+  "n_rounds_scored": 250,
+  "replay_pos0_agreement": 0.996,
+  "K1": {
+    "label": "K=1",
+    "n": 250,
+    "P0": 0.88,
+    "P1_counterfactual": 0.744,
+    "Joint2": 0.668,
+    "Conditional_P1": 0.7590909090909091,
+    "expected_drafts": 1.548,
+    "mean_margin_pos0": 4.328814784433225,
+    "mean_margin_pos1": 4.290352684414331
+  },
+  "K3": {
+    "label": "K=3",
+    "n": 250,
+    "P0": 0.86,
+    "P1_counterfactual": 0.744,
+    "Joint2": 0.652,
+    "Conditional_P1": 0.758139534883721,
+    "expected_drafts": 1.512,
+    "mean_margin_pos0": 4.343627034900567,
+    "mean_margin_pos1": 4.344006796486894
+  },
+  "pos0_matrix": {
+    "True_True": 214,
+    "True_False": 6,
+    "False_True": 1,
+    "False_False": 29
+  },
+  "joint_matrix": {
+    "True_True": 162,
+    "True_False": 5,
+    "False_True": 1,
+    "False_False": 82
+  },
+  "n_disagreements": 7
+}
