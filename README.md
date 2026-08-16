@@ -79,6 +79,43 @@ test, limitations, and guarded crash recovery. Normalized measurements are in
 [`data/experimental/deepseek-v4-flash.tsv`](data/experimental/deepseek-v4-flash.tsv),
 with the compact profile matrix under [`experiments/deepseek-v4-flash/`](experiments/deepseek-v4-flash/).
 
+## Qwen3.8-27B quantization comparison
+
+Two Unsloth dynamic quantizations of Qwen3.8-27B were measured on the R9700
+under llama.cpp/Vulkan, fully offloaded, using the model's built-in MTP head for
+speculative decoding. Q4_K_XL is the selected profile for routine local serving.
+
+| | UD-Q4_K_XL | UD-Q6_K_XL |
+|---|---:|---:|
+| Context size | 163,840 | 65,536 |
+| Decode, ten-sample mean | **51.30 tokens/s** | **39.08 tokens/s** |
+| Prefill, ten-sample mean | **705.99 tokens/s** | **700.05 tokens/s** |
+| MTP draft acceptance | **71.6%** | **70.4%** |
+| R9700 allocation | 29.784 GB | 30.409 GB |
+
+Prefill is unchanged between the two, inside run-to-run spread, because prompt
+processing is compute-bound. Decode falls 23.8% because it is bandwidth-bound
+and Q6 weights are 1.446× larger. Draft acceptance is effectively identical, so
+Q6 returns nothing through speculation. The context sizes differ by necessity:
+Q6 weights leave too little VRAM for 163,840 tokens. This is a speed
+measurement only — no quality or perplexity comparison was run.
+
+Two negative results are worth the space. `--models-max` defaults to 4 and
+evicts by model count rather than VRAM, so the router held two large models on
+one 32 GB card, spilled weights to host RAM, and dropped decode to 3.85
+tokens/s with nothing in the logs explaining it. Separately, varying only the
+sampler seed between benchmark samples yields prompt-cache hits and a
+meaningless prefill figure; prompts must be prefixed uniquely.
+
+The [full Qwen3.8-27B record](docs/qwen3-8-27b-quant-comparison.md) covers the
+hybrid Gated DeltaNet architecture and its unusually small KV footprint, router
+preset precedence, the speculative-decoding sweep, and the null results for
+batch sizing, host scheduling flags, and GPU clock control. Normalized
+measurements are in
+[`data/experimental/qwen3-8-27b-quant.tsv`](data/experimental/qwen3-8-27b-quant.tsv),
+with the harness and preset under
+[`experiments/qwen3-8-27b/`](experiments/qwen3-8-27b/).
+
 ## Hardware and backend
 
 - AMD Radeon AI PRO R9700, 32 GB VRAM, `gfx1201`
