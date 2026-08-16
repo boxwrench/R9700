@@ -37,6 +37,7 @@ Device isolation is mandatory on this host. Both Vulkan and HIP enumerate the
 | 10 | `n_rs_seq` sufficiency | Snapshot configuration alone is sufficient | this document |
 | 11 | K=1 vs K=3 verifier agreement | Neutral; branch closed for performance | this document |
 | 12 | Qwen3.6 vs Qwen3.8 native MTP | No proposer gap; hypothesis rejected | this document |
+| 13 | MTP round-cost decomposition | Verification is 89% of round cost | this document |
 
 ## 1–6. Earlier entries
 
@@ -328,12 +329,83 @@ is not better proposer weights but the cost and structure of each speculative
 round — reducing per-round overhead, or changing the speculative mechanism
 itself.
 
+## 13. MTP round-cost decomposition
+
+With both the runtime-path and proposer-weight explanations closed, this entry
+asks where the time in a speculative round actually goes.
+
+`draft-mtp` reports cumulative `dur(b,g,a)` = `t_begin_us`, `t_draft_us`,
+`t_accept_us` (`common/speculative.cpp:2764`, counts at `:2786`). The timers
+themselves are plain RAII wall clocks with no synchronization
+(`common/common.h:40`), but `dur(g)` is still reliable: the region it brackets
+runs `llama_decode(ctx_dft, ...)` at `common/speculative.cpp:1596` and then
+`common_sampler_sample` at `:1614`, whose first statement is
+`llama_synchronize` (`common/sampling.cpp:595`). Draft GPU work must therefore
+complete inside the timed region. Target verification is **not** inside any of
+these timers -- it runs in the server loop at `server-context.cpp:3819` -- so it
+is obtained by subtraction. Trace output requires `-lv 4`.
+
+Four arms, same 256-token harness, five repetitions after a discarded unrelated
+warmup, fresh server, `cache_prompt` disabled:
+
+| | T0 serial K=1 | T1 serial K=3 | T2 n-gram K=3 | T3 MTP |
+|---|---:|---:|---:|---:|
+| decode tok/s | 29.56 | 29.02 | 30.62 | **53.24** |
+| ms per output token | 33.702 | 34.327 | 32.533 | **18.713** |
+| verification rounds | 0 | 0 | 123 | 509 |
+| output tokens per round | — | — | 1.7886 | 2.4931 |
+
+Round cost is solved from `total = n_serial x t_serial + n_rounds x t_round`
+rather than `total / rounds`, because not every output token comes from a round.
+For T3 this barely matters -- 11 of 1280 tokens are serial -- so the estimate is
+robust; for T2 it is far more sensitive and is used only as a cross-check.
+
+| component | ms per round | share |
+|---|---:|---:|
+| target verification, 3-position batch | **41.259** | 89.1% |
+| MTP draft head (`dur(g)`) | **5.057** | 10.9% |
+| accept and begin bookkeeping | ~0.000 | ~0% |
+| **total round** | **46.317** | 100% |
+
+Against a single serial K=3 step of 34.327 ms, the excess is **+11.990 ms**,
+split 6.932 ms (57.8%) extra verification for two more positions and 5.057 ms
+(42.2%) draft head. **The K=3 snapshot overhead is separable and small: +0.625
+ms per serial step, 1.9%**, measured directly as T1 - T0 with no drafting
+involved, and it sits inside the baseline rather than in the excess.
+
+Two independent arms agree on the verification cost: T2 solves to 42.728 ms per
+round with a proposer costing 0.001 ms per call, against T3's 41.259 -- within
+3.5%.
+
+Accounting ceilings, not achievable targets:
+
+| eliminate | ms per output token | tok/s | gain |
+|---|---:|---:|---:|
+| nothing (current) | 18.713 | 53.24 | — |
+| draft head entirely | 16.549 | 60.43 | +13.5% |
+| extra verification cost | 15.797 | 63.30 | +18.9% |
+| all | 13.518 | 73.98 | +38.9% |
+
+**Verification is the lever, not the proposer.** It is 89% of round cost and 58%
+of the excess. Verifying 3 positions costs 41.26 ms against 34.33 for 1 -- +20%
+for three times the positions, already sublinear because decode is
+bandwidth-bound and the weights stream once regardless of batch size. Whether
+that marginal ~6.9 ms is recoverable is a kernel question this entry does not
+answer; it establishes only where the time is.
+
+The sublinearity has a structural implication: deeper drafting spreads a fixed
+~34 ms weight-streaming cost across more candidate tokens. That is in tension
+with `n-max 2` being the sweep's decisive optimum, where the binding limit is
+acceptance decay rather than verification cost. A cheaper proposer at greater
+depth is the shape of any remaining win.
+
 ## Open threads
 
-- Cost and structure of each speculative round, now the remaining lever after
-  entries 11 and 12 closed both the runtime-path and proposer-weight
-  explanations. Per-round overhead reduction or a different speculative
-  mechanism, not better head weights.
+- Whether the marginal ~6.9 ms cost of verifying three positions instead of one
+  is recoverable at the kernel level, or is irreducible compute. Entry 13
+  locates it but does not profile it.
+- Whether a cheaper proposer at greater depth beats the current n-max 2 point,
+  given that verification is sublinear in batch size.
 - Which of the two K paths is closer to unquantized reference output. Requires
   a reference the campaign does not currently have.
 - Whether the ~0.2 logit perturbation is quantization-sensitive. A Q6 repeat of
@@ -348,6 +420,7 @@ Harnesses are under [`experiments/qwen3-8-27b/`](../experiments/qwen3-8-27b/):
 `bench.py` (bucketed benchmark), `sweep.py` (parameter sweep), `kvsweep.py`
 (entry 7), `equiv_step1.py` and `equiv_localize.py` (entries 8–9),
 `rs_seq_test.py` (entry 10), `k1_vs_k3.py` (entry 11), `qwen36_control.py`
-(entry 12, production build). Entries 9-11 require an instrumented llama.cpp
+(entry 12), `round_cost.py` (entry 13). Entries 9-11 require an instrumented
+llama.cpp
 build; the probes they depend on are described inline in each script and are
 log-only except `LLAMA_FORCE_N_RS_SEQ`, which deliberately changes `cparams`.
