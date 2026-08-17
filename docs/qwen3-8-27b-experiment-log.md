@@ -849,6 +849,34 @@ reduce work per byte.
 that the end-to-end validation gate worked: component timings and acceptance
 rates looked favourable, and only the wall-clock holdout exposed the collapse.
 
+## 18B. Root-Cause Diagnosis of the Reconstruction Failure
+
+**Status**: `ESTABLISHED`
+
+Diagnostic work following Entry 18, isolating *where* the reconstruction path
+broke. Raw diagnostic output:
+[`qwen38_diag_raw_logs.txt`](../data/experimental/qwen38_diag_raw_logs.txt).
+
+Established:
+
+1. The reduced 64K / 32K heads are **genuinely materialized** — not a fallback to
+   the full head.
+2. **Copied rows produce matching logits.** The slicing from `output.weight` is
+   faithful.
+3. `d2t` is a **valid I64 tensor and maps correctly** to target vocabulary IDs.
+4. **`FILL` + `SET_ROWS` works in isolation.** The primitives are not themselves
+   defective.
+5. The reconstruction *architecture* nonetheless **interacts badly with the real
+   backend sampling and scheduler path**, and should not be revived.
+
+Points 1 and 3 were independently re-confirmed during Entry 19 (head widths
+reported as 65536 / 32768 / 248320; local index `39882` → target `39138`).
+
+The practical consequence: the failure was never in the reduced vocabulary, the
+head, the map, or the individual ops. It was in composing them into a
+full-vocabulary reconstruction that the backend sampler then had to consume.
+**Do not attempt to repair the `SET_ROWS` reconstruction path.**
+
 ## 19. Direct Reduced-Vocabulary MTP Sampling
 
 **Status**: `BLOCKED AT EARLY GATE — IMPLEMENTATION INCOMPLETE`

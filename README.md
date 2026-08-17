@@ -124,6 +124,13 @@ measurements are in
 with the harness and preset under
 [`experiments/qwen3-8-27b/`](experiments/qwen3-8-27b/).
 
+The ongoing R9700 inference-optimization research program lives under
+[`research-program/`](research-program/README.md), with the authoritative
+experiment log at
+[`docs/qwen3-8-27b-experiment-log.md`](docs/qwen3-8-27b-experiment-log.md). It is
+currently **paused at the Entry 19 early gate**; [`HANDOFF.md`](HANDOFF.md) is
+the entry point for resuming it.
+
 ## Qwen3.8-27B runtime parameter sweep
 
 Twenty-nine configurations were measured against the production Qwen3.8-27B

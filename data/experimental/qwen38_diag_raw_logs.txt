@@ -1,0 +1,2324 @@
+=== FULL BASELINE (p_min=0.3) ===
+
+
+Write a complete, production-grade Python asynchronous task pool with priority queuing, worker concurrency limiting, and exponential backoff retry logic. Include full type hints and docstrings.
+
+<think>
+The user wants a complete, production-grade Python asynchronous task pool with:
+1. Priority queuing
+2. Worker concurrency limiting
+3. Exponential back
+
+
+
+
+WARNING: radv is not a conformant Vulkan implementation, testing use only.
+0.00.067.705 I cmn  common_init_: fitting params to device memory ...
+0.00.067.708 I cmn  common_init_: (for bugs during this step try to reproduce them with -fit off, or provide --verbose logs if the bug only occurs with -fit on)
+0.00.067.714 I common_params_fit_impl: getting device memory data for initial parameters:
+0.00.370.206 I common_memory_breakdown_print: | memory breakdown [MiB]                    | total    free     self   model   context   compute    unaccounted |
+0.00.370.209 I common_memory_breakdown_print: |   - Vulkan1 (AI PRO R9700 (RADV GFX1201)) | 32624 = 15068 + (17503 = 16400 +     960 +     142) +          51 |
+0.00.370.209 I common_memory_breakdown_print: |   - Host                                  |                    710 =   682 +       0 +      28                |
+0.00.409.623 I common_params_fit_impl: projected to use 17503 MiB of device memory vs. 15068 MiB of free device memory
+0.00.409.626 I common_params_fit_impl: cannot meet free memory target of 1024 MiB, need to reduce device memory by 3458 MiB
+0.00.409.627 I common_params_fit_impl: context size set by user to 8192 -> no change
+0.00.409.702 W common_fit_params: failed to fit params to free device memory: n_gpu_layers already set by user to 999, abort
+0.00.409.712 I common_fit_params: fitting params to free memory took 0.34 seconds
+0.00.441.617 I llama_model_loader: loaded meta data with 51 key-value pairs and 866 tensors from /ai/models/Qwen3.8-27B-UD-Q4_K_XL/Qwen3.8-27B-UD-Q4_K_XL.gguf (version GGUF V3 (latest))
+0.00.441.638 I llama_model_loader: Dumping metadata keys/values. Note: KV overrides do not apply in this output.
+0.00.441.642 I llama_model_loader: - kv   0:                       general.architecture str              = qwen35
+0.00.441.643 I llama_model_loader: - kv   1:                               general.type str              = model
+0.00.441.644 I llama_model_loader: - kv   2:                     general.sampling.top_k i32              = 20
+0.00.441.649 I llama_model_loader: - kv   3:                     general.sampling.top_p f32              = 0.950000
+0.00.441.650 I llama_model_loader: - kv   4:                      general.sampling.temp f32              = 1.000000
+0.00.441.650 I llama_model_loader: - kv   5:                               general.name str              = Qwen3.8-27B
+0.00.441.651 I llama_model_loader: - kv   6:                           general.basename str              = Qwen3.8-27B
+0.00.441.652 I llama_model_loader: - kv   7:                        general.description str              = Renewal of the beloved Qwen model, de...
+0.00.441.652 I llama_model_loader: - kv   8:                       general.quantized_by str              = Unsloth
+0.00.441.653 I llama_model_loader: - kv   9:                         general.size_label str              = 27B
+0.00.441.653 I llama_model_loader: - kv  10:                            general.license str              = apache-2.0
+0.00.441.654 I llama_model_loader: - kv  11:                           general.repo_url str              = https://huggingface.co/unsloth
+0.00.441.655 I llama_model_loader: - kv  12:                   general.base_model.count u32              = 1
+0.00.441.656 I llama_model_loader: - kv  13:                  general.base_model.0.name str              = Qwen3.8 27B
+0.00.441.656 I llama_model_loader: - kv  14:          general.base_model.0.organization str              = Qwen
+0.00.441.657 I llama_model_loader: - kv  15:              general.base_model.0.repo_url str              = https://huggingface.co/Qwen/Qwen3.8-27B
+0.00.441.668 I llama_model_loader: - kv  16:                               general.tags arr[str,1]       = ["unsloth"]
+0.00.441.669 I llama_model_loader: - kv  17:                         qwen35.block_count u32              = 65
+0.00.441.669 I llama_model_loader: - kv  18:                      qwen35.context_length u32              = 262144
+0.00.441.670 I llama_model_loader: - kv  19:                    qwen35.embedding_length u32              = 5120
+0.00.441.670 I llama_model_loader: - kv  20:                 qwen35.feed_forward_length u32              = 17408
+0.00.441.670 I llama_model_loader: - kv  21:                qwen35.attention.head_count u32              = 24
+0.00.441.671 I llama_model_loader: - kv  22:             qwen35.attention.head_count_kv u32              = 4
+0.00.441.672 I llama_model_loader: - kv  23:             qwen35.rope.dimension_sections arr[i32,4]       = [11, 11, 10, 0]
+0.00.441.674 I llama_model_loader: - kv  24:                      qwen35.rope.freq_base f32              = 10000000.000000
+0.00.441.674 I llama_model_loader: - kv  25:    qwen35.attention.layer_norm_rms_epsilon f32              = 0.000001
+0.00.441.675 I llama_model_loader: - kv  26:                qwen35.attention.key_length u32              = 256
+0.00.441.675 I llama_model_loader: - kv  27:              qwen35.attention.value_length u32              = 256
+0.00.441.676 I llama_model_loader: - kv  28:                qwen35.nextn_predict_layers u32              = 1
+0.00.441.676 I llama_model_loader: - kv  29:                     qwen35.ssm.conv_kernel u32              = 4
+0.00.441.676 I llama_model_loader: - kv  30:                      qwen35.ssm.state_size u32              = 128
+0.00.441.676 I llama_model_loader: - kv  31:                     qwen35.ssm.group_count u32              = 16
+0.00.441.677 I llama_model_loader: - kv  32:                  qwen35.ssm.time_step_rank u32              = 48
+0.00.441.677 I llama_model_loader: - kv  33:                      qwen35.ssm.inner_size u32              = 6144
+0.00.441.678 I llama_model_loader: - kv  34:             qwen35.full_attention_interval u32              = 4
+0.00.441.678 I llama_model_loader: - kv  35:                qwen35.rope.dimension_count u32              = 64
+0.00.441.679 I llama_model_loader: - kv  36:                       tokenizer.ggml.model str              = gpt2
+0.00.441.679 I llama_model_loader: - kv  37:                         tokenizer.ggml.pre str              = qwen35
+0.00.455.976 I llama_model_loader: - kv  38:                      tokenizer.ggml.tokens arr[str,248320]  = ["!", "\"", "#", "$", "%", "&", "'", ...
+0.00.459.366 I llama_model_loader: - kv  39:                  tokenizer.ggml.token_type arr[i32,248320]  = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, ...
+0.00.471.579 I llama_model_loader: - kv  40:                      tokenizer.ggml.merges arr[str,247587]  = ["Ġ Ġ", "ĠĠ ĠĠ", "i n", "Ġ t",...
+0.00.471.581 I llama_model_loader: - kv  41:                tokenizer.ggml.eos_token_id u32              = 248046
+0.00.471.582 I llama_model_loader: - kv  42:            tokenizer.ggml.padding_token_id u32              = 248055
+0.00.471.582 I llama_model_loader: - kv  43:                tokenizer.ggml.bos_token_id u32              = 248044
+0.00.471.583 I llama_model_loader: - kv  44:               general.quantization_version u32              = 2
+0.00.471.583 I llama_model_loader: - kv  45:                          general.file_type u32              = 14
+0.00.471.584 I llama_model_loader: - kv  46:                      quantize.imatrix.file str              = /mnt/disks/unslothai/ubuntu/workspace...
+0.00.471.585 I llama_model_loader: - kv  47:                   quantize.imatrix.dataset str              = unsloth_calibration_Qwen3.8-27B.txt
+0.00.471.585 I llama_model_loader: - kv  48:             quantize.imatrix.entries_count u32              = 496
+0.00.471.585 I llama_model_loader: - kv  49:              quantize.imatrix.chunks_count u32              = 45
+0.00.471.588 I llama_model_loader: - kv  50:                    tokenizer.chat_template str              = {%- set image_count = namespace(value...
+0.00.471.589 I llama_model_loader: - type  f32:  360 tensors
+0.00.471.590 I llama_model_loader: - type q4_K:   97 tensors
+0.00.471.590 I llama_model_loader: - type q5_K:  325 tensors
+0.00.471.590 I llama_model_loader: - type q6_K:   19 tensors
+0.00.471.590 I llama_model_loader: - type iq4_xs:   65 tensors
+0.00.471.591 I print_info: file format = GGUF V3 (latest)
+0.00.471.592 I print_info: file type   = Q4_K - Small
+0.00.471.595 I print_info: file size   = 16.68 GiB (5.25 BPW) 
+0.00.471.770 I llama_prepare_model_devices: using device Vulkan1 (AMD Radeon AI PRO R9700 (RADV GFX1201)) (0000:06:00.0) - 15517 MiB free
+0.00.536.996 I load: 0 unused tokens
+0.00.581.686 I load: printing all EOG tokens:
+0.00.581.688 I load:   - 248044 ('<|endoftext|>')
+0.00.581.689 I load:   - 248046 ('<|im_end|>')
+0.00.581.689 I load:   - 248063 ('<|fim_pad|>')
+0.00.581.690 I load:   - 248064 ('<|repo_name|>')
+0.00.581.690 I load:   - 248065 ('<|file_sep|>')
+0.00.581.977 I load: special tokens cache size = 33
+0.00.631.468 I load: token to piece cache size = 1.7581 MB
+0.00.631.481 I print_info: arch                  = qwen35
+0.00.631.481 I print_info: vocab_only            = 0
+0.00.631.481 I print_info: no_alloc              = 0
+0.00.631.482 I print_info: n_ctx_train           = 262144
+0.00.631.482 I print_info: n_embd_inp            = 5120
+0.00.631.482 I print_info: n_embd                = 5120
+0.00.631.483 I print_info: n_embd_out            = 5120
+0.00.631.483 I print_info: n_layer               = 64
+0.00.631.483 I print_info: n_layer_all           = 65
+0.00.631.491 I print_info: n_head                = 24
+0.00.631.492 I print_info: n_head_kv             = 4
+0.00.631.492 I print_info: n_rot                 = 64
+0.00.631.492 I print_info: n_swa                 = 0
+0.00.631.493 I print_info: is_swa_any            = 0
+0.00.631.493 I print_info: n_embd_head_k         = 256
+0.00.631.493 I print_info: n_embd_head_v         = 256
+0.00.631.494 I print_info: n_gqa                 = 6
+0.00.631.496 I print_info: n_embd_k_gqa          = 1024
+0.00.631.497 I print_info: n_embd_v_gqa          = 1024
+0.00.631.497 I print_info: f_norm_eps            = 0.0e+00
+0.00.631.498 I print_info: f_norm_rms_eps        = 1.0e-06
+0.00.631.498 I print_info: f_clamp_kqv           = 0.0e+00
+0.00.631.499 I print_info: f_max_alibi_bias      = 0.0e+00
+0.00.631.499 I print_info: f_logit_scale         = 0.0e+00
+0.00.631.499 I print_info: f_attn_scale          = 0.0e+00
+0.00.631.500 I print_info: f_attn_value_scale    = 0.0000
+0.00.631.500 I print_info: n_ff                  = 17408
+0.00.631.501 I print_info: n_expert              = 0
+0.00.631.501 I print_info: n_expert_used         = 0
+0.00.631.501 I print_info: n_expert_groups       = 0
+0.00.631.501 I print_info: n_group_used          = 0
+0.00.631.501 I print_info: causal attn           = 1
+0.00.631.501 I print_info: pooling type          = -1
+0.00.631.502 I print_info: rope type             = 40
+0.00.631.502 I print_info: rope scaling          = linear
+0.00.631.503 I print_info: freq_base_train       = 10000000.0
+0.00.631.503 I print_info: freq_scale_train      = 1
+0.00.631.503 I print_info: n_ctx_orig_yarn       = 262144
+0.00.631.503 I print_info: rope_yarn_log_mul     = 0.0000
+0.00.631.503 I print_info: rope_finetuned        = unknown
+0.00.631.504 I print_info: mrope sections        = [11, 11, 10, 0]
+0.00.631.504 I print_info: ssm_d_conv            = 4
+0.00.631.504 I print_info: ssm_d_inner           = 6144
+0.00.631.504 I print_info: ssm_d_state           = 128
+0.00.631.504 I print_info: ssm_dt_rank           = 48
+0.00.631.504 I print_info: ssm_n_group           = 16
+0.00.631.505 I print_info: ssm_dt_b_c_rms        = 0
+0.00.631.505 I print_info: model type            = 27B
+0.00.631.506 I print_info: model params          = 27.32 B
+0.00.631.506 I print_info: general.name          = Qwen3.8-27B
+0.00.631.507 I print_info: vocab type            = BPE
+0.00.631.508 I print_info: n_vocab               = 248320
+0.00.631.508 I print_info: n_merges              = 247587
+0.00.631.508 I print_info: BOS token             = 248044 '<|endoftext|>'
+0.00.631.508 I print_info: EOS token             = 248046 '<|im_end|>'
+0.00.631.508 I print_info: EOT token             = 248046 '<|im_end|>'
+0.00.631.508 I print_info: PAD token             = 248055 '<|vision_pad|>'
+0.00.631.509 I print_info: LF token              = 198 'Ċ'
+0.00.631.509 I print_info: FIM PRE token         = 248060 '<|fim_prefix|>'
+0.00.631.509 I print_info: FIM SUF token         = 248062 '<|fim_suffix|>'
+0.00.631.509 I print_info: FIM MID token         = 248061 '<|fim_middle|>'
+0.00.631.509 I print_info: FIM PAD token         = 248063 '<|fim_pad|>'
+0.00.631.509 I print_info: FIM REP token         = 248064 '<|repo_name|>'
+0.00.631.509 I print_info: FIM SEP token         = 248065 '<|file_sep|>'
+0.00.631.509 I print_info: EOG token             = 248044 '<|endoftext|>'
+0.00.631.510 I print_info: EOG token             = 248046 '<|im_end|>'
+0.00.631.510 I print_info: EOG token             = 248063 '<|fim_pad|>'
+0.00.631.510 I print_info: EOG token             = 248064 '<|repo_name|>'
+0.00.631.510 I print_info: EOG token             = 248065 '<|file_sep|>'
+0.00.631.510 I print_info: max token length      = 256
+0.00.631.679 I load_tensors: loading model tensors, this can take a while... (load_mode = mmap)
+0.00.799.505 I load_tensors: offloading output layer to GPU
+0.00.799.508 I load_tensors: offloading 64 repeating layers to GPU
+0.00.799.508 I load_tensors: offloaded 66/66 layers to GPU
+0.00.799.514 I load_tensors:   CPU_Mapped model buffer size =   682.03 MiB
+0.00.799.514 I load_tensors:      Vulkan1 model buffer size = 16400.56 MiB
+.............................................................................................
+0.02.867.980 I cmn  common_init_: added <|endoftext|> logit bias = -inf
+0.02.867.983 I cmn  common_init_: added <|im_end|> logit bias = -inf
+0.02.867.984 I cmn  common_init_: added <|fim_pad|> logit bias = -inf
+0.02.867.984 I cmn  common_init_: added <|repo_name|> logit bias = -inf
+0.02.867.985 I cmn  common_init_: added <|file_sep|> logit bias = -inf
+0.02.868.050 I llama_context: constructing llama_context
+0.02.868.052 I llama_context: n_seq_max             = 1
+0.02.868.053 I llama_context: n_ctx                 = 8192
+0.02.868.053 I llama_context: n_ctx_seq             = 8192
+0.02.868.053 I llama_context: n_batch               = 2048
+0.02.868.053 I llama_context: n_ubatch              = 512
+0.02.868.054 I llama_context: causal_attn           = 1
+0.02.868.054 I llama_context: flash_attn            = enabled
+0.02.868.054 I llama_context: kv_unified            = false
+0.02.868.057 I llama_context: freq_base             = 10000000.0
+0.02.868.058 I llama_context: freq_scale            = 1
+0.02.868.059 I llama_context: n_rs_seq              = 2
+0.02.868.059 I llama_context: n_outputs_max         = 3
+0.02.868.059 I llama_context: n_outputs_max_per_seq = 3
+0.02.868.060 I llama_context: n_ctx_seq (8192) < n_ctx_train (262144) -- the full capacity of the model will not be utilized
+0.02.868.242 I llama_context: Vulkan_Host  output buffer size =     0.95 MiB
+0.02.868.814 I llama_kv_cache:    Vulkan1 KV buffer size =   512.00 MiB
+0.02.890.234 I llama_kv_cache: size =  512.00 MiB (  8192 cells,  16 layers,  1/1 seqs), K (f16):  256.00 MiB, V (f16):  256.00 MiB
+0.02.890.238 I llama_kv_cache: attn_rot_k = 0, n_embd_head_k_all = 256
+0.02.890.239 I llama_kv_cache: attn_rot_v = 0, n_embd_head_k_all = 256
+0.02.907.920 I llama_memory_recurrent:    Vulkan1 RS buffer size =   448.88 MiB
+0.02.907.929 I llama_memory_recurrent: size =  448.88 MiB (     1 cells,  64 layers,  1 seqs  2 rs_seq), R (f32):   16.88 MiB, S (f32):  432.00 MiB
+0.02.907.940 I sched_reserve: reserving ...
+0.02.913.102 I resolve_fused_ops: resolving fused Gated Delta Net support:
+0.02.914.594 I resolve_fused_ops: fused Gated Delta Net (autoregressive) enabled
+0.02.915.756 I resolve_fused_ops: fused Gated Delta Net (chunked) enabled
+0.02.915.757 I resolve_fused_ops: resolving fused Lightning Indexer support:
+0.02.916.891 I resolve_fused_ops: Lightning Indexer enabled
+0.02.916.892 I resolve_fused_ops: resolving fused DeepSeek V4 HC support:
+0.02.918.009 I resolve_fused_ops: fused DeepSeek V4 HC pre enabled
+0.02.919.123 I resolve_fused_ops: fused DeepSeek V4 HC comb enabled
+0.02.920.223 I resolve_fused_ops: fused DeepSeek V4 HC post enabled
+0.02.925.693 I sched_reserve:    Vulkan1 compute buffer size =   142.13 MiB
+0.02.925.695 I sched_reserve: Vulkan_Host compute buffer size =    28.03 MiB
+0.02.925.695 I sched_reserve: graph nodes  = 3943
+0.02.925.695 I sched_reserve: graph splits = 2
+0.02.925.697 I sched_reserve: reserve took 17.75 ms, sched copies = 1
+0.02.925.754 I cmn          init: llama threadpool init, n_threads = 8
+0.02.925.781 I cmn  common_init_: warming up the model with an empty run - please wait ... (--no-warmup to disable)
+0.03.116.530 I common_speculative_init_result: creating MTP draft context against the target model '/ai/models/Qwen3.8-27B-UD-Q4_K_XL/Qwen3.8-27B-UD-Q4_K_XL.gguf'
+0.03.116.551 I llama_context: constructing llama_context
+0.03.116.554 I llama_context: n_seq_max             = 1
+0.03.116.554 I llama_context: n_ctx                 = 8192
+0.03.116.554 I llama_context: n_ctx_seq             = 8192
+0.03.116.554 I llama_context: n_batch               = 2048
+0.03.116.554 I llama_context: n_ubatch              = 512
+0.03.116.555 I llama_context: causal_attn           = 1
+0.03.116.556 I llama_context: flash_attn            = enabled
+0.03.116.556 I llama_context: kv_unified            = false
+0.03.116.560 I llama_context: freq_base             = 10000000.0
+0.03.116.561 I llama_context: freq_scale            = 1
+0.03.116.561 I llama_context: n_rs_seq              = 0
+0.03.116.561 I llama_context: n_outputs_max         = 1
+0.03.116.561 I llama_context: n_outputs_max_per_seq = 1
+0.03.116.562 I llama_context: n_ctx_seq (8192) < n_ctx_train (262144) -- the full capacity of the model will not be utilized
+0.03.116.761 I llama_context: Vulkan_Host  output buffer size =     0.95 MiB
+0.03.116.851 I llama_kv_cache:    Vulkan1 KV buffer size =    32.00 MiB
+0.03.116.977 I llama_kv_cache: size =   32.00 MiB (  8192 cells,   1 layers,  1/1 seqs), K (f16):   16.00 MiB, V (f16):   16.00 MiB
+0.03.116.979 I llama_kv_cache: attn_rot_k = 0, n_embd_head_k_all = 256
+0.03.116.979 I llama_kv_cache: attn_rot_v = 0, n_embd_head_k_all = 256
+0.03.116.984 I sched_reserve: reserving ...
+0.03.121.645 I resolve_fused_ops: resolving fused Gated Delta Net support:
+0.03.121.756 I resolve_fused_ops: fused Gated Delta Net (autoregressive) enabled
+0.03.121.814 I resolve_fused_ops: fused Gated Delta Net (chunked) enabled
+0.03.121.815 I resolve_fused_ops: resolving fused Lightning Indexer support:
+0.03.121.862 I resolve_fused_ops: Lightning Indexer enabled
+0.03.121.863 I resolve_fused_ops: resolving fused DeepSeek V4 HC support:
+0.03.121.907 I resolve_fused_ops: fused DeepSeek V4 HC pre enabled
+0.03.121.950 I resolve_fused_ops: fused DeepSeek V4 HC comb enabled
+0.03.121.993 I resolve_fused_ops: fused DeepSeek V4 HC post enabled
+0.03.123.638 I sched_reserve:    Vulkan1 compute buffer size =   130.02 MiB
+0.03.123.640 I sched_reserve: Vulkan_Host compute buffer size =    28.02 MiB
+0.03.123.641 I sched_reserve: graph nodes  = 50
+0.03.123.641 I sched_reserve: graph splits = 2
+0.03.123.642 I sched_reserve: reserve took 6.66 ms, sched copies = 1
+0.03.299.259 I cmn  common_conte: the context supports bounded partial sequence removal
+0.03.340.861 I spec common_specu: adding speculative implementation 'draft-mtp'
+0.03.340.867 I spec common_specu: - n_max=2, n_min=0, p_min=0.30, n_embd=5120, backend_sampling=1
+0.03.340.869 I spec common_specu: - gpu_layers=-1, cache_k=f16, cache_v=f16, ctx_tgt=yes, ctx_dft=yes, devices=[default]
+0.03.713.068 I sched_reserve: reserving ...
+0.03.719.260 I sched_reserve:    Vulkan1 compute buffer size =   130.02 MiB
+0.03.719.264 I sched_reserve: Vulkan_Host compute buffer size =    28.02 MiB
+0.03.719.264 I sched_reserve: graph nodes  = 56
+0.03.719.264 I sched_reserve: graph splits = 2
+0.03.719.266 I sched_reserve: reserve took 6.19 ms, sched copies = 1
+
+[DIAG MTP STEP 0 | Seq 0 | Iter 0]
+  Hidden State: norm=130.562120, sum=-36.846560, h[0..3]=[-0.1976, 1.7099, -0.4684, -1.6261]
+  Logits Stats: total=248320, finite=248320, -INF=0, NaN=0
+  Timing (us): decode=7781, get_logits=6, sampler=33
+  Top-10 Candidates (after sampler):
+    [ 1] id=   271 (raw_logit=    0.0000, p=0.963075) '
+
+'
+    [ 2] id=   561 (raw_logit=    0.0000, p=0.013136) ' The'
+    [ 3] id=  1061 (raw_logit=    0.0000, p=0.010727) ' This'
+    [ 4] id= 28763 (raw_logit=    0.0000, p=0.003422) ' Include'
+    [ 5] id=   198 (raw_logit=    0.0000, p=0.002294) '
+'
+    [ 6] id=  7054 (raw_logit=    0.0000, p=0.001655) ' Also'
+    [ 7] id=   357 (raw_logit=    0.0000, p=0.001643) ' A'
+    [ 8] id=   353 (raw_logit=    0.0000, p=0.001605) ' I'
+    [ 9] id=  6558 (raw_logit=    0.0000, p=0.001409) ' Let'
+    [10] id=248046 (raw_logit=    0.0000, p=0.001034) '<|im_end|>'
+  Decision: top_p=0.963075 vs p_min=0.300000 -> ACCEPT_DRAFT
+
+[DIAG MTP STEP 1 | Seq 0 | Iter 1]
+  Hidden State: norm=130.562120, sum=-36.846560, h[0..3]=[-0.1976, 1.7099, -0.4684, -1.6261]
+  Logits Stats: total=248320, finite=248320, -INF=0, NaN=0
+  Timing (us): decode=2584, get_logits=2, sampler=3
+  Top-10 Candidates (after sampler):
+    [ 1] id=  1919 (raw_logit=    0.0000, p=0.303500) 'This'
+    [ 2] id=  9764 (raw_logit=    0.0000, p=0.181105) 'Let'
+    [ 3] id=   760 (raw_logit=    0.0000, p=0.165076) 'The'
+    [ 4] id=  8160 (raw_logit=    0.0000, p=0.157456) 'Here'
+    [ 5] id=   550 (raw_logit=    0.0000, p=0.091346) '##'
+    [ 6] id=    40 (raw_logit=    0.0000, p=0.033973) 'I'
+    [ 7] id=   332 (raw_logit=    0.0000, p=0.027892) '**'
+    [ 8] id=    32 (raw_logit=    0.0000, p=0.022167) 'A'
+    [ 9] id= 13962 (raw_logit=    0.0000, p=0.009169) '###'
+    [10] id=  5170 (raw_logit=    0.0000, p=0.008316) 'First'
+  Decision: top_p=0.303500 vs p_min=0.300000 -> ACCEPT_DRAFT
+
+[DIAG MTP STEP 2 | Seq 0 | Iter 0]
+  Hidden State: norm=138.729237, sum=69.273971, h[0..3]=[0.7800, -2.9402, 0.7406, 1.6886]
+  Logits Stats: total=248320, finite=248320, -INF=0, NaN=0
+  Timing (us): decode=2676, get_logits=2, sampler=3
+  Top-10 Candidates (after sampler):
+    [ 1] id=   198 (raw_logit=    0.0000, p=0.941757) '
+'
+    [ 2] id=   271 (raw_logit=    0.0000, p=0.058076) '
+
+'
+    [ 3] id= 74455 (raw_logit=    0.0000, p=0.000055) 'assistant'
+    [ 4] id=   561 (raw_logit=    0.0000, p=0.000046) ' The'
+    [ 5] id=   760 (raw_logit=    0.0000, p=0.000022) 'The'
+    [ 6] id=  2218 (raw_logit=    0.0000, p=0.000014) '—'
+    [ 7] id=    30 (raw_logit=    0.0000, p=0.000013) '?'
+    [ 8] id=   279 (raw_logit=    0.0000, p=0.000008) ' the'
+    [ 9] id=   318 (raw_logit=    0.0000, p=0.000004) ' ('
+    [10] id=  1532 (raw_logit=    0.0000, p=0.000004) ' here'
+  Decision: top_p=0.941757 vs p_min=0.300000 -> ACCEPT_DRAFT
+
+[DIAG MTP STEP 3 | Seq 0 | Iter 1]
+  Hidden State: norm=138.729237, sum=69.273971, h[0..3]=[0.7800, -2.9402, 0.7406, 1.6886]
+  Logits Stats: total=248320, finite=248320, -INF=0, NaN=0
+  Timing (us): decode=2625, get_logits=4, sampler=3
+  Top-10 Candidates (after sampler):
+    [ 1] id=   760 (raw_logit=    0.0000, p=0.852841) 'The'
+    [ 2] id=248068 (raw_logit=    0.0000, p=0.109110) '<think>'
+    [ 3] id=  9764 (raw_logit=    0.0000, p=0.030604) 'Let'
+    [ 4] id=  1919 (raw_logit=    0.0000, p=0.003157) 'This'
+    [ 5] id=    40 (raw_logit=    0.0000, p=0.001342) 'I'
+    [ 6] id=  8160 (raw_logit=    0.0000, p=0.000966) 'Here'
+    [ 7] id= 13784 (raw_logit=    0.0000, p=0.000659) 'Wait'
+    [ 8] id=  1421 (raw_logit=    0.0000, p=0.000633) 'User'
+    [ 9] id= 22916 (raw_logit=    0.0000, p=0.000400) 'Need'
+    [10] id= 14562 (raw_logit=    0.0000, p=0.000289) 'Should'
+  Decision: top_p=0.852841 vs p_min=0.300000 -> ACCEPT_DRAFT
+
+[DIAG MTP STEP 4 | Seq 0 | Iter 0]
+  Hidden State: norm=122.670590, sum=4.833389, h[0..3]=[0.3339, -0.2758, -1.1300, 1.6725]
+  Logits Stats: total=248320, finite=248320, -INF=0, NaN=0
+  Timing (us): decode=2683, get_logits=2, sampler=4
+  Top-10 Candidates (after sampler):
+    [ 1] id=  6587 (raw_logit=    0.0000, p=0.979738) ' wants'
+    [ 2] id=   369 (raw_logit=    0.0000, p=0.020247) ' is'
+    [ 3] id=  1318 (raw_logit=    0.0000, p=0.000011) ' want'
+    [ 4] id= 16561 (raw_logit=    0.0000, p=0.000002) ' asks'
+    [ 5] id=  7154 (raw_logit=    0.0000, p=0.000001) ' requests'
+    [ 6] id=  7225 (raw_logit=    0.0000, p=0.000001) ' requires'
+    [ 7] id=  3749 (raw_logit=    0.0000, p=0.000000) ' needs'
+    [ 8] id= 98831 (raw_logit=    0.0000, p=0.000000) '想要'
+    [ 9] id=   682 (raw_logit=    0.0000, p=0.000000) ' has'
+    [10] id=   513 (raw_logit=    0.0000, p=0.000000) ' are'
+  Decision: top_p=0.979738 vs p_min=0.300000 -> ACCEPT_DRAFT
+
+[DIAG MTP STEP 5 | Seq 0 | Iter 1]
+  Hidden State: norm=122.670590, sum=4.833389, h[0..3]=[0.3339, -0.2758, -1.1300, 1.6725]
+  Logits Stats: total=248320, finite=248320, -INF=0, NaN=0
+  Timing (us): decode=2595, get_logits=4, sampler=3
+  Top-10 Candidates (after sampler):
+    [ 1] id=   264 (raw_logit=    0.0000, p=0.999250) ' a'
+    [ 2] id=   449 (raw_logit=    0.0000, p=0.000514) ' an'
+    [ 3] id=   728 (raw_logit=    0.0000, p=0.000205) ' me'
+    [ 4] id=    25 (raw_logit=    0.0000, p=0.000015) ':'
+    [ 5] id=  2414 (raw_logit=    0.0000, p=0.000010) ' something'
+    [ 6] id=  1330 (raw_logit=    0.0000, p=0.000002) ' two'
+    [ 7] id=   357 (raw_logit=    0.0000, p=0.000001) ' A'
+    [ 8] id=   328 (raw_logit=    0.0000, p=0.000001) ' "'
+    [ 9] id=   279 (raw_logit=    0.0000, p=0.000001) ' the'
+    [10] id=   411 (raw_logit=    0.0000, p=0.000000) ' this'
+  Decision: top_p=0.999250 vs p_min=0.300000 -> ACCEPT_DRAFT
+
+[DIAG MTP STEP 6 | Seq 0 | Iter 0]
+  Hidden State: norm=128.191923, sum=-44.706259, h[0..3]=[-2.0161, -1.1351, 0.6153, 1.5118]
+  Logits Stats: total=248320, finite=248320, -INF=0, NaN=0
+  Timing (us): decode=2798, get_logits=1, sampler=3
+  Top-10 Candidates (after sampler):
+    [ 1] id=    11 (raw_logit=    0.0000, p=0.999995) ','
+    [ 2] id=  5492 (raw_logit=    0.0000, p=0.000005) ' production'
+    [ 3] id= 12654 (raw_logit=    0.0000, p=0.000000) ' Python'
+    [ 4] id=  3203 (raw_logit=    0.0000, p=0.000000) ' async'
+    [ 5] id=   321 (raw_logit=    0.0000, p=0.000000) ' and'
+    [ 6] id= 43424 (raw_logit=    0.0000, p=0.000000) ' asyncio'
+    [ 7] id=   328 (raw_logit=    0.0000, p=0.000000) ' "'
+    [ 8] id=   318 (raw_logit=    0.0000, p=0.000000) ' ('
+    [ 9] id= 21924 (raw_logit=    0.0000, p=0.000000) 'production'
+    [10] id=  7873 (raw_logit=    0.0000, p=0.000000) ' implementation'
+  Decision: top_p=0.999995 vs p_min=0.300000 -> ACCEPT_DRAFT
+
+[DIAG MTP STEP 7 | Seq 0 | Iter 1]
+  Hidden State: norm=128.191923, sum=-44.706259, h[0..3]=[-2.0161, -1.1351, 0.6153, 1.5118]
+  Logits Stats: total=248320, finite=248320, -INF=0, NaN=0
+  Timing (us): decode=2618, get_logits=2, sampler=4
+  Top-10 Candidates (after sampler):
+    [ 1] id=  5492 (raw_logit=    0.0000, p=0.999993) ' production'
+    [ 2] id= 21924 (raw_logit=    0.0000, p=0.000005) 'production'
+    [ 3] id= 12654 (raw_logit=    0.0000, p=0.000001) ' Python'
+    [ 4] id= 23288 (raw_logit=    0.0000, p=0.000001) ' Production'
+    [ 5] id= 96721 (raw_logit=    0.0000, p=0.000000) '生产'
+    [ 6] id= 67208 (raw_logit=    0.0000, p=0.000000) '-production'
+    [ 7] id= 88810 (raw_logit=    0.0000, p=0.000000) '_production'
+    [ 8] id=  3203 (raw_logit=    0.0000, p=0.000000) ' async'
+    [ 9] id= 43467 (raw_logit=    0.0000, p=0.000000) 'Production'
+    [10] id= 66162 (raw_logit=    0.0000, p=0.000000) '.production'
+  Decision: top_p=0.999993 vs p_min=0.300000 -> ACCEPT_DRAFT
+
+[DIAG MTP STEP 8 | Seq 0 | Iter 0]
+  Hidden State: norm=135.688456, sum=-81.319553, h[0..3]=[-1.4918, 1.6278, -1.4506, 1.5886]
+  Logits Stats: total=248320, finite=248320, -INF=0, NaN=0
+  Timing (us): decode=2693, get_logits=2, sampler=4
+  Top-10 Candidates (after sampler):
+    [ 1] id= 12654 (raw_logit=    0.0000, p=0.974036) ' Python'
+    [ 2] id= 37715 (raw_logit=    0.0000, p=0.013202) ' asynchronous'
+    [ 3] id=  3203 (raw_logit=    0.0000, p=0.012069) ' async'
+    [ 4] id= 43424 (raw_logit=    0.0000, p=0.000585) ' asyncio'
+    [ 5] id= 29292 (raw_logit=    0.0000, p=0.000034) 'Python'
+    [ 6] id= 92927 (raw_logit=    0.0000, p=0.000023) ' asympt'
+    [ 7] id=  5187 (raw_logit=    0.0000, p=0.000018) ' Py'
+    [ 8] id=119935 (raw_logit=    0.0000, p=0.000014) '异步'
+    [ 9] id= 20776 (raw_logit=    0.0000, p=0.000011) ' Async'
+    [10] id= 32907 (raw_logit=    0.0000, p=0.000007) ' concurrent'
+  Decision: top_p=0.974036 vs p_min=0.300000 -> ACCEPT_DRAFT
+
+[DIAG MTP STEP 9 | Seq 0 | Iter 1]
+  Hidden State: norm=135.688456, sum=-81.319553, h[0..3]=[-1.4918, 1.6278, -1.4506, 1.5886]
+  Logits Stats: total=248320, finite=248320, -INF=0, NaN=0
+  Timing (us): decode=2565, get_logits=1, sampler=1
+  Top-10 Candidates (after sampler):
+    [ 1] id= 37715 (raw_logit=    0.0000, p=0.938254) ' asynchronous'
+    [ 2] id=  3203 (raw_logit=    0.0000, p=0.057490) ' async'
+    [ 3] id= 43424 (raw_logit=    0.0000, p=0.002314) ' asyncio'
+    [ 4] id=119935 (raw_logit=    0.0000, p=0.001439) '异步'
+    [ 5] id=  5574 (raw_logit=    0.0000, p=0.000140) ' AS'
+    [ 6] id=  1577 (raw_logit=    0.0000, p=0.000123) ' As'
+    [ 7] id= 65496 (raw_logit=    0.0000, p=0.000082) ' asynchronously'
+    [ 8] id= 20776 (raw_logit=    0.0000, p=0.000077) ' Async'
+    [ 9] id= 31363 (raw_logit=    0.0000, p=0.000043) '-as'
+    [10] id=   430 (raw_logit=    0.0000, p=0.000038) ' as'
+  Decision: top_p=0.938254 vs p_min=0.300000 -> ACCEPT_DRAFT
+0.05.503.993 I encoded   34 tokens in    0.380 seconds, speed:   89.368 t/s
+0.05.503.994 I decoded   35 tokens in    1.783 seconds, speed:   19.633 t/s
+0.05.503.994 I 
+0.05.503.994 I n_draft   = 2
+0.05.503.994 I n_predict = 35
+0.05.504.000 I n_drafted = 24
+0.05.504.000 I n_accept  = 23
+0.05.504.001 I accept    = 95.833%
+0.05.504.001 I 
+0.05.504.001 I draft:
+
+0.05.504.033 I spec common_specu: statistics        draft-mtp: #calls(b,g,a) =    1     12     12, #gen drafts =     12, #acc drafts =    12, #gen tokens =     24, #acc tokens =    23, #mean acc len = 2.92, #acc rate/pos = (1.000, 0.917), dur(b,g,a) = 0.005, 73.336, 0.020 ms
+0.05.504.033 I 
+0.05.504.033 I target:
+
+0.05.504.037 I common_perf_print:    sampling time =       6.69 ms
+0.05.504.037 I common_perf_print:    samplers time =       2.35 ms /    35 tokens
+0.05.504.041 I common_perf_print:        load time =    2644.72 ms
+0.05.504.042 I common_perf_print: prompt eval time =    1725.02 ms /    71 tokens (   24.30 ms per token,    41.16 tokens per second)
+0.05.504.042 I common_perf_print:        eval time =       0.00 ms /     1 runs   (    0.00 ms per token,      inf tokens per second)
+0.05.504.043 I common_perf_print:       total time =    2387.54 ms /    72 tokens
+0.05.504.043 I common_perf_print: unaccounted time =     655.83 ms /  27.5 %      (total - sampling - prompt eval - eval) / (total)
+0.05.504.043 I common_perf_print:    graphs reused =         12
+0.05.504.255 I common_memory_breakdown_print: | memory breakdown [MiB]                    | total   free     self   model   context   compute    unaccounted |
+0.05.504.255 I common_memory_breakdown_print: |   - Vulkan1 (AI PRO R9700 (RADV GFX1201)) | 32624 =   76 + (17503 = 16400 +     960 +     142) +       15043 |
+0.05.504.256 I common_memory_breakdown_print: |   - Host                                  |                   710 =   682 +       0 +      28                |
+
+
+=== 64K TRIMMED (p_min=0.3) ===
+
+
+Write a complete, production-grade Python asynchronous task pool with priority queuing, worker concurrency limiting, and exponential backoff retry logic. Include full type hints and docstrings.
+
+<think>
+The user wants a complete, production-grade Python asynchronous task pool with:
+1. Priority queuing
+2. Worker concurrency limiting
+3. Ex
+
+
+
+
+WARNING: radv is not a conformant Vulkan implementation, testing use only.
+0.00.033.917 I cmn  common_init_: fitting params to device memory ...
+0.00.033.919 I cmn  common_init_: (for bugs during this step try to reproduce them with -fit off, or provide --verbose logs if the bug only occurs with -fit on)
+0.00.033.924 I common_params_fit_impl: getting device memory data for initial parameters:
+0.00.317.981 I common_memory_breakdown_print: | memory breakdown [MiB]                    | total    free     self   model   context   compute    unaccounted |
+0.00.317.987 I common_memory_breakdown_print: |   - Vulkan1 (AI PRO R9700 (RADV GFX1201)) | 32624 = 15068 + (17766 = 16663 +     960 +     142) +        -211 |
+0.00.317.987 I common_memory_breakdown_print: |   - Host                                  |                    710 =   682 +       0 +      28                |
+0.00.378.265 I common_params_fit_impl: projected to use 17766 MiB of device memory vs. 15068 MiB of free device memory
+0.00.378.269 I common_params_fit_impl: cannot meet free memory target of 1024 MiB, need to reduce device memory by 3721 MiB
+0.00.378.270 I common_params_fit_impl: context size set by user to 8192 -> no change
+0.00.378.350 W common_fit_params: failed to fit params to free device memory: n_gpu_layers already set by user to 999, abort
+0.00.378.361 I common_fit_params: fitting params to free memory took 0.34 seconds
+0.00.409.764 I llama_model_loader: loaded meta data with 51 key-value pairs and 866 tensors from /ai/models/Qwen3.8-27B-UD-Q4_K_XL/Qwen3.8-27B-UD-Q4_K_XL.gguf (version GGUF V3 (latest))
+0.00.409.788 I llama_model_loader: Dumping metadata keys/values. Note: KV overrides do not apply in this output.
+0.00.409.793 I llama_model_loader: - kv   0:                       general.architecture str              = qwen35
+0.00.409.794 I llama_model_loader: - kv   1:                               general.type str              = model
+0.00.409.795 I llama_model_loader: - kv   2:                     general.sampling.top_k i32              = 20
+0.00.409.800 I llama_model_loader: - kv   3:                     general.sampling.top_p f32              = 0.950000
+0.00.409.802 I llama_model_loader: - kv   4:                      general.sampling.temp f32              = 1.000000
+0.00.409.802 I llama_model_loader: - kv   5:                               general.name str              = Qwen3.8-27B
+0.00.409.802 I llama_model_loader: - kv   6:                           general.basename str              = Qwen3.8-27B
+0.00.409.804 I llama_model_loader: - kv   7:                        general.description str              = Renewal of the beloved Qwen model, de...
+0.00.409.804 I llama_model_loader: - kv   8:                       general.quantized_by str              = Unsloth
+0.00.409.805 I llama_model_loader: - kv   9:                         general.size_label str              = 27B
+0.00.409.805 I llama_model_loader: - kv  10:                            general.license str              = apache-2.0
+0.00.409.806 I llama_model_loader: - kv  11:                           general.repo_url str              = https://huggingface.co/unsloth
+0.00.409.807 I llama_model_loader: - kv  12:                   general.base_model.count u32              = 1
+0.00.409.808 I llama_model_loader: - kv  13:                  general.base_model.0.name str              = Qwen3.8 27B
+0.00.409.808 I llama_model_loader: - kv  14:          general.base_model.0.organization str              = Qwen
+0.00.409.809 I llama_model_loader: - kv  15:              general.base_model.0.repo_url str              = https://huggingface.co/Qwen/Qwen3.8-27B
+0.00.409.818 I llama_model_loader: - kv  16:                               general.tags arr[str,1]       = ["unsloth"]
+0.00.409.819 I llama_model_loader: - kv  17:                         qwen35.block_count u32              = 65
+0.00.409.820 I llama_model_loader: - kv  18:                      qwen35.context_length u32              = 262144
+0.00.409.820 I llama_model_loader: - kv  19:                    qwen35.embedding_length u32              = 5120
+0.00.409.821 I llama_model_loader: - kv  20:                 qwen35.feed_forward_length u32              = 17408
+0.00.409.821 I llama_model_loader: - kv  21:                qwen35.attention.head_count u32              = 24
+0.00.409.821 I llama_model_loader: - kv  22:             qwen35.attention.head_count_kv u32              = 4
+0.00.409.823 I llama_model_loader: - kv  23:             qwen35.rope.dimension_sections arr[i32,4]       = [11, 11, 10, 0]
+0.00.409.825 I llama_model_loader: - kv  24:                      qwen35.rope.freq_base f32              = 10000000.000000
+0.00.409.826 I llama_model_loader: - kv  25:    qwen35.attention.layer_norm_rms_epsilon f32              = 0.000001
+0.00.409.826 I llama_model_loader: - kv  26:                qwen35.attention.key_length u32              = 256
+0.00.409.827 I llama_model_loader: - kv  27:              qwen35.attention.value_length u32              = 256
+0.00.409.827 I llama_model_loader: - kv  28:                qwen35.nextn_predict_layers u32              = 1
+0.00.409.827 I llama_model_loader: - kv  29:                     qwen35.ssm.conv_kernel u32              = 4
+0.00.409.828 I llama_model_loader: - kv  30:                      qwen35.ssm.state_size u32              = 128
+0.00.409.828 I llama_model_loader: - kv  31:                     qwen35.ssm.group_count u32              = 16
+0.00.409.828 I llama_model_loader: - kv  32:                  qwen35.ssm.time_step_rank u32              = 48
+0.00.409.829 I llama_model_loader: - kv  33:                      qwen35.ssm.inner_size u32              = 6144
+0.00.409.829 I llama_model_loader: - kv  34:             qwen35.full_attention_interval u32              = 4
+0.00.409.829 I llama_model_loader: - kv  35:                qwen35.rope.dimension_count u32              = 64
+0.00.409.829 I llama_model_loader: - kv  36:                       tokenizer.ggml.model str              = gpt2
+0.00.409.830 I llama_model_loader: - kv  37:                         tokenizer.ggml.pre str              = qwen35
+0.00.422.863 I llama_model_loader: - kv  38:                      tokenizer.ggml.tokens arr[str,248320]  = ["!", "\"", "#", "$", "%", "&", "'", ...
+0.00.426.292 I llama_model_loader: - kv  39:                  tokenizer.ggml.token_type arr[i32,248320]  = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, ...
+0.00.438.733 I llama_model_loader: - kv  40:                      tokenizer.ggml.merges arr[str,247587]  = ["Ġ Ġ", "ĠĠ ĠĠ", "i n", "Ġ t",...
+0.00.438.739 I llama_model_loader: - kv  41:                tokenizer.ggml.eos_token_id u32              = 248046
+0.00.438.740 I llama_model_loader: - kv  42:            tokenizer.ggml.padding_token_id u32              = 248055
+0.00.438.740 I llama_model_loader: - kv  43:                tokenizer.ggml.bos_token_id u32              = 248044
+0.00.438.741 I llama_model_loader: - kv  44:               general.quantization_version u32              = 2
+0.00.438.742 I llama_model_loader: - kv  45:                          general.file_type u32              = 14
+0.00.438.743 I llama_model_loader: - kv  46:                      quantize.imatrix.file str              = /mnt/disks/unslothai/ubuntu/workspace...
+0.00.438.744 I llama_model_loader: - kv  47:                   quantize.imatrix.dataset str              = unsloth_calibration_Qwen3.8-27B.txt
+0.00.438.744 I llama_model_loader: - kv  48:             quantize.imatrix.entries_count u32              = 496
+0.00.438.744 I llama_model_loader: - kv  49:              quantize.imatrix.chunks_count u32              = 45
+0.00.438.747 I llama_model_loader: - kv  50:                    tokenizer.chat_template str              = {%- set image_count = namespace(value...
+0.00.438.747 I llama_model_loader: - type  f32:  360 tensors
+0.00.438.748 I llama_model_loader: - type q4_K:   97 tensors
+0.00.438.748 I llama_model_loader: - type q5_K:  325 tensors
+0.00.438.748 I llama_model_loader: - type q6_K:   19 tensors
+0.00.438.749 I llama_model_loader: - type iq4_xs:   65 tensors
+0.00.438.750 I print_info: file format = GGUF V3 (latest)
+0.00.438.751 I print_info: file type   = Q4_K - Small
+0.00.438.755 I print_info: file size   = 16.68 GiB (5.25 BPW) 
+0.00.438.970 I llama_prepare_model_devices: using device Vulkan1 (AMD Radeon AI PRO R9700 (RADV GFX1201)) (0000:06:00.0) - 15517 MiB free
+0.00.529.823 I load: 0 unused tokens
+0.00.567.781 I load: printing all EOG tokens:
+0.00.567.783 I load:   - 248044 ('<|endoftext|>')
+0.00.567.784 I load:   - 248046 ('<|im_end|>')
+0.00.567.784 I load:   - 248063 ('<|fim_pad|>')
+0.00.567.784 I load:   - 248064 ('<|repo_name|>')
+0.00.567.784 I load:   - 248065 ('<|file_sep|>')
+0.00.568.047 I load: special tokens cache size = 33
+0.00.619.242 I load: token to piece cache size = 1.7581 MB
+0.00.619.257 I print_info: arch                  = qwen35
+0.00.619.258 I print_info: vocab_only            = 0
+0.00.619.258 I print_info: no_alloc              = 0
+0.00.619.259 I print_info: n_ctx_train           = 262144
+0.00.619.260 I print_info: n_embd_inp            = 5120
+0.00.619.260 I print_info: n_embd                = 5120
+0.00.619.260 I print_info: n_embd_out            = 5120
+0.00.619.261 I print_info: n_layer               = 64
+0.00.619.261 I print_info: n_layer_all           = 65
+0.00.619.269 I print_info: n_head                = 24
+0.00.619.271 I print_info: n_head_kv             = 4
+0.00.619.271 I print_info: n_rot                 = 64
+0.00.619.271 I print_info: n_swa                 = 0
+0.00.619.272 I print_info: is_swa_any            = 0
+0.00.619.272 I print_info: n_embd_head_k         = 256
+0.00.619.272 I print_info: n_embd_head_v         = 256
+0.00.619.273 I print_info: n_gqa                 = 6
+0.00.619.274 I print_info: n_embd_k_gqa          = 1024
+0.00.619.276 I print_info: n_embd_v_gqa          = 1024
+0.00.619.277 I print_info: f_norm_eps            = 0.0e+00
+0.00.619.278 I print_info: f_norm_rms_eps        = 1.0e-06
+0.00.619.278 I print_info: f_clamp_kqv           = 0.0e+00
+0.00.619.278 I print_info: f_max_alibi_bias      = 0.0e+00
+0.00.619.279 I print_info: f_logit_scale         = 0.0e+00
+0.00.619.279 I print_info: f_attn_scale          = 0.0e+00
+0.00.619.279 I print_info: f_attn_value_scale    = 0.0000
+0.00.619.280 I print_info: n_ff                  = 17408
+0.00.619.280 I print_info: n_expert              = 0
+0.00.619.280 I print_info: n_expert_used         = 0
+0.00.619.281 I print_info: n_expert_groups       = 0
+0.00.619.281 I print_info: n_group_used          = 0
+0.00.619.281 I print_info: causal attn           = 1
+0.00.619.281 I print_info: pooling type          = -1
+0.00.619.281 I print_info: rope type             = 40
+0.00.619.281 I print_info: rope scaling          = linear
+0.00.619.282 I print_info: freq_base_train       = 10000000.0
+0.00.619.283 I print_info: freq_scale_train      = 1
+0.00.619.283 I print_info: n_ctx_orig_yarn       = 262144
+0.00.619.283 I print_info: rope_yarn_log_mul     = 0.0000
+0.00.619.283 I print_info: rope_finetuned        = unknown
+0.00.619.283 I print_info: mrope sections        = [11, 11, 10, 0]
+0.00.619.284 I print_info: ssm_d_conv            = 4
+0.00.619.284 I print_info: ssm_d_inner           = 6144
+0.00.619.284 I print_info: ssm_d_state           = 128
+0.00.619.284 I print_info: ssm_dt_rank           = 48
+0.00.619.284 I print_info: ssm_n_group           = 16
+0.00.619.284 I print_info: ssm_dt_b_c_rms        = 0
+0.00.619.285 I print_info: model type            = 27B
+0.00.619.286 I print_info: model params          = 27.32 B
+0.00.619.286 I print_info: general.name          = Qwen3.8-27B
+0.00.619.289 I print_info: vocab type            = BPE
+0.00.619.289 I print_info: n_vocab               = 248320
+0.00.619.290 I print_info: n_merges              = 247587
+0.00.619.290 I print_info: BOS token             = 248044 '<|endoftext|>'
+0.00.619.290 I print_info: EOS token             = 248046 '<|im_end|>'
+0.00.619.290 I print_info: EOT token             = 248046 '<|im_end|>'
+0.00.619.290 I print_info: PAD token             = 248055 '<|vision_pad|>'
+0.00.619.290 I print_info: LF token              = 198 'Ċ'
+0.00.619.290 I print_info: FIM PRE token         = 248060 '<|fim_prefix|>'
+0.00.619.290 I print_info: FIM SUF token         = 248062 '<|fim_suffix|>'
+0.00.619.291 I print_info: FIM MID token         = 248061 '<|fim_middle|>'
+0.00.619.291 I print_info: FIM PAD token         = 248063 '<|fim_pad|>'
+0.00.619.291 I print_info: FIM REP token         = 248064 '<|repo_name|>'
+0.00.619.291 I print_info: FIM SEP token         = 248065 '<|file_sep|>'
+0.00.619.291 I print_info: EOG token             = 248044 '<|endoftext|>'
+0.00.619.292 I print_info: EOG token             = 248046 '<|im_end|>'
+0.00.619.292 I print_info: EOG token             = 248063 '<|fim_pad|>'
+0.00.619.292 I print_info: EOG token             = 248064 '<|repo_name|>'
+0.00.619.292 I print_info: EOG token             = 248065 '<|file_sep|>'
+0.00.619.292 I print_info: max token length      = 256
+0.00.619.474 I load_tensors: loading model tensors, this can take a while... (load_mode = mmap)
+0.00.619.636 I load_arch_tensors: MTP configured with d2t vocabulary map (draft_vocab_size = 65536)
+0.00.789.471 I load_tensors: offloading output layer to GPU
+0.00.789.475 I load_tensors: offloading 64 repeating layers to GPU
+0.00.789.475 I load_tensors: offloaded 66/66 layers to GPU
+0.00.789.480 I load_tensors:   CPU_Mapped model buffer size =   682.03 MiB
+0.00.789.481 I load_tensors:      Vulkan1 model buffer size = 16663.56 MiB
+.............................................................................................
+0.02.870.499 I load_tensors: slicing 65536 rows from output.weight into nextn.shared_head_head...
+0.05.368.232 I cmn  common_init_: added <|endoftext|> logit bias = -inf
+0.05.368.236 I cmn  common_init_: added <|im_end|> logit bias = -inf
+0.05.368.237 I cmn  common_init_: added <|fim_pad|> logit bias = -inf
+0.05.368.238 I cmn  common_init_: added <|repo_name|> logit bias = -inf
+0.05.368.239 I cmn  common_init_: added <|file_sep|> logit bias = -inf
+0.05.368.360 I llama_context: constructing llama_context
+0.05.368.364 I llama_context: n_seq_max             = 1
+0.05.368.365 I llama_context: n_ctx                 = 8192
+0.05.368.365 I llama_context: n_ctx_seq             = 8192
+0.05.368.365 I llama_context: n_batch               = 2048
+0.05.368.365 I llama_context: n_ubatch              = 512
+0.05.368.365 I llama_context: causal_attn           = 1
+0.05.368.366 I llama_context: flash_attn            = enabled
+0.05.368.366 I llama_context: kv_unified            = false
+0.05.368.369 I llama_context: freq_base             = 10000000.0
+0.05.368.370 I llama_context: freq_scale            = 1
+0.05.368.370 I llama_context: n_rs_seq              = 2
+0.05.368.370 I llama_context: n_outputs_max         = 3
+0.05.368.370 I llama_context: n_outputs_max_per_seq = 3
+0.05.368.370 I llama_context: n_ctx_seq (8192) < n_ctx_train (262144) -- the full capacity of the model will not be utilized
+0.05.368.527 I llama_context: Vulkan_Host  output buffer size =     0.95 MiB
+0.05.369.082 I llama_kv_cache:    Vulkan1 KV buffer size =   512.00 MiB
+0.05.388.681 I llama_kv_cache: size =  512.00 MiB (  8192 cells,  16 layers,  1/1 seqs), K (f16):  256.00 MiB, V (f16):  256.00 MiB
+0.05.388.684 I llama_kv_cache: attn_rot_k = 0, n_embd_head_k_all = 256
+0.05.388.684 I llama_kv_cache: attn_rot_v = 0, n_embd_head_k_all = 256
+0.05.406.109 I llama_memory_recurrent:    Vulkan1 RS buffer size =   448.88 MiB
+0.05.406.114 I llama_memory_recurrent: size =  448.88 MiB (     1 cells,  64 layers,  1 seqs  2 rs_seq), R (f32):   16.88 MiB, S (f32):  432.00 MiB
+0.05.406.122 I sched_reserve: reserving ...
+0.05.410.410 I resolve_fused_ops: resolving fused Gated Delta Net support:
+0.05.412.407 I resolve_fused_ops: fused Gated Delta Net (autoregressive) enabled
+0.05.413.630 I resolve_fused_ops: fused Gated Delta Net (chunked) enabled
+0.05.413.632 I resolve_fused_ops: resolving fused Lightning Indexer support:
+0.05.414.777 I resolve_fused_ops: Lightning Indexer enabled
+0.05.414.778 I resolve_fused_ops: resolving fused DeepSeek V4 HC support:
+0.05.415.894 I resolve_fused_ops: fused DeepSeek V4 HC pre enabled
+0.05.417.165 I resolve_fused_ops: fused DeepSeek V4 HC comb enabled
+0.05.418.279 I resolve_fused_ops: fused DeepSeek V4 HC post enabled
+0.05.424.273 I sched_reserve:    Vulkan1 compute buffer size =   142.13 MiB
+0.05.424.279 I sched_reserve: Vulkan_Host compute buffer size =    28.03 MiB
+0.05.424.280 I sched_reserve: graph nodes  = 3943
+0.05.424.280 I sched_reserve: graph splits = 2
+0.05.424.282 I sched_reserve: reserve took 18.16 ms, sched copies = 1
+0.05.424.431 I cmn          init: llama threadpool init, n_threads = 8
+0.05.424.483 I cmn  common_init_: warming up the model with an empty run - please wait ... (--no-warmup to disable)
+0.05.584.151 I common_speculative_init_result: creating MTP draft context against the target model '/ai/models/Qwen3.8-27B-UD-Q4_K_XL/Qwen3.8-27B-UD-Q4_K_XL.gguf'
+0.05.584.167 I llama_context: constructing llama_context
+0.05.584.170 I llama_context: n_seq_max             = 1
+0.05.584.171 I llama_context: n_ctx                 = 8192
+0.05.584.171 I llama_context: n_ctx_seq             = 8192
+0.05.584.171 I llama_context: n_batch               = 2048
+0.05.584.171 I llama_context: n_ubatch              = 512
+0.05.584.171 I llama_context: causal_attn           = 1
+0.05.584.172 I llama_context: flash_attn            = enabled
+0.05.584.172 I llama_context: kv_unified            = false
+0.05.584.177 I llama_context: freq_base             = 10000000.0
+0.05.584.178 I llama_context: freq_scale            = 1
+0.05.584.178 I llama_context: n_rs_seq              = 0
+0.05.584.178 I llama_context: n_outputs_max         = 1
+0.05.584.179 I llama_context: n_outputs_max_per_seq = 1
+0.05.584.179 I llama_context: n_ctx_seq (8192) < n_ctx_train (262144) -- the full capacity of the model will not be utilized
+0.05.584.356 I llama_context: Vulkan_Host  output buffer size =     0.95 MiB
+0.05.584.428 I llama_kv_cache:    Vulkan1 KV buffer size =    32.00 MiB
+0.05.584.510 I llama_kv_cache: size =   32.00 MiB (  8192 cells,   1 layers,  1/1 seqs), K (f16):   16.00 MiB, V (f16):   16.00 MiB
+0.05.584.511 I llama_kv_cache: attn_rot_k = 0, n_embd_head_k_all = 256
+0.05.584.512 I llama_kv_cache: attn_rot_v = 0, n_embd_head_k_all = 256
+0.05.584.515 I sched_reserve: reserving ...
+0.05.589.066 I resolve_fused_ops: resolving fused Gated Delta Net support:
+0.05.589.172 I resolve_fused_ops: fused Gated Delta Net (autoregressive) enabled
+0.05.589.225 I resolve_fused_ops: fused Gated Delta Net (chunked) enabled
+0.05.589.226 I resolve_fused_ops: resolving fused Lightning Indexer support:
+0.05.589.266 I resolve_fused_ops: Lightning Indexer enabled
+0.05.589.266 I resolve_fused_ops: resolving fused DeepSeek V4 HC support:
+0.05.589.307 I resolve_fused_ops: fused DeepSeek V4 HC pre enabled
+0.05.589.344 I resolve_fused_ops: fused DeepSeek V4 HC comb enabled
+0.05.589.379 I resolve_fused_ops: fused DeepSeek V4 HC post enabled
+0.05.590.676 I sched_reserve:    Vulkan1 compute buffer size =   130.96 MiB
+0.05.590.677 I sched_reserve: Vulkan_Host compute buffer size =    28.02 MiB
+0.05.590.678 I sched_reserve: graph nodes  = 56
+0.05.590.678 I sched_reserve: graph splits = 2
+0.05.590.679 I sched_reserve: reserve took 6.16 ms, sched copies = 1
+0.05.736.596 I cmn  common_conte: the context supports bounded partial sequence removal
+0.05.796.281 I spec common_specu: adding speculative implementation 'draft-mtp'
+0.05.796.285 I spec common_specu: - n_max=2, n_min=0, p_min=0.30, n_embd=5120, backend_sampling=1
+0.05.796.293 I spec common_specu: - gpu_layers=-1, cache_k=f16, cache_v=f16, ctx_tgt=yes, ctx_dft=yes, devices=[default]
+0.06.047.097 I sched_reserve: reserving ...
+0.06.055.080 I sched_reserve:    Vulkan1 compute buffer size =   130.96 MiB
+0.06.055.082 I sched_reserve: Vulkan_Host compute buffer size =    28.02 MiB
+0.06.055.082 I sched_reserve: graph nodes  = 62
+0.06.055.083 I sched_reserve: graph splits = 2
+0.06.055.084 I sched_reserve: reserve took 7.98 ms, sched copies = 1
+
+[DIAG MTP STEP 0 | Seq 0 | Iter 0]
+  Hidden State: norm=130.562120, sum=-36.846560, h[0..3]=[-0.1976, 1.7099, -0.4684, -1.6261]
+  Logits Stats: total=248320, finite=248320, -INF=0, NaN=0
+  Timing (us): decode=40272, get_logits=9, sampler=31
+  Top-10 Candidates (after sampler):
+    [ 1] id=     9 (raw_logit=    0.0000, p=0.100000) '*'
+    [ 2] id=    10 (raw_logit=    0.0000, p=0.100000) '+'
+    [ 3] id=     5 (raw_logit=    0.0000, p=0.100000) '&'
+    [ 4] id=     8 (raw_logit=    0.0000, p=0.100000) ')'
+    [ 5] id=     6 (raw_logit=    0.0000, p=0.100000) '''
+    [ 6] id=     4 (raw_logit=    0.0000, p=0.100000) '%'
+    [ 7] id=     1 (raw_logit=    0.0000, p=0.100000) '"'
+    [ 8] id=     0 (raw_logit=    0.0000, p=0.100000) '!'
+    [ 9] id=     2 (raw_logit=    0.0000, p=0.100000) '#'
+    [10] id=     7 (raw_logit=    0.0000, p=0.100000) '('
+  Decision: top_p=0.100000 vs p_min=0.300000 -> REJECT_AND_STOP
+
+[DIAG MTP STEP 1 | Seq 0 | Iter 0]
+  Hidden State: norm=138.391748, sum=-60.625878, h[0..3]=[1.2962, -3.3710, 1.7534, 0.7642]
+  Logits Stats: total=248320, finite=248320, -INF=0, NaN=0
+  Timing (us): decode=35490, get_logits=15, sampler=11
+  Top-10 Candidates (after sampler):
+    [ 1] id=     8 (raw_logit=    0.0000, p=0.100000) ')'
+    [ 2] id=     9 (raw_logit=    0.0000, p=0.100000) '*'
+    [ 3] id=     4 (raw_logit=    0.0000, p=0.100000) '%'
+    [ 4] id=     7 (raw_logit=    0.0000, p=0.100000) '('
+    [ 5] id=     5 (raw_logit=    0.0000, p=0.100000) '&'
+    [ 6] id=     3 (raw_logit=    0.0000, p=0.100000) '$'
+    [ 7] id=     1 (raw_logit=    0.0000, p=0.100000) '"'
+    [ 8] id=     0 (raw_logit=    0.0000, p=0.100000) '!'
+    [ 9] id=     2 (raw_logit=    0.0000, p=0.100000) '#'
+    [10] id=     6 (raw_logit=    0.0000, p=0.100000) '''
+  Decision: top_p=0.100000 vs p_min=0.300000 -> REJECT_AND_STOP
+
+[DIAG MTP STEP 2 | Seq 0 | Iter 0]
+  Hidden State: norm=138.728935, sum=69.236260, h[0..3]=[0.7797, -2.9401, 0.7407, 1.6888]
+  Logits Stats: total=248320, finite=248320, -INF=0, NaN=0
+  Timing (us): decode=32495, get_logits=20, sampler=16
+  Top-10 Candidates (after sampler):
+    [ 1] id=     8 (raw_logit=    0.0000, p=0.100000) ')'
+    [ 2] id=     9 (raw_logit=    0.0000, p=0.100000) '*'
+    [ 3] id=     4 (raw_logit=    0.0000, p=0.100000) '%'
+    [ 4] id=     7 (raw_logit=    0.0000, p=0.100000) '('
+    [ 5] id=     5 (raw_logit=    0.0000, p=0.100000) '&'
+    [ 6] id=     3 (raw_logit=    0.0000, p=0.100000) '$'
+    [ 7] id=     1 (raw_logit=    0.0000, p=0.100000) '"'
+    [ 8] id=     0 (raw_logit=    0.0000, p=0.100000) '!'
+    [ 9] id=     2 (raw_logit=    0.0000, p=0.100000) '#'
+    [10] id=     6 (raw_logit=    0.0000, p=0.100000) '''
+  Decision: top_p=0.100000 vs p_min=0.300000 -> REJECT_AND_STOP
+
+[DIAG MTP STEP 3 | Seq 0 | Iter 0]
+  Hidden State: norm=138.642264, sum=75.390017, h[0..3]=[-0.5311, -0.6403, -1.6961, -0.6467]
+  Logits Stats: total=248320, finite=248320, -INF=0, NaN=0
+  Timing (us): decode=32739, get_logits=15, sampler=9
+  Top-10 Candidates (after sampler):
+    [ 1] id=     8 (raw_logit=    0.0000, p=0.100000) ')'
+    [ 2] id=     9 (raw_logit=    0.0000, p=0.100000) '*'
+    [ 3] id=     4 (raw_logit=    0.0000, p=0.100000) '%'
+    [ 4] id=     7 (raw_logit=    0.0000, p=0.100000) '('
+    [ 5] id=     5 (raw_logit=    0.0000, p=0.100000) '&'
+    [ 6] id=     3 (raw_logit=    0.0000, p=0.100000) '$'
+    [ 7] id=     1 (raw_logit=    0.0000, p=0.100000) '"'
+    [ 8] id=     0 (raw_logit=    0.0000, p=0.100000) '!'
+    [ 9] id=     2 (raw_logit=    0.0000, p=0.100000) '#'
+    [10] id=     6 (raw_logit=    0.0000, p=0.100000) '''
+  Decision: top_p=0.100000 vs p_min=0.300000 -> REJECT_AND_STOP
+
+[DIAG MTP STEP 4 | Seq 0 | Iter 0]
+  Hidden State: norm=136.952176, sum=-164.444828, h[0..3]=[-2.2785, -2.3142, -0.9737, -0.8804]
+  Logits Stats: total=248320, finite=248320, -INF=0, NaN=0
+  Timing (us): decode=32901, get_logits=18, sampler=12
+  Top-10 Candidates (after sampler):
+    [ 1] id=     8 (raw_logit=    0.0000, p=0.100000) ')'
+    [ 2] id=     9 (raw_logit=    0.0000, p=0.100000) '*'
+    [ 3] id=     4 (raw_logit=    0.0000, p=0.100000) '%'
+    [ 4] id=     7 (raw_logit=    0.0000, p=0.100000) '('
+    [ 5] id=     5 (raw_logit=    0.0000, p=0.100000) '&'
+    [ 6] id=     3 (raw_logit=    0.0000, p=0.100000) '$'
+    [ 7] id=     1 (raw_logit=    0.0000, p=0.100000) '"'
+    [ 8] id=     0 (raw_logit=    0.0000, p=0.100000) '!'
+    [ 9] id=     2 (raw_logit=    0.0000, p=0.100000) '#'
+    [10] id=     6 (raw_logit=    0.0000, p=0.100000) '''
+  Decision: top_p=0.100000 vs p_min=0.300000 -> REJECT_AND_STOP
+
+[DIAG MTP STEP 5 | Seq 0 | Iter 0]
+  Hidden State: norm=122.678086, sum=4.854986, h[0..3]=[0.3345, -0.2749, -1.1309, 1.6729]
+  Logits Stats: total=248320, finite=248320, -INF=0, NaN=0
+  Timing (us): decode=32747, get_logits=25, sampler=13
+  Top-10 Candidates (after sampler):
+    [ 1] id=     8 (raw_logit=    0.0000, p=0.100000) ')'
+    [ 2] id=     9 (raw_logit=    0.0000, p=0.100000) '*'
+    [ 3] id=     4 (raw_logit=    0.0000, p=0.100000) '%'
+    [ 4] id=     7 (raw_logit=    0.0000, p=0.100000) '('
+    [ 5] id=     5 (raw_logit=    0.0000, p=0.100000) '&'
+    [ 6] id=     3 (raw_logit=    0.0000, p=0.100000) '$'
+    [ 7] id=     1 (raw_logit=    0.0000, p=0.100000) '"'
+    [ 8] id=     0 (raw_logit=    0.0000, p=0.100000) '!'
+    [ 9] id=     2 (raw_logit=    0.0000, p=0.100000) '#'
+    [10] id=     6 (raw_logit=    0.0000, p=0.100000) '''
+  Decision: top_p=0.100000 vs p_min=0.300000 -> REJECT_AND_STOP
+
+[DIAG MTP STEP 6 | Seq 0 | Iter 0]
+  Hidden State: norm=117.613549, sum=-26.303378, h[0..3]=[1.3078, -0.3002, -2.3263, 1.7873]
+  Logits Stats: total=248320, finite=248320, -INF=0, NaN=0
+  Timing (us): decode=32768, get_logits=17, sampler=11
+  Top-10 Candidates (after sampler):
+    [ 1] id=     9 (raw_logit=    0.0000, p=0.100000) '*'
+    [ 2] id=    10 (raw_logit=    0.0000, p=0.100000) '+'
+    [ 3] id=     4 (raw_logit=    0.0000, p=0.100000) '%'
+    [ 4] id=     8 (raw_logit=    0.0000, p=0.100000) ')'
+    [ 5] id=     6 (raw_logit=    0.0000, p=0.100000) '''
+    [ 6] id=     3 (raw_logit=    0.0000, p=0.100000) '$'
+    [ 7] id=     1 (raw_logit=    0.0000, p=0.100000) '"'
+    [ 8] id=     0 (raw_logit=    0.0000, p=0.100000) '!'
+    [ 9] id=     2 (raw_logit=    0.0000, p=0.100000) '#'
+    [10] id=     7 (raw_logit=    0.0000, p=0.100000) '('
+  Decision: top_p=0.100000 vs p_min=0.300000 -> REJECT_AND_STOP
+
+[DIAG MTP STEP 7 | Seq 0 | Iter 0]
+  Hidden State: norm=97.846909, sum=-65.938334, h[0..3]=[0.0537, -0.0936, -0.1166, 0.5585]
+  Logits Stats: total=248320, finite=248320, -INF=0, NaN=0
+  Timing (us): decode=32572, get_logits=18, sampler=10
+  Top-10 Candidates (after sampler):
+    [ 1] id=     8 (raw_logit=    0.0000, p=0.100000) ')'
+    [ 2] id=     9 (raw_logit=    0.0000, p=0.100000) '*'
+    [ 3] id=     4 (raw_logit=    0.0000, p=0.100000) '%'
+    [ 4] id=     7 (raw_logit=    0.0000, p=0.100000) '('
+    [ 5] id=     5 (raw_logit=    0.0000, p=0.100000) '&'
+    [ 6] id=     3 (raw_logit=    0.0000, p=0.100000) '$'
+    [ 7] id=     1 (raw_logit=    0.0000, p=0.100000) '"'
+    [ 8] id=     0 (raw_logit=    0.0000, p=0.100000) '!'
+    [ 9] id=     2 (raw_logit=    0.0000, p=0.100000) '#'
+    [10] id=     6 (raw_logit=    0.0000, p=0.100000) '''
+  Decision: top_p=0.100000 vs p_min=0.300000 -> REJECT_AND_STOP
+
+[DIAG MTP STEP 8 | Seq 0 | Iter 0]
+  Hidden State: norm=128.192856, sum=-44.706081, h[0..3]=[-2.0162, -1.1350, 0.6156, 1.5117]
+  Logits Stats: total=248320, finite=248320, -INF=0, NaN=0
+  Timing (us): decode=32612, get_logits=12, sampler=10
+  Top-10 Candidates (after sampler):
+    [ 1] id=     9 (raw_logit=    0.0000, p=0.100000) '*'
+    [ 2] id=    10 (raw_logit=    0.0000, p=0.100000) '+'
+    [ 3] id=     4 (raw_logit=    0.0000, p=0.100000) '%'
+    [ 4] id=     8 (raw_logit=    0.0000, p=0.100000) ')'
+    [ 5] id=     6 (raw_logit=    0.0000, p=0.100000) '''
+    [ 6] id=     3 (raw_logit=    0.0000, p=0.100000) '$'
+    [ 7] id=     1 (raw_logit=    0.0000, p=0.100000) '"'
+    [ 8] id=     0 (raw_logit=    0.0000, p=0.100000) '!'
+    [ 9] id=     2 (raw_logit=    0.0000, p=0.100000) '#'
+    [10] id=     7 (raw_logit=    0.0000, p=0.100000) '('
+  Decision: top_p=0.100000 vs p_min=0.300000 -> REJECT_AND_STOP
+
+[DIAG MTP STEP 9 | Seq 0 | Iter 0]
+  Hidden State: norm=112.850416, sum=-91.063425, h[0..3]=[-0.6113, -0.0017, -0.8781, 0.5796]
+  Logits Stats: total=248320, finite=248320, -INF=0, NaN=0
+  Timing (us): decode=35398, get_logits=19, sampler=11
+  Top-10 Candidates (after sampler):
+    [ 1] id=     9 (raw_logit=    0.0000, p=0.100000) '*'
+    [ 2] id=    10 (raw_logit=    0.0000, p=0.100000) '+'
+    [ 3] id=     4 (raw_logit=    0.0000, p=0.100000) '%'
+    [ 4] id=     8 (raw_logit=    0.0000, p=0.100000) ')'
+    [ 5] id=     6 (raw_logit=    0.0000, p=0.100000) '''
+    [ 6] id=     3 (raw_logit=    0.0000, p=0.100000) '$'
+    [ 7] id=     1 (raw_logit=    0.0000, p=0.100000) '"'
+    [ 8] id=     0 (raw_logit=    0.0000, p=0.100000) '!'
+    [ 9] id=     2 (raw_logit=    0.0000, p=0.100000) '#'
+    [10] id=     7 (raw_logit=    0.0000, p=0.100000) '('
+  Decision: top_p=0.100000 vs p_min=0.300000 -> REJECT_AND_STOP
+0.10.010.935 I encoded   34 tokens in    0.261 seconds, speed:  130.459 t/s
+0.10.010.935 I decoded   33 tokens in    3.954 seconds, speed:    8.346 t/s
+0.10.010.936 I 
+0.10.010.936 I n_draft   = 2
+0.10.010.936 I n_predict = 33
+0.10.010.936 I n_drafted = 0
+0.10.010.936 I n_accept  = 0
+0.10.010.936 I accept    = -nan%
+0.10.010.936 I 
+0.10.010.937 I draft:
+
+0.10.010.962 I spec common_specu: statistics        draft-mtp: #calls(b,g,a) =    1     33      0, #gen drafts =      0, #acc drafts =     0, #gen tokens =      0, #acc tokens =     0, dur(b,g,a) = 0.005, 1103.229, 0.000 ms
+0.10.010.962 I 
+0.10.010.963 I target:
+
+0.10.010.965 I common_perf_print:    sampling time =      10.90 ms
+0.10.010.966 I common_perf_print:    samplers time =       3.32 ms /    33 tokens
+0.10.010.970 I common_perf_print:        load time =    5145.14 ms
+0.10.010.971 I common_perf_print: prompt eval time =     145.88 ms /    35 tokens (    4.17 ms per token,   239.92 tokens per second)
+0.10.010.972 I common_perf_print:        eval time =    2825.70 ms /    33 runs   (   85.63 ms per token,    11.68 tokens per second)
+0.10.010.973 I common_perf_print:       total time =    4426.85 ms /    68 tokens
+0.10.010.973 I common_perf_print: unaccounted time =    1444.37 ms /  32.6 %      (total - sampling - prompt eval - eval) / (total)
+0.10.010.974 I common_perf_print:    graphs reused =         33
+0.10.011.189 I common_memory_breakdown_print: | memory breakdown [MiB]                    | total   free     self   model   context   compute    unaccounted |
+0.10.011.190 I common_memory_breakdown_print: |   - Vulkan1 (AI PRO R9700 (RADV GFX1201)) | 32624 =  265 + (17766 = 16663 +     960 +     142) +       14592 |
+0.10.011.190 I common_memory_breakdown_print: |   - Host                                  |                   710 =   682 +       0 +      28                |
+
+
+=== 32K TRIMMED (p_min=0.3) ===
+
+
+Write a complete, production-grade Python asynchronous task pool with priority queuing, worker concurrency limiting, and exponential backoff retry logic. Include full type hints and docstrings.
+
+<think>
+The user wants a complete, production-grade Python asynchronous task pool with:
+1. Priority queuing
+2. Worker concurrency limiting
+3. Ex
+
+
+
+
+WARNING: radv is not a conformant Vulkan implementation, testing use only.
+0.00.030.230 I cmn  common_init_: fitting params to device memory ...
+0.00.030.234 I cmn  common_init_: (for bugs during this step try to reproduce them with -fit off, or provide --verbose logs if the bug only occurs with -fit on)
+0.00.030.242 I common_params_fit_impl: getting device memory data for initial parameters:
+0.00.323.685 I common_memory_breakdown_print: | memory breakdown [MiB]                    | total    free     self   model   context   compute    unaccounted |
+0.00.323.688 I common_memory_breakdown_print: |   - Vulkan1 (AI PRO R9700 (RADV GFX1201)) | 32624 = 15068 + (17635 = 16532 +     960 +     142) +         -79 |
+0.00.323.688 I common_memory_breakdown_print: |   - Host                                  |                    710 =   682 +       0 +      28                |
+0.00.360.448 I common_params_fit_impl: projected to use 17635 MiB of device memory vs. 15068 MiB of free device memory
+0.00.360.451 I common_params_fit_impl: cannot meet free memory target of 1024 MiB, need to reduce device memory by 3590 MiB
+0.00.360.452 I common_params_fit_impl: context size set by user to 8192 -> no change
+0.00.360.526 W common_fit_params: failed to fit params to free device memory: n_gpu_layers already set by user to 999, abort
+0.00.360.536 I common_fit_params: fitting params to free memory took 0.33 seconds
+0.00.392.248 I llama_model_loader: loaded meta data with 51 key-value pairs and 866 tensors from /ai/models/Qwen3.8-27B-UD-Q4_K_XL/Qwen3.8-27B-UD-Q4_K_XL.gguf (version GGUF V3 (latest))
+0.00.392.271 I llama_model_loader: Dumping metadata keys/values. Note: KV overrides do not apply in this output.
+0.00.392.276 I llama_model_loader: - kv   0:                       general.architecture str              = qwen35
+0.00.392.276 I llama_model_loader: - kv   1:                               general.type str              = model
+0.00.392.290 I llama_model_loader: - kv   2:                     general.sampling.top_k i32              = 20
+0.00.392.295 I llama_model_loader: - kv   3:                     general.sampling.top_p f32              = 0.950000
+0.00.392.296 I llama_model_loader: - kv   4:                      general.sampling.temp f32              = 1.000000
+0.00.392.297 I llama_model_loader: - kv   5:                               general.name str              = Qwen3.8-27B
+0.00.392.297 I llama_model_loader: - kv   6:                           general.basename str              = Qwen3.8-27B
+0.00.392.298 I llama_model_loader: - kv   7:                        general.description str              = Renewal of the beloved Qwen model, de...
+0.00.392.299 I llama_model_loader: - kv   8:                       general.quantized_by str              = Unsloth
+0.00.392.299 I llama_model_loader: - kv   9:                         general.size_label str              = 27B
+0.00.392.300 I llama_model_loader: - kv  10:                            general.license str              = apache-2.0
+0.00.392.301 I llama_model_loader: - kv  11:                           general.repo_url str              = https://huggingface.co/unsloth
+0.00.392.302 I llama_model_loader: - kv  12:                   general.base_model.count u32              = 1
+0.00.392.302 I llama_model_loader: - kv  13:                  general.base_model.0.name str              = Qwen3.8 27B
+0.00.392.302 I llama_model_loader: - kv  14:          general.base_model.0.organization str              = Qwen
+0.00.392.303 I llama_model_loader: - kv  15:              general.base_model.0.repo_url str              = https://huggingface.co/Qwen/Qwen3.8-27B
+0.00.392.316 I llama_model_loader: - kv  16:                               general.tags arr[str,1]       = ["unsloth"]
+0.00.392.317 I llama_model_loader: - kv  17:                         qwen35.block_count u32              = 65
+0.00.392.318 I llama_model_loader: - kv  18:                      qwen35.context_length u32              = 262144
+0.00.392.318 I llama_model_loader: - kv  19:                    qwen35.embedding_length u32              = 5120
+0.00.392.318 I llama_model_loader: - kv  20:                 qwen35.feed_forward_length u32              = 17408
+0.00.392.318 I llama_model_loader: - kv  21:                qwen35.attention.head_count u32              = 24
+0.00.392.319 I llama_model_loader: - kv  22:             qwen35.attention.head_count_kv u32              = 4
+0.00.392.320 I llama_model_loader: - kv  23:             qwen35.rope.dimension_sections arr[i32,4]       = [11, 11, 10, 0]
+0.00.392.322 I llama_model_loader: - kv  24:                      qwen35.rope.freq_base f32              = 10000000.000000
+0.00.392.323 I llama_model_loader: - kv  25:    qwen35.attention.layer_norm_rms_epsilon f32              = 0.000001
+0.00.392.323 I llama_model_loader: - kv  26:                qwen35.attention.key_length u32              = 256
+0.00.392.323 I llama_model_loader: - kv  27:              qwen35.attention.value_length u32              = 256
+0.00.392.323 I llama_model_loader: - kv  28:                qwen35.nextn_predict_layers u32              = 1
+0.00.392.324 I llama_model_loader: - kv  29:                     qwen35.ssm.conv_kernel u32              = 4
+0.00.392.324 I llama_model_loader: - kv  30:                      qwen35.ssm.state_size u32              = 128
+0.00.392.324 I llama_model_loader: - kv  31:                     qwen35.ssm.group_count u32              = 16
+0.00.392.324 I llama_model_loader: - kv  32:                  qwen35.ssm.time_step_rank u32              = 48
+0.00.392.324 I llama_model_loader: - kv  33:                      qwen35.ssm.inner_size u32              = 6144
+0.00.392.325 I llama_model_loader: - kv  34:             qwen35.full_attention_interval u32              = 4
+0.00.392.325 I llama_model_loader: - kv  35:                qwen35.rope.dimension_count u32              = 64
+0.00.392.326 I llama_model_loader: - kv  36:                       tokenizer.ggml.model str              = gpt2
+0.00.392.326 I llama_model_loader: - kv  37:                         tokenizer.ggml.pre str              = qwen35
+0.00.406.903 I llama_model_loader: - kv  38:                      tokenizer.ggml.tokens arr[str,248320]  = ["!", "\"", "#", "$", "%", "&", "'", ...
+0.00.410.355 I llama_model_loader: - kv  39:                  tokenizer.ggml.token_type arr[i32,248320]  = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, ...
+0.00.423.511 I llama_model_loader: - kv  40:                      tokenizer.ggml.merges arr[str,247587]  = ["Ġ Ġ", "ĠĠ ĠĠ", "i n", "Ġ t",...
+0.00.423.514 I llama_model_loader: - kv  41:                tokenizer.ggml.eos_token_id u32              = 248046
+0.00.423.515 I llama_model_loader: - kv  42:            tokenizer.ggml.padding_token_id u32              = 248055
+0.00.423.516 I llama_model_loader: - kv  43:                tokenizer.ggml.bos_token_id u32              = 248044
+0.00.423.516 I llama_model_loader: - kv  44:               general.quantization_version u32              = 2
+0.00.423.516 I llama_model_loader: - kv  45:                          general.file_type u32              = 14
+0.00.423.517 I llama_model_loader: - kv  46:                      quantize.imatrix.file str              = /mnt/disks/unslothai/ubuntu/workspace...
+0.00.423.518 I llama_model_loader: - kv  47:                   quantize.imatrix.dataset str              = unsloth_calibration_Qwen3.8-27B.txt
+0.00.423.518 I llama_model_loader: - kv  48:             quantize.imatrix.entries_count u32              = 496
+0.00.423.518 I llama_model_loader: - kv  49:              quantize.imatrix.chunks_count u32              = 45
+0.00.423.520 I llama_model_loader: - kv  50:                    tokenizer.chat_template str              = {%- set image_count = namespace(value...
+0.00.423.521 I llama_model_loader: - type  f32:  360 tensors
+0.00.423.522 I llama_model_loader: - type q4_K:   97 tensors
+0.00.423.522 I llama_model_loader: - type q5_K:  325 tensors
+0.00.423.522 I llama_model_loader: - type q6_K:   19 tensors
+0.00.423.522 I llama_model_loader: - type iq4_xs:   65 tensors
+0.00.423.524 I print_info: file format = GGUF V3 (latest)
+0.00.423.525 I print_info: file type   = Q4_K - Small
+0.00.423.527 I print_info: file size   = 16.68 GiB (5.25 BPW) 
+0.00.423.711 I llama_prepare_model_devices: using device Vulkan1 (AMD Radeon AI PRO R9700 (RADV GFX1201)) (0000:06:00.0) - 15517 MiB free
+0.00.520.768 I load: 0 unused tokens
+0.00.561.749 I load: printing all EOG tokens:
+0.00.561.752 I load:   - 248044 ('<|endoftext|>')
+0.00.561.753 I load:   - 248046 ('<|im_end|>')
+0.00.561.753 I load:   - 248063 ('<|fim_pad|>')
+0.00.561.753 I load:   - 248064 ('<|repo_name|>')
+0.00.561.754 I load:   - 248065 ('<|file_sep|>')
+0.00.561.984 I load: special tokens cache size = 33
+0.00.613.428 I load: token to piece cache size = 1.7581 MB
+0.00.613.447 I print_info: arch                  = qwen35
+0.00.613.448 I print_info: vocab_only            = 0
+0.00.613.448 I print_info: no_alloc              = 0
+0.00.613.448 I print_info: n_ctx_train           = 262144
+0.00.613.449 I print_info: n_embd_inp            = 5120
+0.00.613.456 I print_info: n_embd                = 5120
+0.00.613.456 I print_info: n_embd_out            = 5120
+0.00.613.457 I print_info: n_layer               = 64
+0.00.613.457 I print_info: n_layer_all           = 65
+0.00.613.466 I print_info: n_head                = 24
+0.00.613.468 I print_info: n_head_kv             = 4
+0.00.613.468 I print_info: n_rot                 = 64
+0.00.613.468 I print_info: n_swa                 = 0
+0.00.613.469 I print_info: is_swa_any            = 0
+0.00.613.469 I print_info: n_embd_head_k         = 256
+0.00.613.469 I print_info: n_embd_head_v         = 256
+0.00.613.470 I print_info: n_gqa                 = 6
+0.00.613.472 I print_info: n_embd_k_gqa          = 1024
+0.00.613.473 I print_info: n_embd_v_gqa          = 1024
+0.00.613.473 I print_info: f_norm_eps            = 0.0e+00
+0.00.613.474 I print_info: f_norm_rms_eps        = 1.0e-06
+0.00.613.475 I print_info: f_clamp_kqv           = 0.0e+00
+0.00.613.475 I print_info: f_max_alibi_bias      = 0.0e+00
+0.00.613.475 I print_info: f_logit_scale         = 0.0e+00
+0.00.613.475 I print_info: f_attn_scale          = 0.0e+00
+0.00.613.475 I print_info: f_attn_value_scale    = 0.0000
+0.00.613.476 I print_info: n_ff                  = 17408
+0.00.613.476 I print_info: n_expert              = 0
+0.00.613.476 I print_info: n_expert_used         = 0
+0.00.613.477 I print_info: n_expert_groups       = 0
+0.00.613.477 I print_info: n_group_used          = 0
+0.00.613.477 I print_info: causal attn           = 1
+0.00.613.477 I print_info: pooling type          = -1
+0.00.613.477 I print_info: rope type             = 40
+0.00.613.477 I print_info: rope scaling          = linear
+0.00.613.478 I print_info: freq_base_train       = 10000000.0
+0.00.613.479 I print_info: freq_scale_train      = 1
+0.00.613.479 I print_info: n_ctx_orig_yarn       = 262144
+0.00.613.479 I print_info: rope_yarn_log_mul     = 0.0000
+0.00.613.479 I print_info: rope_finetuned        = unknown
+0.00.613.480 I print_info: mrope sections        = [11, 11, 10, 0]
+0.00.613.480 I print_info: ssm_d_conv            = 4
+0.00.613.480 I print_info: ssm_d_inner           = 6144
+0.00.613.480 I print_info: ssm_d_state           = 128
+0.00.613.480 I print_info: ssm_dt_rank           = 48
+0.00.613.480 I print_info: ssm_n_group           = 16
+0.00.613.480 I print_info: ssm_dt_b_c_rms        = 0
+0.00.613.481 I print_info: model type            = 27B
+0.00.613.482 I print_info: model params          = 27.32 B
+0.00.613.482 I print_info: general.name          = Qwen3.8-27B
+0.00.613.484 I print_info: vocab type            = BPE
+0.00.613.484 I print_info: n_vocab               = 248320
+0.00.613.484 I print_info: n_merges              = 247587
+0.00.613.484 I print_info: BOS token             = 248044 '<|endoftext|>'
+0.00.613.484 I print_info: EOS token             = 248046 '<|im_end|>'
+0.00.613.484 I print_info: EOT token             = 248046 '<|im_end|>'
+0.00.613.485 I print_info: PAD token             = 248055 '<|vision_pad|>'
+0.00.613.485 I print_info: LF token              = 198 'Ċ'
+0.00.613.485 I print_info: FIM PRE token         = 248060 '<|fim_prefix|>'
+0.00.613.485 I print_info: FIM SUF token         = 248062 '<|fim_suffix|>'
+0.00.613.485 I print_info: FIM MID token         = 248061 '<|fim_middle|>'
+0.00.613.485 I print_info: FIM PAD token         = 248063 '<|fim_pad|>'
+0.00.613.486 I print_info: FIM REP token         = 248064 '<|repo_name|>'
+0.00.613.486 I print_info: FIM SEP token         = 248065 '<|file_sep|>'
+0.00.613.486 I print_info: EOG token             = 248044 '<|endoftext|>'
+0.00.613.486 I print_info: EOG token             = 248046 '<|im_end|>'
+0.00.613.486 I print_info: EOG token             = 248063 '<|fim_pad|>'
+0.00.613.487 I print_info: EOG token             = 248064 '<|repo_name|>'
+0.00.613.487 I print_info: EOG token             = 248065 '<|file_sep|>'
+0.00.613.487 I print_info: max token length      = 256
+0.00.613.702 I load_tensors: loading model tensors, this can take a while... (load_mode = mmap)
+0.00.613.912 I load_arch_tensors: MTP configured with d2t vocabulary map (draft_vocab_size = 32768)
+0.00.773.618 I load_tensors: offloading output layer to GPU
+0.00.773.621 I load_tensors: offloading 64 repeating layers to GPU
+0.00.773.621 I load_tensors: offloaded 66/66 layers to GPU
+0.00.773.627 I load_tensors:   CPU_Mapped model buffer size =   682.03 MiB
+0.00.773.627 I load_tensors:      Vulkan1 model buffer size = 16532.06 MiB
+.............................................................................................
+0.02.820.437 I load_tensors: slicing 32768 rows from output.weight into nextn.shared_head_head...
+0.04.045.564 I cmn  common_init_: added <|endoftext|> logit bias = -inf
+0.04.045.569 I cmn  common_init_: added <|im_end|> logit bias = -inf
+0.04.045.570 I cmn  common_init_: added <|fim_pad|> logit bias = -inf
+0.04.045.570 I cmn  common_init_: added <|repo_name|> logit bias = -inf
+0.04.045.575 I cmn  common_init_: added <|file_sep|> logit bias = -inf
+0.04.045.649 I llama_context: constructing llama_context
+0.04.045.652 I llama_context: n_seq_max             = 1
+0.04.045.652 I llama_context: n_ctx                 = 8192
+0.04.045.653 I llama_context: n_ctx_seq             = 8192
+0.04.045.653 I llama_context: n_batch               = 2048
+0.04.045.653 I llama_context: n_ubatch              = 512
+0.04.045.654 I llama_context: causal_attn           = 1
+0.04.045.654 I llama_context: flash_attn            = enabled
+0.04.045.655 I llama_context: kv_unified            = false
+0.04.045.658 I llama_context: freq_base             = 10000000.0
+0.04.045.659 I llama_context: freq_scale            = 1
+0.04.045.659 I llama_context: n_rs_seq              = 2
+0.04.045.660 I llama_context: n_outputs_max         = 3
+0.04.045.660 I llama_context: n_outputs_max_per_seq = 3
+0.04.045.660 I llama_context: n_ctx_seq (8192) < n_ctx_train (262144) -- the full capacity of the model will not be utilized
+0.04.045.842 I llama_context: Vulkan_Host  output buffer size =     0.95 MiB
+0.04.046.493 I llama_kv_cache:    Vulkan1 KV buffer size =   512.00 MiB
+0.04.066.469 I llama_kv_cache: size =  512.00 MiB (  8192 cells,  16 layers,  1/1 seqs), K (f16):  256.00 MiB, V (f16):  256.00 MiB
+0.04.066.473 I llama_kv_cache: attn_rot_k = 0, n_embd_head_k_all = 256
+0.04.066.474 I llama_kv_cache: attn_rot_v = 0, n_embd_head_k_all = 256
+0.04.084.181 I llama_memory_recurrent:    Vulkan1 RS buffer size =   448.88 MiB
+0.04.084.191 I llama_memory_recurrent: size =  448.88 MiB (     1 cells,  64 layers,  1 seqs  2 rs_seq), R (f32):   16.88 MiB, S (f32):  432.00 MiB
+0.04.084.202 I sched_reserve: reserving ...
+0.04.088.894 I resolve_fused_ops: resolving fused Gated Delta Net support:
+0.04.090.343 I resolve_fused_ops: fused Gated Delta Net (autoregressive) enabled
+0.04.091.475 I resolve_fused_ops: fused Gated Delta Net (chunked) enabled
+0.04.091.476 I resolve_fused_ops: resolving fused Lightning Indexer support:
+0.04.092.586 I resolve_fused_ops: Lightning Indexer enabled
+0.04.092.587 I resolve_fused_ops: resolving fused DeepSeek V4 HC support:
+0.04.093.687 I resolve_fused_ops: fused DeepSeek V4 HC pre enabled
+0.04.094.786 I resolve_fused_ops: fused DeepSeek V4 HC comb enabled
+0.04.095.880 I resolve_fused_ops: fused DeepSeek V4 HC post enabled
+0.04.101.195 I sched_reserve:    Vulkan1 compute buffer size =   142.13 MiB
+0.04.101.196 I sched_reserve: Vulkan_Host compute buffer size =    28.03 MiB
+0.04.101.197 I sched_reserve: graph nodes  = 3943
+0.04.101.197 I sched_reserve: graph splits = 2
+0.04.101.198 I sched_reserve: reserve took 16.99 ms, sched copies = 1
+0.04.101.253 I cmn          init: llama threadpool init, n_threads = 8
+0.04.101.282 I cmn  common_init_: warming up the model with an empty run - please wait ... (--no-warmup to disable)
+0.04.257.283 I common_speculative_init_result: creating MTP draft context against the target model '/ai/models/Qwen3.8-27B-UD-Q4_K_XL/Qwen3.8-27B-UD-Q4_K_XL.gguf'
+0.04.257.310 I llama_context: constructing llama_context
+0.04.257.314 I llama_context: n_seq_max             = 1
+0.04.257.315 I llama_context: n_ctx                 = 8192
+0.04.257.315 I llama_context: n_ctx_seq             = 8192
+0.04.257.315 I llama_context: n_batch               = 2048
+0.04.257.316 I llama_context: n_ubatch              = 512
+0.04.257.317 I llama_context: causal_attn           = 1
+0.04.257.318 I llama_context: flash_attn            = enabled
+0.04.257.318 I llama_context: kv_unified            = false
+0.04.257.325 I llama_context: freq_base             = 10000000.0
+0.04.257.327 I llama_context: freq_scale            = 1
+0.04.257.327 I llama_context: n_rs_seq              = 0
+0.04.257.328 I llama_context: n_outputs_max         = 1
+0.04.257.328 I llama_context: n_outputs_max_per_seq = 1
+0.04.257.329 I llama_context: n_ctx_seq (8192) < n_ctx_train (262144) -- the full capacity of the model will not be utilized
+0.04.257.594 I llama_context: Vulkan_Host  output buffer size =     0.95 MiB
+0.04.257.725 I llama_kv_cache:    Vulkan1 KV buffer size =    32.00 MiB
+0.04.257.836 I llama_kv_cache: size =   32.00 MiB (  8192 cells,   1 layers,  1/1 seqs), K (f16):   16.00 MiB, V (f16):   16.00 MiB
+0.04.257.838 I llama_kv_cache: attn_rot_k = 0, n_embd_head_k_all = 256
+0.04.257.838 I llama_kv_cache: attn_rot_v = 0, n_embd_head_k_all = 256
+0.04.257.845 I sched_reserve: reserving ...
+0.04.263.217 I resolve_fused_ops: resolving fused Gated Delta Net support:
+0.04.263.384 I resolve_fused_ops: fused Gated Delta Net (autoregressive) enabled
+0.04.263.444 I resolve_fused_ops: fused Gated Delta Net (chunked) enabled
+0.04.263.445 I resolve_fused_ops: resolving fused Lightning Indexer support:
+0.04.263.489 I resolve_fused_ops: Lightning Indexer enabled
+0.04.263.490 I resolve_fused_ops: resolving fused DeepSeek V4 HC support:
+0.04.263.530 I resolve_fused_ops: fused DeepSeek V4 HC pre enabled
+0.04.263.568 I resolve_fused_ops: fused DeepSeek V4 HC comb enabled
+0.04.263.606 I resolve_fused_ops: fused DeepSeek V4 HC post enabled
+0.04.265.659 I sched_reserve:    Vulkan1 compute buffer size =   130.96 MiB
+0.04.265.660 I sched_reserve: Vulkan_Host compute buffer size =    28.02 MiB
+0.04.265.660 I sched_reserve: graph nodes  = 56
+0.04.265.661 I sched_reserve: graph splits = 2
+0.04.265.662 I sched_reserve: reserve took 7.82 ms, sched copies = 1
+0.04.412.781 I cmn  common_conte: the context supports bounded partial sequence removal
+0.04.466.125 I spec common_specu: adding speculative implementation 'draft-mtp'
+0.04.466.128 I spec common_specu: - n_max=2, n_min=0, p_min=0.30, n_embd=5120, backend_sampling=1
+0.04.466.130 I spec common_specu: - gpu_layers=-1, cache_k=f16, cache_v=f16, ctx_tgt=yes, ctx_dft=yes, devices=[default]
+0.04.715.265 I sched_reserve: reserving ...
+0.04.721.425 I sched_reserve:    Vulkan1 compute buffer size =   130.96 MiB
+0.04.721.427 I sched_reserve: Vulkan_Host compute buffer size =    28.02 MiB
+0.04.721.428 I sched_reserve: graph nodes  = 62
+0.04.721.428 I sched_reserve: graph splits = 2
+0.04.721.429 I sched_reserve: reserve took 6.16 ms, sched copies = 1
+
+[DIAG MTP STEP 0 | Seq 0 | Iter 0]
+  Hidden State: norm=130.562120, sum=-36.846560, h[0..3]=[-0.1976, 1.7099, -0.4684, -1.6261]
+  Logits Stats: total=248320, finite=248320, -INF=0, NaN=0
+  Timing (us): decode=36058, get_logits=11, sampler=44
+  Top-10 Candidates (after sampler):
+    [ 1] id=     9 (raw_logit=    0.0000, p=0.100000) '*'
+    [ 2] id=    10 (raw_logit=    0.0000, p=0.100000) '+'
+    [ 3] id=     5 (raw_logit=    0.0000, p=0.100000) '&'
+    [ 4] id=     8 (raw_logit=    0.0000, p=0.100000) ')'
+    [ 5] id=     6 (raw_logit=    0.0000, p=0.100000) '''
+    [ 6] id=     4 (raw_logit=    0.0000, p=0.100000) '%'
+    [ 7] id=     1 (raw_logit=    0.0000, p=0.100000) '"'
+    [ 8] id=     0 (raw_logit=    0.0000, p=0.100000) '!'
+    [ 9] id=     2 (raw_logit=    0.0000, p=0.100000) '#'
+    [10] id=     7 (raw_logit=    0.0000, p=0.100000) '('
+  Decision: top_p=0.100000 vs p_min=0.300000 -> REJECT_AND_STOP
+
+[DIAG MTP STEP 1 | Seq 0 | Iter 0]
+  Hidden State: norm=138.391748, sum=-60.625878, h[0..3]=[1.2962, -3.3710, 1.7534, 0.7642]
+  Logits Stats: total=248320, finite=248320, -INF=0, NaN=0
+  Timing (us): decode=26996, get_logits=7, sampler=7
+  Top-10 Candidates (after sampler):
+    [ 1] id=     8 (raw_logit=    0.0000, p=0.100000) ')'
+    [ 2] id=     9 (raw_logit=    0.0000, p=0.100000) '*'
+    [ 3] id=     4 (raw_logit=    0.0000, p=0.100000) '%'
+    [ 4] id=     7 (raw_logit=    0.0000, p=0.100000) '('
+    [ 5] id=     5 (raw_logit=    0.0000, p=0.100000) '&'
+    [ 6] id=     3 (raw_logit=    0.0000, p=0.100000) '$'
+    [ 7] id=     1 (raw_logit=    0.0000, p=0.100000) '"'
+    [ 8] id=     0 (raw_logit=    0.0000, p=0.100000) '!'
+    [ 9] id=     2 (raw_logit=    0.0000, p=0.100000) '#'
+    [10] id=     6 (raw_logit=    0.0000, p=0.100000) '''
+  Decision: top_p=0.100000 vs p_min=0.300000 -> REJECT_AND_STOP
+
+[DIAG MTP STEP 2 | Seq 0 | Iter 0]
+  Hidden State: norm=138.728935, sum=69.236260, h[0..3]=[0.7797, -2.9401, 0.7407, 1.6888]
+  Logits Stats: total=248320, finite=248320, -INF=0, NaN=0
+  Timing (us): decode=27467, get_logits=27, sampler=16
+  Top-10 Candidates (after sampler):
+    [ 1] id=     8 (raw_logit=    0.0000, p=0.100000) ')'
+    [ 2] id=     9 (raw_logit=    0.0000, p=0.100000) '*'
+    [ 3] id=     4 (raw_logit=    0.0000, p=0.100000) '%'
+    [ 4] id=     7 (raw_logit=    0.0000, p=0.100000) '('
+    [ 5] id=     5 (raw_logit=    0.0000, p=0.100000) '&'
+    [ 6] id=     3 (raw_logit=    0.0000, p=0.100000) '$'
+    [ 7] id=     1 (raw_logit=    0.0000, p=0.100000) '"'
+    [ 8] id=     0 (raw_logit=    0.0000, p=0.100000) '!'
+    [ 9] id=     2 (raw_logit=    0.0000, p=0.100000) '#'
+    [10] id=     6 (raw_logit=    0.0000, p=0.100000) '''
+  Decision: top_p=0.100000 vs p_min=0.300000 -> REJECT_AND_STOP
+
+[DIAG MTP STEP 3 | Seq 0 | Iter 0]
+  Hidden State: norm=138.642264, sum=75.390017, h[0..3]=[-0.5311, -0.6403, -1.6961, -0.6467]
+  Logits Stats: total=248320, finite=248320, -INF=0, NaN=0
+  Timing (us): decode=28540, get_logits=20, sampler=11
+  Top-10 Candidates (after sampler):
+    [ 1] id=     8 (raw_logit=    0.0000, p=0.100000) ')'
+    [ 2] id=     9 (raw_logit=    0.0000, p=0.100000) '*'
+    [ 3] id=     4 (raw_logit=    0.0000, p=0.100000) '%'
+    [ 4] id=     7 (raw_logit=    0.0000, p=0.100000) '('
+    [ 5] id=     5 (raw_logit=    0.0000, p=0.100000) '&'
+    [ 6] id=     3 (raw_logit=    0.0000, p=0.100000) '$'
+    [ 7] id=     1 (raw_logit=    0.0000, p=0.100000) '"'
+    [ 8] id=     0 (raw_logit=    0.0000, p=0.100000) '!'
+    [ 9] id=     2 (raw_logit=    0.0000, p=0.100000) '#'
+    [10] id=     6 (raw_logit=    0.0000, p=0.100000) '''
+  Decision: top_p=0.100000 vs p_min=0.300000 -> REJECT_AND_STOP
+
+[DIAG MTP STEP 4 | Seq 0 | Iter 0]
+  Hidden State: norm=136.952176, sum=-164.444828, h[0..3]=[-2.2785, -2.3142, -0.9737, -0.8804]
+  Logits Stats: total=248320, finite=248320, -INF=0, NaN=0
+  Timing (us): decode=27671, get_logits=16, sampler=10
+  Top-10 Candidates (after sampler):
+    [ 1] id=     8 (raw_logit=    0.0000, p=0.100000) ')'
+    [ 2] id=     9 (raw_logit=    0.0000, p=0.100000) '*'
+    [ 3] id=     4 (raw_logit=    0.0000, p=0.100000) '%'
+    [ 4] id=     7 (raw_logit=    0.0000, p=0.100000) '('
+    [ 5] id=     5 (raw_logit=    0.0000, p=0.100000) '&'
+    [ 6] id=     3 (raw_logit=    0.0000, p=0.100000) '$'
+    [ 7] id=     1 (raw_logit=    0.0000, p=0.100000) '"'
+    [ 8] id=     0 (raw_logit=    0.0000, p=0.100000) '!'
+    [ 9] id=     2 (raw_logit=    0.0000, p=0.100000) '#'
+    [10] id=     6 (raw_logit=    0.0000, p=0.100000) '''
+  Decision: top_p=0.100000 vs p_min=0.300000 -> REJECT_AND_STOP
+
+[DIAG MTP STEP 5 | Seq 0 | Iter 0]
+  Hidden State: norm=122.678086, sum=4.854986, h[0..3]=[0.3345, -0.2749, -1.1309, 1.6729]
+  Logits Stats: total=248320, finite=248320, -INF=0, NaN=0
+  Timing (us): decode=27551, get_logits=22, sampler=13
+  Top-10 Candidates (after sampler):
+    [ 1] id=     8 (raw_logit=    0.0000, p=0.100000) ')'
+    [ 2] id=     9 (raw_logit=    0.0000, p=0.100000) '*'
+    [ 3] id=     4 (raw_logit=    0.0000, p=0.100000) '%'
+    [ 4] id=     7 (raw_logit=    0.0000, p=0.100000) '('
+    [ 5] id=     5 (raw_logit=    0.0000, p=0.100000) '&'
+    [ 6] id=     3 (raw_logit=    0.0000, p=0.100000) '$'
+    [ 7] id=     1 (raw_logit=    0.0000, p=0.100000) '"'
+    [ 8] id=     0 (raw_logit=    0.0000, p=0.100000) '!'
+    [ 9] id=     2 (raw_logit=    0.0000, p=0.100000) '#'
+    [10] id=     6 (raw_logit=    0.0000, p=0.100000) '''
+  Decision: top_p=0.100000 vs p_min=0.300000 -> REJECT_AND_STOP
+
+[DIAG MTP STEP 6 | Seq 0 | Iter 0]
+  Hidden State: norm=117.613549, sum=-26.303378, h[0..3]=[1.3078, -0.3002, -2.3263, 1.7873]
+  Logits Stats: total=248320, finite=248320, -INF=0, NaN=0
+  Timing (us): decode=27414, get_logits=9, sampler=7
+  Top-10 Candidates (after sampler):
+    [ 1] id=     9 (raw_logit=    0.0000, p=0.100000) '*'
+    [ 2] id=    10 (raw_logit=    0.0000, p=0.100000) '+'
+    [ 3] id=     4 (raw_logit=    0.0000, p=0.100000) '%'
+    [ 4] id=     8 (raw_logit=    0.0000, p=0.100000) ')'
+    [ 5] id=     6 (raw_logit=    0.0000, p=0.100000) '''
+    [ 6] id=     3 (raw_logit=    0.0000, p=0.100000) '$'
+    [ 7] id=     1 (raw_logit=    0.0000, p=0.100000) '"'
+    [ 8] id=     0 (raw_logit=    0.0000, p=0.100000) '!'
+    [ 9] id=     2 (raw_logit=    0.0000, p=0.100000) '#'
+    [10] id=     7 (raw_logit=    0.0000, p=0.100000) '('
+  Decision: top_p=0.100000 vs p_min=0.300000 -> REJECT_AND_STOP
+
+[DIAG MTP STEP 7 | Seq 0 | Iter 0]
+  Hidden State: norm=97.846909, sum=-65.938334, h[0..3]=[0.0537, -0.0936, -0.1166, 0.5585]
+  Logits Stats: total=248320, finite=248320, -INF=0, NaN=0
+  Timing (us): decode=27530, get_logits=9, sampler=9
+  Top-10 Candidates (after sampler):
+    [ 1] id=     8 (raw_logit=    0.0000, p=0.100000) ')'
+    [ 2] id=     9 (raw_logit=    0.0000, p=0.100000) '*'
+    [ 3] id=     4 (raw_logit=    0.0000, p=0.100000) '%'
+    [ 4] id=     7 (raw_logit=    0.0000, p=0.100000) '('
+    [ 5] id=     5 (raw_logit=    0.0000, p=0.100000) '&'
+    [ 6] id=     3 (raw_logit=    0.0000, p=0.100000) '$'
+    [ 7] id=     1 (raw_logit=    0.0000, p=0.100000) '"'
+    [ 8] id=     0 (raw_logit=    0.0000, p=0.100000) '!'
+    [ 9] id=     2 (raw_logit=    0.0000, p=0.100000) '#'
+    [10] id=     6 (raw_logit=    0.0000, p=0.100000) '''
+  Decision: top_p=0.100000 vs p_min=0.300000 -> REJECT_AND_STOP
+
+[DIAG MTP STEP 8 | Seq 0 | Iter 0]
+  Hidden State: norm=128.192856, sum=-44.706081, h[0..3]=[-2.0162, -1.1350, 0.6156, 1.5117]
+  Logits Stats: total=248320, finite=248320, -INF=0, NaN=0
+  Timing (us): decode=27453, get_logits=12, sampler=9
+  Top-10 Candidates (after sampler):
+    [ 1] id=     9 (raw_logit=    0.0000, p=0.100000) '*'
+    [ 2] id=    10 (raw_logit=    0.0000, p=0.100000) '+'
+    [ 3] id=     4 (raw_logit=    0.0000, p=0.100000) '%'
+    [ 4] id=     8 (raw_logit=    0.0000, p=0.100000) ')'
+    [ 5] id=     6 (raw_logit=    0.0000, p=0.100000) '''
+    [ 6] id=     3 (raw_logit=    0.0000, p=0.100000) '$'
+    [ 7] id=     1 (raw_logit=    0.0000, p=0.100000) '"'
+    [ 8] id=     0 (raw_logit=    0.0000, p=0.100000) '!'
+    [ 9] id=     2 (raw_logit=    0.0000, p=0.100000) '#'
+    [10] id=     7 (raw_logit=    0.0000, p=0.100000) '('
+  Decision: top_p=0.100000 vs p_min=0.300000 -> REJECT_AND_STOP
+
+[DIAG MTP STEP 9 | Seq 0 | Iter 0]
+  Hidden State: norm=112.850416, sum=-91.063425, h[0..3]=[-0.6113, -0.0017, -0.8781, 0.5796]
+  Logits Stats: total=248320, finite=248320, -INF=0, NaN=0
+  Timing (us): decode=27466, get_logits=17, sampler=15
+  Top-10 Candidates (after sampler):
+    [ 1] id=     9 (raw_logit=    0.0000, p=0.100000) '*'
+    [ 2] id=    10 (raw_logit=    0.0000, p=0.100000) '+'
+    [ 3] id=     4 (raw_logit=    0.0000, p=0.100000) '%'
+    [ 4] id=     8 (raw_logit=    0.0000, p=0.100000) ')'
+    [ 5] id=     6 (raw_logit=    0.0000, p=0.100000) '''
+    [ 6] id=     3 (raw_logit=    0.0000, p=0.100000) '$'
+    [ 7] id=     1 (raw_logit=    0.0000, p=0.100000) '"'
+    [ 8] id=     0 (raw_logit=    0.0000, p=0.100000) '!'
+    [ 9] id=     2 (raw_logit=    0.0000, p=0.100000) '#'
+    [10] id=     7 (raw_logit=    0.0000, p=0.100000) '('
+  Decision: top_p=0.100000 vs p_min=0.300000 -> REJECT_AND_STOP
+0.08.500.189 I encoded   34 tokens in    0.257 seconds, speed:  132.490 t/s
+0.08.500.191 I decoded   33 tokens in    3.777 seconds, speed:    8.736 t/s
+0.08.500.191 I 
+0.08.500.192 I n_draft   = 2
+0.08.500.192 I n_predict = 33
+0.08.500.192 I n_drafted = 0
+0.08.500.194 I n_accept  = 0
+0.08.500.194 I accept    = -nan%
+0.08.500.194 I 
+0.08.500.194 I draft:
+
+0.08.500.236 I spec common_specu: statistics        draft-mtp: #calls(b,g,a) =    1     33      0, #gen drafts =      0, #acc drafts =     0, #gen tokens =      0, #acc tokens =     0, dur(b,g,a) = 0.004, 928.525, 0.000 ms
+0.08.500.237 I 
+0.08.500.237 I target:
+
+0.08.500.240 I common_perf_print:    sampling time =      10.47 ms
+0.08.500.241 I common_perf_print:    samplers time =       3.23 ms /    33 tokens
+0.08.500.247 I common_perf_print:        load time =    3833.51 ms
+0.08.500.248 I common_perf_print: prompt eval time =     146.13 ms /    35 tokens (    4.18 ms per token,   239.51 tokens per second)
+0.08.500.249 I common_perf_print:        eval time =    2823.72 ms /    33 runs   (   85.57 ms per token,    11.69 tokens per second)
+0.08.500.249 I common_perf_print:       total time =    4243.01 ms /    68 tokens
+0.08.500.250 I common_perf_print: unaccounted time =    1262.70 ms /  29.8 %      (total - sampling - prompt eval - eval) / (total)
+0.08.500.250 I common_perf_print:    graphs reused =         33
+0.08.500.585 I common_memory_breakdown_print: | memory breakdown [MiB]                    | total   free     self   model   context   compute    unaccounted |
+0.08.500.587 I common_memory_breakdown_print: |   - Vulkan1 (AI PRO R9700 (RADV GFX1201)) | 32624 =  265 + (17635 = 16532 +     960 +     142) +       14723 |
+0.08.500.587 I common_memory_breakdown_print: |   - Host                                  |                   710 =   682 +       0 +      28                |
+
+
+=== 64K TRIMMED (p_min=0.0) ===
+
+
+Write a complete, production-grade Python asynchronous task pool with priority queuing, worker concurrency limiting, and exponential backoff retry logic. Include full type hints and docstrings.
+
+<think>
+The user wants a complete, production-grade Python asynchronous task pool with:
+1. Priority queuing
+2. Worker concurrency limiting
+3. Ex
+
+
+
+
+WARNING: radv is not a conformant Vulkan implementation, testing use only.
+0.00.034.681 I cmn  common_init_: fitting params to device memory ...
+0.00.034.683 I cmn  common_init_: (for bugs during this step try to reproduce them with -fit off, or provide --verbose logs if the bug only occurs with -fit on)
+0.00.034.688 I common_params_fit_impl: getting device memory data for initial parameters:
+0.00.313.766 I common_memory_breakdown_print: | memory breakdown [MiB]                    | total    free     self   model   context   compute    unaccounted |
+0.00.313.770 I common_memory_breakdown_print: |   - Vulkan1 (AI PRO R9700 (RADV GFX1201)) | 32624 = 15068 + (17766 = 16663 +     960 +     142) +        -211 |
+0.00.313.770 I common_memory_breakdown_print: |   - Host                                  |                    710 =   682 +       0 +      28                |
+0.00.363.227 I common_params_fit_impl: projected to use 17766 MiB of device memory vs. 15068 MiB of free device memory
+0.00.363.230 I common_params_fit_impl: cannot meet free memory target of 1024 MiB, need to reduce device memory by 3721 MiB
+0.00.363.231 I common_params_fit_impl: context size set by user to 8192 -> no change
+0.00.363.307 W common_fit_params: failed to fit params to free device memory: n_gpu_layers already set by user to 999, abort
+0.00.363.317 I common_fit_params: fitting params to free memory took 0.33 seconds
+0.00.394.333 I llama_model_loader: loaded meta data with 51 key-value pairs and 866 tensors from /ai/models/Qwen3.8-27B-UD-Q4_K_XL/Qwen3.8-27B-UD-Q4_K_XL.gguf (version GGUF V3 (latest))
+0.00.394.350 I llama_model_loader: Dumping metadata keys/values. Note: KV overrides do not apply in this output.
+0.00.394.354 I llama_model_loader: - kv   0:                       general.architecture str              = qwen35
+0.00.394.355 I llama_model_loader: - kv   1:                               general.type str              = model
+0.00.394.356 I llama_model_loader: - kv   2:                     general.sampling.top_k i32              = 20
+0.00.394.359 I llama_model_loader: - kv   3:                     general.sampling.top_p f32              = 0.950000
+0.00.394.361 I llama_model_loader: - kv   4:                      general.sampling.temp f32              = 1.000000
+0.00.394.361 I llama_model_loader: - kv   5:                               general.name str              = Qwen3.8-27B
+0.00.394.361 I llama_model_loader: - kv   6:                           general.basename str              = Qwen3.8-27B
+0.00.394.362 I llama_model_loader: - kv   7:                        general.description str              = Renewal of the beloved Qwen model, de...
+0.00.394.362 I llama_model_loader: - kv   8:                       general.quantized_by str              = Unsloth
+0.00.394.363 I llama_model_loader: - kv   9:                         general.size_label str              = 27B
+0.00.394.363 I llama_model_loader: - kv  10:                            general.license str              = apache-2.0
+0.00.394.364 I llama_model_loader: - kv  11:                           general.repo_url str              = https://huggingface.co/unsloth
+0.00.394.364 I llama_model_loader: - kv  12:                   general.base_model.count u32              = 1
+0.00.394.365 I llama_model_loader: - kv  13:                  general.base_model.0.name str              = Qwen3.8 27B
+0.00.394.365 I llama_model_loader: - kv  14:          general.base_model.0.organization str              = Qwen
+0.00.394.365 I llama_model_loader: - kv  15:              general.base_model.0.repo_url str              = https://huggingface.co/Qwen/Qwen3.8-27B
+0.00.394.374 I llama_model_loader: - kv  16:                               general.tags arr[str,1]       = ["unsloth"]
+0.00.394.375 I llama_model_loader: - kv  17:                         qwen35.block_count u32              = 65
+0.00.394.375 I llama_model_loader: - kv  18:                      qwen35.context_length u32              = 262144
+0.00.394.375 I llama_model_loader: - kv  19:                    qwen35.embedding_length u32              = 5120
+0.00.394.375 I llama_model_loader: - kv  20:                 qwen35.feed_forward_length u32              = 17408
+0.00.394.376 I llama_model_loader: - kv  21:                qwen35.attention.head_count u32              = 24
+0.00.394.376 I llama_model_loader: - kv  22:             qwen35.attention.head_count_kv u32              = 4
+0.00.394.377 I llama_model_loader: - kv  23:             qwen35.rope.dimension_sections arr[i32,4]       = [11, 11, 10, 0]
+0.00.394.379 I llama_model_loader: - kv  24:                      qwen35.rope.freq_base f32              = 10000000.000000
+0.00.394.379 I llama_model_loader: - kv  25:    qwen35.attention.layer_norm_rms_epsilon f32              = 0.000001
+0.00.394.380 I llama_model_loader: - kv  26:                qwen35.attention.key_length u32              = 256
+0.00.394.380 I llama_model_loader: - kv  27:              qwen35.attention.value_length u32              = 256
+0.00.394.380 I llama_model_loader: - kv  28:                qwen35.nextn_predict_layers u32              = 1
+0.00.394.380 I llama_model_loader: - kv  29:                     qwen35.ssm.conv_kernel u32              = 4
+0.00.394.380 I llama_model_loader: - kv  30:                      qwen35.ssm.state_size u32              = 128
+0.00.394.380 I llama_model_loader: - kv  31:                     qwen35.ssm.group_count u32              = 16
+0.00.394.381 I llama_model_loader: - kv  32:                  qwen35.ssm.time_step_rank u32              = 48
+0.00.394.381 I llama_model_loader: - kv  33:                      qwen35.ssm.inner_size u32              = 6144
+0.00.394.381 I llama_model_loader: - kv  34:             qwen35.full_attention_interval u32              = 4
+0.00.394.381 I llama_model_loader: - kv  35:                qwen35.rope.dimension_count u32              = 64
+0.00.394.382 I llama_model_loader: - kv  36:                       tokenizer.ggml.model str              = gpt2
+0.00.394.382 I llama_model_loader: - kv  37:                         tokenizer.ggml.pre str              = qwen35
+0.00.406.942 I llama_model_loader: - kv  38:                      tokenizer.ggml.tokens arr[str,248320]  = ["!", "\"", "#", "$", "%", "&", "'", ...
+0.00.410.342 I llama_model_loader: - kv  39:                  tokenizer.ggml.token_type arr[i32,248320]  = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, ...
+0.00.423.060 I llama_model_loader: - kv  40:                      tokenizer.ggml.merges arr[str,247587]  = ["Ġ Ġ", "ĠĠ ĠĠ", "i n", "Ġ t",...
+0.00.423.065 I llama_model_loader: - kv  41:                tokenizer.ggml.eos_token_id u32              = 248046
+0.00.423.066 I llama_model_loader: - kv  42:            tokenizer.ggml.padding_token_id u32              = 248055
+0.00.423.067 I llama_model_loader: - kv  43:                tokenizer.ggml.bos_token_id u32              = 248044
+0.00.423.068 I llama_model_loader: - kv  44:               general.quantization_version u32              = 2
+0.00.423.069 I llama_model_loader: - kv  45:                          general.file_type u32              = 14
+0.00.423.071 I llama_model_loader: - kv  46:                      quantize.imatrix.file str              = /mnt/disks/unslothai/ubuntu/workspace...
+0.00.423.072 I llama_model_loader: - kv  47:                   quantize.imatrix.dataset str              = unsloth_calibration_Qwen3.8-27B.txt
+0.00.423.073 I llama_model_loader: - kv  48:             quantize.imatrix.entries_count u32              = 496
+0.00.423.085 I llama_model_loader: - kv  49:              quantize.imatrix.chunks_count u32              = 45
+0.00.423.089 I llama_model_loader: - kv  50:                    tokenizer.chat_template str              = {%- set image_count = namespace(value...
+0.00.423.092 I llama_model_loader: - type  f32:  360 tensors
+0.00.423.093 I llama_model_loader: - type q4_K:   97 tensors
+0.00.423.093 I llama_model_loader: - type q5_K:  325 tensors
+0.00.423.093 I llama_model_loader: - type q6_K:   19 tensors
+0.00.423.094 I llama_model_loader: - type iq4_xs:   65 tensors
+0.00.423.097 I print_info: file format = GGUF V3 (latest)
+0.00.423.098 I print_info: file type   = Q4_K - Small
+0.00.423.103 I print_info: file size   = 16.68 GiB (5.25 BPW) 
+0.00.423.369 I llama_prepare_model_devices: using device Vulkan1 (AMD Radeon AI PRO R9700 (RADV GFX1201)) (0000:06:00.0) - 15517 MiB free
+0.00.506.723 I load: 0 unused tokens
+0.00.545.877 I load: printing all EOG tokens:
+0.00.545.881 I load:   - 248044 ('<|endoftext|>')
+0.00.545.881 I load:   - 248046 ('<|im_end|>')
+0.00.545.882 I load:   - 248063 ('<|fim_pad|>')
+0.00.545.882 I load:   - 248064 ('<|repo_name|>')
+0.00.545.882 I load:   - 248065 ('<|file_sep|>')
+0.00.546.150 I load: special tokens cache size = 33
+0.00.594.455 I load: token to piece cache size = 1.7581 MB
+0.00.594.469 I print_info: arch                  = qwen35
+0.00.594.469 I print_info: vocab_only            = 0
+0.00.594.470 I print_info: no_alloc              = 0
+0.00.594.470 I print_info: n_ctx_train           = 262144
+0.00.594.471 I print_info: n_embd_inp            = 5120
+0.00.594.471 I print_info: n_embd                = 5120
+0.00.594.471 I print_info: n_embd_out            = 5120
+0.00.594.471 I print_info: n_layer               = 64
+0.00.594.471 I print_info: n_layer_all           = 65
+0.00.594.480 I print_info: n_head                = 24
+0.00.594.481 I print_info: n_head_kv             = 4
+0.00.594.482 I print_info: n_rot                 = 64
+0.00.594.482 I print_info: n_swa                 = 0
+0.00.594.483 I print_info: is_swa_any            = 0
+0.00.594.483 I print_info: n_embd_head_k         = 256
+0.00.594.483 I print_info: n_embd_head_v         = 256
+0.00.594.484 I print_info: n_gqa                 = 6
+0.00.594.486 I print_info: n_embd_k_gqa          = 1024
+0.00.594.490 I print_info: n_embd_v_gqa          = 1024
+0.00.594.490 I print_info: f_norm_eps            = 0.0e+00
+0.00.594.491 I print_info: f_norm_rms_eps        = 1.0e-06
+0.00.594.491 I print_info: f_clamp_kqv           = 0.0e+00
+0.00.594.491 I print_info: f_max_alibi_bias      = 0.0e+00
+0.00.594.492 I print_info: f_logit_scale         = 0.0e+00
+0.00.594.492 I print_info: f_attn_scale          = 0.0e+00
+0.00.594.492 I print_info: f_attn_value_scale    = 0.0000
+0.00.594.493 I print_info: n_ff                  = 17408
+0.00.594.493 I print_info: n_expert              = 0
+0.00.594.493 I print_info: n_expert_used         = 0
+0.00.594.494 I print_info: n_expert_groups       = 0
+0.00.594.494 I print_info: n_group_used          = 0
+0.00.594.494 I print_info: causal attn           = 1
+0.00.594.494 I print_info: pooling type          = -1
+0.00.594.494 I print_info: rope type             = 40
+0.00.594.495 I print_info: rope scaling          = linear
+0.00.594.496 I print_info: freq_base_train       = 10000000.0
+0.00.594.496 I print_info: freq_scale_train      = 1
+0.00.594.496 I print_info: n_ctx_orig_yarn       = 262144
+0.00.594.496 I print_info: rope_yarn_log_mul     = 0.0000
+0.00.594.496 I print_info: rope_finetuned        = unknown
+0.00.594.497 I print_info: mrope sections        = [11, 11, 10, 0]
+0.00.594.497 I print_info: ssm_d_conv            = 4
+0.00.594.497 I print_info: ssm_d_inner           = 6144
+0.00.594.497 I print_info: ssm_d_state           = 128
+0.00.594.497 I print_info: ssm_dt_rank           = 48
+0.00.594.497 I print_info: ssm_n_group           = 16
+0.00.594.497 I print_info: ssm_dt_b_c_rms        = 0
+0.00.594.498 I print_info: model type            = 27B
+0.00.594.499 I print_info: model params          = 27.32 B
+0.00.594.499 I print_info: general.name          = Qwen3.8-27B
+0.00.594.500 I print_info: vocab type            = BPE
+0.00.594.500 I print_info: n_vocab               = 248320
+0.00.594.500 I print_info: n_merges              = 247587
+0.00.594.500 I print_info: BOS token             = 248044 '<|endoftext|>'
+0.00.594.501 I print_info: EOS token             = 248046 '<|im_end|>'
+0.00.594.501 I print_info: EOT token             = 248046 '<|im_end|>'
+0.00.594.501 I print_info: PAD token             = 248055 '<|vision_pad|>'
+0.00.594.501 I print_info: LF token              = 198 'Ċ'
+0.00.594.501 I print_info: FIM PRE token         = 248060 '<|fim_prefix|>'
+0.00.594.501 I print_info: FIM SUF token         = 248062 '<|fim_suffix|>'
+0.00.594.501 I print_info: FIM MID token         = 248061 '<|fim_middle|>'
+0.00.594.502 I print_info: FIM PAD token         = 248063 '<|fim_pad|>'
+0.00.594.502 I print_info: FIM REP token         = 248064 '<|repo_name|>'
+0.00.594.502 I print_info: FIM SEP token         = 248065 '<|file_sep|>'
+0.00.594.502 I print_info: EOG token             = 248044 '<|endoftext|>'
+0.00.594.502 I print_info: EOG token             = 248046 '<|im_end|>'
+0.00.594.503 I print_info: EOG token             = 248063 '<|fim_pad|>'
+0.00.594.503 I print_info: EOG token             = 248064 '<|repo_name|>'
+0.00.594.503 I print_info: EOG token             = 248065 '<|file_sep|>'
+0.00.594.503 I print_info: max token length      = 256
+0.00.594.676 I load_tensors: loading model tensors, this can take a while... (load_mode = mmap)
+0.00.594.825 I load_arch_tensors: MTP configured with d2t vocabulary map (draft_vocab_size = 65536)
+0.00.761.767 I load_tensors: offloading output layer to GPU
+0.00.761.771 I load_tensors: offloading 64 repeating layers to GPU
+0.00.761.771 I load_tensors: offloaded 66/66 layers to GPU
+0.00.761.781 I load_tensors:   CPU_Mapped model buffer size =   682.03 MiB
+0.00.761.782 I load_tensors:      Vulkan1 model buffer size = 16663.56 MiB
+.............................................................................................
+0.02.793.003 I load_tensors: slicing 65536 rows from output.weight into nextn.shared_head_head...
+0.05.203.523 I cmn  common_init_: added <|endoftext|> logit bias = -inf
+0.05.203.528 I cmn  common_init_: added <|im_end|> logit bias = -inf
+0.05.203.529 I cmn  common_init_: added <|fim_pad|> logit bias = -inf
+0.05.203.529 I cmn  common_init_: added <|repo_name|> logit bias = -inf
+0.05.203.530 I cmn  common_init_: added <|file_sep|> logit bias = -inf
+0.05.203.594 I llama_context: constructing llama_context
+0.05.203.597 I llama_context: n_seq_max             = 1
+0.05.203.597 I llama_context: n_ctx                 = 8192
+0.05.203.597 I llama_context: n_ctx_seq             = 8192
+0.05.203.597 I llama_context: n_batch               = 2048
+0.05.203.598 I llama_context: n_ubatch              = 512
+0.05.203.599 I llama_context: causal_attn           = 1
+0.05.203.599 I llama_context: flash_attn            = enabled
+0.05.203.600 I llama_context: kv_unified            = false
+0.05.203.603 I llama_context: freq_base             = 10000000.0
+0.05.203.604 I llama_context: freq_scale            = 1
+0.05.203.604 I llama_context: n_rs_seq              = 2
+0.05.203.604 I llama_context: n_outputs_max         = 3
+0.05.203.604 I llama_context: n_outputs_max_per_seq = 3
+0.05.203.604 I llama_context: n_ctx_seq (8192) < n_ctx_train (262144) -- the full capacity of the model will not be utilized
+0.05.203.769 I llama_context: Vulkan_Host  output buffer size =     0.95 MiB
+0.05.204.283 I llama_kv_cache:    Vulkan1 KV buffer size =   512.00 MiB
+0.05.223.845 I llama_kv_cache: size =  512.00 MiB (  8192 cells,  16 layers,  1/1 seqs), K (f16):  256.00 MiB, V (f16):  256.00 MiB
+0.05.223.849 I llama_kv_cache: attn_rot_k = 0, n_embd_head_k_all = 256
+0.05.223.849 I llama_kv_cache: attn_rot_v = 0, n_embd_head_k_all = 256
+0.05.241.235 I llama_memory_recurrent:    Vulkan1 RS buffer size =   448.88 MiB
+0.05.241.245 I llama_memory_recurrent: size =  448.88 MiB (     1 cells,  64 layers,  1 seqs  2 rs_seq), R (f32):   16.88 MiB, S (f32):  432.00 MiB
+0.05.241.254 I sched_reserve: reserving ...
+0.05.245.980 I resolve_fused_ops: resolving fused Gated Delta Net support:
+0.05.247.504 I resolve_fused_ops: fused Gated Delta Net (autoregressive) enabled
+0.05.248.684 I resolve_fused_ops: fused Gated Delta Net (chunked) enabled
+0.05.248.685 I resolve_fused_ops: resolving fused Lightning Indexer support:
+0.05.249.807 I resolve_fused_ops: Lightning Indexer enabled
+0.05.249.807 I resolve_fused_ops: resolving fused DeepSeek V4 HC support:
+0.05.250.905 I resolve_fused_ops: fused DeepSeek V4 HC pre enabled
+0.05.252.017 I resolve_fused_ops: fused DeepSeek V4 HC comb enabled
+0.05.253.128 I resolve_fused_ops: fused DeepSeek V4 HC post enabled
+0.05.258.292 I sched_reserve:    Vulkan1 compute buffer size =   142.13 MiB
+0.05.258.294 I sched_reserve: Vulkan_Host compute buffer size =    28.03 MiB
+0.05.258.294 I sched_reserve: graph nodes  = 3943
+0.05.258.294 I sched_reserve: graph splits = 2
+0.05.258.295 I sched_reserve: reserve took 17.04 ms, sched copies = 1
+0.05.258.346 I cmn          init: llama threadpool init, n_threads = 8
+0.05.258.372 I cmn  common_init_: warming up the model with an empty run - please wait ... (--no-warmup to disable)
+0.05.414.623 I common_speculative_init_result: creating MTP draft context against the target model '/ai/models/Qwen3.8-27B-UD-Q4_K_XL/Qwen3.8-27B-UD-Q4_K_XL.gguf'
+0.05.414.646 I llama_context: constructing llama_context
+0.05.414.650 I llama_context: n_seq_max             = 1
+0.05.414.652 I llama_context: n_ctx                 = 8192
+0.05.414.652 I llama_context: n_ctx_seq             = 8192
+0.05.414.653 I llama_context: n_batch               = 2048
+0.05.414.653 I llama_context: n_ubatch              = 512
+0.05.414.654 I llama_context: causal_attn           = 1
+0.05.414.655 I llama_context: flash_attn            = enabled
+0.05.414.655 I llama_context: kv_unified            = false
+0.05.414.662 I llama_context: freq_base             = 10000000.0
+0.05.414.664 I llama_context: freq_scale            = 1
+0.05.414.664 I llama_context: n_rs_seq              = 0
+0.05.414.664 I llama_context: n_outputs_max         = 1
+0.05.414.665 I llama_context: n_outputs_max_per_seq = 1
+0.05.414.665 I llama_context: n_ctx_seq (8192) < n_ctx_train (262144) -- the full capacity of the model will not be utilized
+0.05.414.939 I llama_context: Vulkan_Host  output buffer size =     0.95 MiB
+0.05.415.052 I llama_kv_cache:    Vulkan1 KV buffer size =    32.00 MiB
+0.05.415.185 I llama_kv_cache: size =   32.00 MiB (  8192 cells,   1 layers,  1/1 seqs), K (f16):   16.00 MiB, V (f16):   16.00 MiB
+0.05.415.186 I llama_kv_cache: attn_rot_k = 0, n_embd_head_k_all = 256
+0.05.415.187 I llama_kv_cache: attn_rot_v = 0, n_embd_head_k_all = 256
+0.05.415.193 I sched_reserve: reserving ...
+0.05.420.795 I resolve_fused_ops: resolving fused Gated Delta Net support:
+0.05.420.987 I resolve_fused_ops: fused Gated Delta Net (autoregressive) enabled
+0.05.421.049 I resolve_fused_ops: fused Gated Delta Net (chunked) enabled
+0.05.421.050 I resolve_fused_ops: resolving fused Lightning Indexer support:
+0.05.421.101 I resolve_fused_ops: Lightning Indexer enabled
+0.05.421.102 I resolve_fused_ops: resolving fused DeepSeek V4 HC support:
+0.05.421.150 I resolve_fused_ops: fused DeepSeek V4 HC pre enabled
+0.05.421.196 I resolve_fused_ops: fused DeepSeek V4 HC comb enabled
+0.05.421.243 I resolve_fused_ops: fused DeepSeek V4 HC post enabled
+0.05.424.657 I sched_reserve:    Vulkan1 compute buffer size =   130.96 MiB
+0.05.424.659 I sched_reserve: Vulkan_Host compute buffer size =    28.02 MiB
+0.05.424.659 I sched_reserve: graph nodes  = 56
+0.05.424.660 I sched_reserve: graph splits = 2
+0.05.424.662 I sched_reserve: reserve took 9.47 ms, sched copies = 1
+0.05.572.695 I cmn  common_conte: the context supports bounded partial sequence removal
+0.05.631.055 I spec common_specu: adding speculative implementation 'draft-mtp'
+0.05.631.057 I spec common_specu: - n_max=2, n_min=0, p_min=0.00, n_embd=5120, backend_sampling=1
+0.05.631.059 I spec common_specu: - gpu_layers=-1, cache_k=f16, cache_v=f16, ctx_tgt=yes, ctx_dft=yes, devices=[default]
+0.05.881.434 I sched_reserve: reserving ...
+0.05.888.320 I sched_reserve:    Vulkan1 compute buffer size =   130.96 MiB
+0.05.888.323 I sched_reserve: Vulkan_Host compute buffer size =    28.02 MiB
+0.05.888.324 I sched_reserve: graph nodes  = 62
+0.05.888.324 I sched_reserve: graph splits = 2
+0.05.888.325 I sched_reserve: reserve took 6.89 ms, sched copies = 1
+
+[DIAG MTP STEP 0 | Seq 0 | Iter 0]
+  Hidden State: norm=130.562120, sum=-36.846560, h[0..3]=[-0.1976, 1.7099, -0.4684, -1.6261]
+  Logits Stats: total=248320, finite=248320, -INF=0, NaN=0
+  Timing (us): decode=41246, get_logits=9, sampler=29
+  Top-10 Candidates (after sampler):
+    [ 1] id=     9 (raw_logit=    0.0000, p=0.100000) '*'
+    [ 2] id=    10 (raw_logit=    0.0000, p=0.100000) '+'
+    [ 3] id=     5 (raw_logit=    0.0000, p=0.100000) '&'
+    [ 4] id=     8 (raw_logit=    0.0000, p=0.100000) ')'
+    [ 5] id=     6 (raw_logit=    0.0000, p=0.100000) '''
+    [ 6] id=     4 (raw_logit=    0.0000, p=0.100000) '%'
+    [ 7] id=     1 (raw_logit=    0.0000, p=0.100000) '"'
+    [ 8] id=     0 (raw_logit=    0.0000, p=0.100000) '!'
+    [ 9] id=     2 (raw_logit=    0.0000, p=0.100000) '#'
+    [10] id=     7 (raw_logit=    0.0000, p=0.100000) '('
+  Decision: top_p=0.100000 vs p_min=0.000000 -> ACCEPT_DRAFT
+
+[DIAG MTP STEP 1 | Seq 0 | Iter 1]
+  Hidden State: norm=130.562120, sum=-36.846560, h[0..3]=[-0.1976, 1.7099, -0.4684, -1.6261]
+  Logits Stats: total=248320, finite=248320, -INF=0, NaN=0
+  Timing (us): decode=21987, get_logits=9, sampler=9
+  Top-10 Candidates (after sampler):
+    [ 1] id=    11 (raw_logit=    0.0000, p=0.100000) ','
+    [ 2] id=    14 (raw_logit=    0.0000, p=0.100000) '/'
+    [ 3] id=     6 (raw_logit=    0.0000, p=0.100000) '''
+    [ 4] id=    10 (raw_logit=    0.0000, p=0.100000) '+'
+    [ 5] id=     7 (raw_logit=    0.0000, p=0.100000) '('
+    [ 6] id=     4 (raw_logit=    0.0000, p=0.100000) '%'
+    [ 7] id=     1 (raw_logit=    0.0000, p=0.100000) '"'
+    [ 8] id=     0 (raw_logit=    0.0000, p=0.100000) '!'
+    [ 9] id=     2 (raw_logit=    0.0000, p=0.100000) '#'
+    [10] id=     8 (raw_logit=    0.0000, p=0.100000) ')'
+  Decision: top_p=0.100000 vs p_min=0.000000 -> ACCEPT_DRAFT
+
+[DIAG MTP STEP 2 | Seq 0 | Iter 0]
+  Hidden State: norm=138.391018, sum=-60.628247, h[0..3]=[1.2959, -3.3713, 1.7532, 0.7641]
+  Logits Stats: total=248320, finite=248320, -INF=0, NaN=0
+  Timing (us): decode=28670, get_logits=11, sampler=10
+  Top-10 Candidates (after sampler):
+    [ 1] id=     8 (raw_logit=    0.0000, p=0.100000) ')'
+    [ 2] id=     9 (raw_logit=    0.0000, p=0.100000) '*'
+    [ 3] id=     4 (raw_logit=    0.0000, p=0.100000) '%'
+    [ 4] id=     7 (raw_logit=    0.0000, p=0.100000) '('
+    [ 5] id=     5 (raw_logit=    0.0000, p=0.100000) '&'
+    [ 6] id=     3 (raw_logit=    0.0000, p=0.100000) '$'
+    [ 7] id=     1 (raw_logit=    0.0000, p=0.100000) '"'
+    [ 8] id=     0 (raw_logit=    0.0000, p=0.100000) '!'
+    [ 9] id=     2 (raw_logit=    0.0000, p=0.100000) '#'
+    [10] id=     6 (raw_logit=    0.0000, p=0.100000) '''
+  Decision: top_p=0.100000 vs p_min=0.000000 -> ACCEPT_DRAFT
+
+[DIAG MTP STEP 3 | Seq 0 | Iter 1]
+  Hidden State: norm=138.391018, sum=-60.628247, h[0..3]=[1.2959, -3.3713, 1.7532, 0.7641]
+  Logits Stats: total=248320, finite=248320, -INF=0, NaN=0
+  Timing (us): decode=22498, get_logits=19, sampler=13
+  Top-10 Candidates (after sampler):
+    [ 1] id=    13 (raw_logit=    0.0000, p=0.100000) '.'
+    [ 2] id=    14 (raw_logit=    0.0000, p=0.100000) '/'
+    [ 3] id=     6 (raw_logit=    0.0000, p=0.100000) '''
+    [ 4] id=    11 (raw_logit=    0.0000, p=0.100000) ','
+    [ 5] id=     8 (raw_logit=    0.0000, p=0.100000) ')'
+    [ 6] id=     3 (raw_logit=    0.0000, p=0.100000) '$'
+    [ 7] id=     1 (raw_logit=    0.0000, p=0.100000) '"'
+    [ 8] id=     0 (raw_logit=    0.0000, p=0.100000) '!'
+    [ 9] id=     2 (raw_logit=    0.0000, p=0.100000) '#'
+    [10] id=    10 (raw_logit=    0.0000, p=0.100000) '+'
+  Decision: top_p=0.100000 vs p_min=0.000000 -> ACCEPT_DRAFT
+
+[DIAG MTP STEP 4 | Seq 0 | Iter 0]
+  Hidden State: norm=138.729237, sum=69.273971, h[0..3]=[0.7800, -2.9402, 0.7406, 1.6886]
+  Logits Stats: total=248320, finite=248320, -INF=0, NaN=0
+  Timing (us): decode=33120, get_logits=12, sampler=11
+  Top-10 Candidates (after sampler):
+    [ 1] id=     8 (raw_logit=    0.0000, p=0.100000) ')'
+    [ 2] id=     9 (raw_logit=    0.0000, p=0.100000) '*'
+    [ 3] id=     4 (raw_logit=    0.0000, p=0.100000) '%'
+    [ 4] id=     7 (raw_logit=    0.0000, p=0.100000) '('
+    [ 5] id=     5 (raw_logit=    0.0000, p=0.100000) '&'
+    [ 6] id=     3 (raw_logit=    0.0000, p=0.100000) '$'
+    [ 7] id=     1 (raw_logit=    0.0000, p=0.100000) '"'
+    [ 8] id=     0 (raw_logit=    0.0000, p=0.100000) '!'
+    [ 9] id=     2 (raw_logit=    0.0000, p=0.100000) '#'
+    [10] id=     6 (raw_logit=    0.0000, p=0.100000) '''
+  Decision: top_p=0.100000 vs p_min=0.000000 -> ACCEPT_DRAFT
+
+[DIAG MTP STEP 5 | Seq 0 | Iter 1]
+  Hidden State: norm=138.729237, sum=69.273971, h[0..3]=[0.7800, -2.9402, 0.7406, 1.6886]
+  Logits Stats: total=248320, finite=248320, -INF=0, NaN=0
+  Timing (us): decode=21992, get_logits=5, sampler=9
+  Top-10 Candidates (after sampler):
+    [ 1] id=    20 (raw_logit=    0.0000, p=0.100000) '5'
+    [ 2] id=    21 (raw_logit=    0.0000, p=0.100000) '6'
+    [ 3] id=    16 (raw_logit=    0.0000, p=0.100000) '1'
+    [ 4] id=    19 (raw_logit=    0.0000, p=0.100000) '4'
+    [ 5] id=    17 (raw_logit=    0.0000, p=0.100000) '2'
+    [ 6] id=    15 (raw_logit=    0.0000, p=0.100000) '0'
+    [ 7] id=     1 (raw_logit=    0.0000, p=0.100000) '"'
+    [ 8] id=     0 (raw_logit=    0.0000, p=0.100000) '!'
+    [ 9] id=     8 (raw_logit=    0.0000, p=0.100000) ')'
+    [10] id=    18 (raw_logit=    0.0000, p=0.100000) '3'
+  Decision: top_p=0.100000 vs p_min=0.000000 -> ACCEPT_DRAFT
+
+[DIAG MTP STEP 6 | Seq 0 | Iter 0]
+  Hidden State: norm=138.642644, sum=75.422972, h[0..3]=[-0.5314, -0.6394, -1.6975, -0.6479]
+  Logits Stats: total=248320, finite=248320, -INF=0, NaN=0
+  Timing (us): decode=32603, get_logits=9, sampler=9
+  Top-10 Candidates (after sampler):
+    [ 1] id=     8 (raw_logit=    0.0000, p=0.100000) ')'
+    [ 2] id=     9 (raw_logit=    0.0000, p=0.100000) '*'
+    [ 3] id=     4 (raw_logit=    0.0000, p=0.100000) '%'
+    [ 4] id=     7 (raw_logit=    0.0000, p=0.100000) '('
+    [ 5] id=     5 (raw_logit=    0.0000, p=0.100000) '&'
+    [ 6] id=     3 (raw_logit=    0.0000, p=0.100000) '$'
+    [ 7] id=     1 (raw_logit=    0.0000, p=0.100000) '"'
+    [ 8] id=     0 (raw_logit=    0.0000, p=0.100000) '!'
+    [ 9] id=     2 (raw_logit=    0.0000, p=0.100000) '#'
+    [10] id=     6 (raw_logit=    0.0000, p=0.100000) '''
+  Decision: top_p=0.100000 vs p_min=0.000000 -> ACCEPT_DRAFT
+
+[DIAG MTP STEP 7 | Seq 0 | Iter 1]
+  Hidden State: norm=138.642644, sum=75.422972, h[0..3]=[-0.5314, -0.6394, -1.6975, -0.6479]
+  Logits Stats: total=248320, finite=248320, -INF=0, NaN=0
+  Timing (us): decode=22116, get_logits=9, sampler=9
+  Top-10 Candidates (after sampler):
+    [ 1] id=    19 (raw_logit=    0.0000, p=0.100000) '4'
+    [ 2] id=    20 (raw_logit=    0.0000, p=0.100000) '5'
+    [ 3] id=    15 (raw_logit=    0.0000, p=0.100000) '0'
+    [ 4] id=    18 (raw_logit=    0.0000, p=0.100000) '3'
+    [ 5] id=    16 (raw_logit=    0.0000, p=0.100000) '1'
+    [ 6] id=    13 (raw_logit=    0.0000, p=0.100000) '.'
+    [ 7] id=     8 (raw_logit=    0.0000, p=0.100000) ')'
+    [ 8] id=     0 (raw_logit=    0.0000, p=0.100000) '!'
+    [ 9] id=    11 (raw_logit=    0.0000, p=0.100000) ','
+    [10] id=    17 (raw_logit=    0.0000, p=0.100000) '2'
+  Decision: top_p=0.100000 vs p_min=0.000000 -> ACCEPT_DRAFT
+
+[DIAG MTP STEP 8 | Seq 0 | Iter 0]
+  Hidden State: norm=136.950471, sum=-164.492592, h[0..3]=[-2.2790, -2.3148, -0.9731, -0.8796]
+  Logits Stats: total=248320, finite=248320, -INF=0, NaN=0
+  Timing (us): decode=34020, get_logits=9, sampler=10
+  Top-10 Candidates (after sampler):
+    [ 1] id=     8 (raw_logit=    0.0000, p=0.100000) ')'
+    [ 2] id=     9 (raw_logit=    0.0000, p=0.100000) '*'
+    [ 3] id=     4 (raw_logit=    0.0000, p=0.100000) '%'
+    [ 4] id=     7 (raw_logit=    0.0000, p=0.100000) '('
+    [ 5] id=     5 (raw_logit=    0.0000, p=0.100000) '&'
+    [ 6] id=     3 (raw_logit=    0.0000, p=0.100000) '$'
+    [ 7] id=     1 (raw_logit=    0.0000, p=0.100000) '"'
+    [ 8] id=     0 (raw_logit=    0.0000, p=0.100000) '!'
+    [ 9] id=     2 (raw_logit=    0.0000, p=0.100000) '#'
+    [10] id=     6 (raw_logit=    0.0000, p=0.100000) '''
+  Decision: top_p=0.100000 vs p_min=0.000000 -> ACCEPT_DRAFT
+
+[DIAG MTP STEP 9 | Seq 0 | Iter 1]
+  Hidden State: norm=136.950471, sum=-164.492592, h[0..3]=[-2.2790, -2.3148, -0.9731, -0.8796]
+  Logits Stats: total=248320, finite=248320, -INF=0, NaN=0
+  Timing (us): decode=21983, get_logits=4, sampler=6
+  Top-10 Candidates (after sampler):
+    [ 1] id=    21 (raw_logit=    0.0000, p=0.100000) '6'
+    [ 2] id=    22 (raw_logit=    0.0000, p=0.100000) '7'
+    [ 3] id=    17 (raw_logit=    0.0000, p=0.100000) '2'
+    [ 4] id=    20 (raw_logit=    0.0000, p=0.100000) '5'
+    [ 5] id=    18 (raw_logit=    0.0000, p=0.100000) '3'
+    [ 6] id=    16 (raw_logit=    0.0000, p=0.100000) '1'
+    [ 7] id=     8 (raw_logit=    0.0000, p=0.100000) ')'
+    [ 8] id=     0 (raw_logit=    0.0000, p=0.100000) '!'
+    [ 9] id=    11 (raw_logit=    0.0000, p=0.100000) ','
+    [10] id=    19 (raw_logit=    0.0000, p=0.100000) '4'
+  Decision: top_p=0.100000 vs p_min=0.000000 -> ACCEPT_DRAFT
+0.11.030.241 I encoded   34 tokens in    0.259 seconds, speed:  131.391 t/s
+0.11.030.242 I decoded   33 tokens in    5.140 seconds, speed:    6.420 t/s
+0.11.030.242 I 
+0.11.030.243 I n_draft   = 2
+0.11.030.243 I n_predict = 33
+0.11.030.243 I n_drafted = 65
+0.11.030.243 I n_accept  = 0
+0.11.030.243 I accept    = 0.000%
+0.11.030.243 I 
+0.11.030.243 I draft:
+
+0.11.030.271 I spec common_specu: statistics        draft-mtp: #calls(b,g,a) =    1     33     33, #gen drafts =     33, #acc drafts =     0, #gen tokens =     65, #acc tokens =     0, #mean acc len = 1.00, #acc rate/pos = (), dur(b,g,a) = 0.005, 1830.318, 0.040 ms
+0.11.030.271 I 
+0.11.030.272 I target:
+
+0.11.030.274 I common_perf_print:    sampling time =      10.06 ms
+0.11.030.275 I common_perf_print:    samplers time =       2.73 ms /    33 tokens
+0.11.030.278 I common_perf_print:        load time =    4991.19 ms
+0.11.030.279 I common_perf_print: prompt eval time =    3316.32 ms /   133 tokens (   24.93 ms per token,    40.10 tokens per second)
+0.11.030.280 I common_perf_print:        eval time =       0.00 ms /     1 runs   (    0.00 ms per token,      inf tokens per second)
+0.11.030.280 I common_perf_print:       total time =    5615.70 ms /   134 tokens
+0.11.030.280 I common_perf_print: unaccounted time =    2289.32 ms /  40.8 %      (total - sampling - prompt eval - eval) / (total)
+0.11.030.281 I common_perf_print:    graphs reused =         31
+0.11.030.516 I common_memory_breakdown_print: | memory breakdown [MiB]                    | total   free     self   model   context   compute    unaccounted |
+0.11.030.517 I common_memory_breakdown_print: |   - Vulkan1 (AI PRO R9700 (RADV GFX1201)) | 32624 =  265 + (17766 = 16663 +     960 +     142) +       14592 |
+0.11.030.517 I common_memory_breakdown_print: |   - Host                                  |                   710 =   682 +       0 +      28                |
+
+
+=== 32K TRIMMED (p_min=0.0) ===
+
+
+Write a complete, production-grade Python asynchronous task pool with priority queuing, worker concurrency limiting, and exponential backoff retry logic. Include full type hints and docstrings.
+
+<think>
+The user wants a complete, production-grade Python asynchronous task pool with:
+1. Priority queuing
+2. Worker concurrency limiting
+3. Ex
+
+
+
+
+WARNING: radv is not a conformant Vulkan implementation, testing use only.
+0.00.028.389 I cmn  common_init_: fitting params to device memory ...
+0.00.028.392 I cmn  common_init_: (for bugs during this step try to reproduce them with -fit off, or provide --verbose logs if the bug only occurs with -fit on)
+0.00.028.399 I common_params_fit_impl: getting device memory data for initial parameters:
+0.00.287.983 I common_memory_breakdown_print: | memory breakdown [MiB]                    | total    free     self   model   context   compute    unaccounted |
+0.00.287.986 I common_memory_breakdown_print: |   - Vulkan1 (AI PRO R9700 (RADV GFX1201)) | 32624 = 15068 + (17635 = 16532 +     960 +     142) +         -79 |
+0.00.287.986 I common_memory_breakdown_print: |   - Host                                  |                    710 =   682 +       0 +      28                |
+0.00.337.445 I common_params_fit_impl: projected to use 17635 MiB of device memory vs. 15068 MiB of free device memory
+0.00.337.448 I common_params_fit_impl: cannot meet free memory target of 1024 MiB, need to reduce device memory by 3590 MiB
+0.00.337.449 I common_params_fit_impl: context size set by user to 8192 -> no change
+0.00.337.528 W common_fit_params: failed to fit params to free device memory: n_gpu_layers already set by user to 999, abort
+0.00.337.540 I common_fit_params: fitting params to free memory took 0.31 seconds
+0.00.368.620 I llama_model_loader: loaded meta data with 51 key-value pairs and 866 tensors from /ai/models/Qwen3.8-27B-UD-Q4_K_XL/Qwen3.8-27B-UD-Q4_K_XL.gguf (version GGUF V3 (latest))
+0.00.368.636 I llama_model_loader: Dumping metadata keys/values. Note: KV overrides do not apply in this output.
+0.00.368.641 I llama_model_loader: - kv   0:                       general.architecture str              = qwen35
+0.00.368.642 I llama_model_loader: - kv   1:                               general.type str              = model
+0.00.368.643 I llama_model_loader: - kv   2:                     general.sampling.top_k i32              = 20
+0.00.368.647 I llama_model_loader: - kv   3:                     general.sampling.top_p f32              = 0.950000
+0.00.368.647 I llama_model_loader: - kv   4:                      general.sampling.temp f32              = 1.000000
+0.00.368.648 I llama_model_loader: - kv   5:                               general.name str              = Qwen3.8-27B
+0.00.368.648 I llama_model_loader: - kv   6:                           general.basename str              = Qwen3.8-27B
+0.00.368.649 I llama_model_loader: - kv   7:                        general.description str              = Renewal of the beloved Qwen model, de...
+0.00.368.650 I llama_model_loader: - kv   8:                       general.quantized_by str              = Unsloth
+0.00.368.650 I llama_model_loader: - kv   9:                         general.size_label str              = 27B
+0.00.368.650 I llama_model_loader: - kv  10:                            general.license str              = apache-2.0
+0.00.368.651 I llama_model_loader: - kv  11:                           general.repo_url str              = https://huggingface.co/unsloth
+0.00.368.652 I llama_model_loader: - kv  12:                   general.base_model.count u32              = 1
+0.00.368.652 I llama_model_loader: - kv  13:                  general.base_model.0.name str              = Qwen3.8 27B
+0.00.368.652 I llama_model_loader: - kv  14:          general.base_model.0.organization str              = Qwen
+0.00.368.653 I llama_model_loader: - kv  15:              general.base_model.0.repo_url str              = https://huggingface.co/Qwen/Qwen3.8-27B
+0.00.368.662 I llama_model_loader: - kv  16:                               general.tags arr[str,1]       = ["unsloth"]
+0.00.368.663 I llama_model_loader: - kv  17:                         qwen35.block_count u32              = 65
+0.00.368.663 I llama_model_loader: - kv  18:                      qwen35.context_length u32              = 262144
+0.00.368.663 I llama_model_loader: - kv  19:                    qwen35.embedding_length u32              = 5120
+0.00.368.664 I llama_model_loader: - kv  20:                 qwen35.feed_forward_length u32              = 17408
+0.00.368.664 I llama_model_loader: - kv  21:                qwen35.attention.head_count u32              = 24
+0.00.368.664 I llama_model_loader: - kv  22:             qwen35.attention.head_count_kv u32              = 4
+0.00.368.666 I llama_model_loader: - kv  23:             qwen35.rope.dimension_sections arr[i32,4]       = [11, 11, 10, 0]
+0.00.368.667 I llama_model_loader: - kv  24:                      qwen35.rope.freq_base f32              = 10000000.000000
+0.00.368.668 I llama_model_loader: - kv  25:    qwen35.attention.layer_norm_rms_epsilon f32              = 0.000001
+0.00.368.668 I llama_model_loader: - kv  26:                qwen35.attention.key_length u32              = 256
+0.00.368.669 I llama_model_loader: - kv  27:              qwen35.attention.value_length u32              = 256
+0.00.368.669 I llama_model_loader: - kv  28:                qwen35.nextn_predict_layers u32              = 1
+0.00.368.669 I llama_model_loader: - kv  29:                     qwen35.ssm.conv_kernel u32              = 4
+0.00.368.669 I llama_model_loader: - kv  30:                      qwen35.ssm.state_size u32              = 128
+0.00.368.669 I llama_model_loader: - kv  31:                     qwen35.ssm.group_count u32              = 16
+0.00.368.669 I llama_model_loader: - kv  32:                  qwen35.ssm.time_step_rank u32              = 48
+0.00.368.670 I llama_model_loader: - kv  33:                      qwen35.ssm.inner_size u32              = 6144
+0.00.368.670 I llama_model_loader: - kv  34:             qwen35.full_attention_interval u32              = 4
+0.00.368.670 I llama_model_loader: - kv  35:                qwen35.rope.dimension_count u32              = 64
+0.00.368.670 I llama_model_loader: - kv  36:                       tokenizer.ggml.model str              = gpt2
+0.00.368.670 I llama_model_loader: - kv  37:                         tokenizer.ggml.pre str              = qwen35
+0.00.381.562 I llama_model_loader: - kv  38:                      tokenizer.ggml.tokens arr[str,248320]  = ["!", "\"", "#", "$", "%", "&", "'", ...
+0.00.385.211 I llama_model_loader: - kv  39:                  tokenizer.ggml.token_type arr[i32,248320]  = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, ...
+0.00.397.406 I llama_model_loader: - kv  40:                      tokenizer.ggml.merges arr[str,247587]  = ["Ġ Ġ", "ĠĠ ĠĠ", "i n", "Ġ t",...
+0.00.397.409 I llama_model_loader: - kv  41:                tokenizer.ggml.eos_token_id u32              = 248046
+0.00.397.409 I llama_model_loader: - kv  42:            tokenizer.ggml.padding_token_id u32              = 248055
+0.00.397.410 I llama_model_loader: - kv  43:                tokenizer.ggml.bos_token_id u32              = 248044
+0.00.397.410 I llama_model_loader: - kv  44:               general.quantization_version u32              = 2
+0.00.397.411 I llama_model_loader: - kv  45:                          general.file_type u32              = 14
+0.00.397.412 I llama_model_loader: - kv  46:                      quantize.imatrix.file str              = /mnt/disks/unslothai/ubuntu/workspace...
+0.00.397.413 I llama_model_loader: - kv  47:                   quantize.imatrix.dataset str              = unsloth_calibration_Qwen3.8-27B.txt
+0.00.397.413 I llama_model_loader: - kv  48:             quantize.imatrix.entries_count u32              = 496
+0.00.397.413 I llama_model_loader: - kv  49:              quantize.imatrix.chunks_count u32              = 45
+0.00.397.415 I llama_model_loader: - kv  50:                    tokenizer.chat_template str              = {%- set image_count = namespace(value...
+0.00.397.416 I llama_model_loader: - type  f32:  360 tensors
+0.00.397.416 I llama_model_loader: - type q4_K:   97 tensors
+0.00.397.417 I llama_model_loader: - type q5_K:  325 tensors
+0.00.397.417 I llama_model_loader: - type q6_K:   19 tensors
+0.00.397.417 I llama_model_loader: - type iq4_xs:   65 tensors
+0.00.397.418 I print_info: file format = GGUF V3 (latest)
+0.00.397.419 I print_info: file type   = Q4_K - Small
+0.00.397.423 I print_info: file size   = 16.68 GiB (5.25 BPW) 
+0.00.397.608 I llama_prepare_model_devices: using device Vulkan1 (AMD Radeon AI PRO R9700 (RADV GFX1201)) (0000:06:00.0) - 15517 MiB free
+0.00.512.812 I load: 0 unused tokens
+0.00.547.794 I load: printing all EOG tokens:
+0.00.547.797 I load:   - 248044 ('<|endoftext|>')
+0.00.547.797 I load:   - 248046 ('<|im_end|>')
+0.00.547.797 I load:   - 248063 ('<|fim_pad|>')
+0.00.547.798 I load:   - 248064 ('<|repo_name|>')
+0.00.547.798 I load:   - 248065 ('<|file_sep|>')
+0.00.547.991 I load: special tokens cache size = 33
+0.00.597.079 I load: token to piece cache size = 1.7581 MB
+0.00.597.094 I print_info: arch                  = qwen35
+0.00.597.094 I print_info: vocab_only            = 0
+0.00.597.095 I print_info: no_alloc              = 0
+0.00.597.095 I print_info: n_ctx_train           = 262144
+0.00.597.095 I print_info: n_embd_inp            = 5120
+0.00.597.095 I print_info: n_embd                = 5120
+0.00.597.096 I print_info: n_embd_out            = 5120
+0.00.597.096 I print_info: n_layer               = 64
+0.00.597.109 I print_info: n_layer_all           = 65
+0.00.597.117 I print_info: n_head                = 24
+0.00.597.119 I print_info: n_head_kv             = 4
+0.00.597.119 I print_info: n_rot                 = 64
+0.00.597.119 I print_info: n_swa                 = 0
+0.00.597.120 I print_info: is_swa_any            = 0
+0.00.597.120 I print_info: n_embd_head_k         = 256
+0.00.597.120 I print_info: n_embd_head_v         = 256
+0.00.597.121 I print_info: n_gqa                 = 6
+0.00.597.122 I print_info: n_embd_k_gqa          = 1024
+0.00.597.123 I print_info: n_embd_v_gqa          = 1024
+0.00.597.124 I print_info: f_norm_eps            = 0.0e+00
+0.00.597.125 I print_info: f_norm_rms_eps        = 1.0e-06
+0.00.597.125 I print_info: f_clamp_kqv           = 0.0e+00
+0.00.597.125 I print_info: f_max_alibi_bias      = 0.0e+00
+0.00.597.126 I print_info: f_logit_scale         = 0.0e+00
+0.00.597.126 I print_info: f_attn_scale          = 0.0e+00
+0.00.597.126 I print_info: f_attn_value_scale    = 0.0000
+0.00.597.127 I print_info: n_ff                  = 17408
+0.00.597.127 I print_info: n_expert              = 0
+0.00.597.127 I print_info: n_expert_used         = 0
+0.00.597.128 I print_info: n_expert_groups       = 0
+0.00.597.128 I print_info: n_group_used          = 0
+0.00.597.128 I print_info: causal attn           = 1
+0.00.597.128 I print_info: pooling type          = -1
+0.00.597.128 I print_info: rope type             = 40
+0.00.597.129 I print_info: rope scaling          = linear
+0.00.597.130 I print_info: freq_base_train       = 10000000.0
+0.00.597.130 I print_info: freq_scale_train      = 1
+0.00.597.130 I print_info: n_ctx_orig_yarn       = 262144
+0.00.597.130 I print_info: rope_yarn_log_mul     = 0.0000
+0.00.597.130 I print_info: rope_finetuned        = unknown
+0.00.597.131 I print_info: mrope sections        = [11, 11, 10, 0]
+0.00.597.131 I print_info: ssm_d_conv            = 4
+0.00.597.131 I print_info: ssm_d_inner           = 6144
+0.00.597.131 I print_info: ssm_d_state           = 128
+0.00.597.131 I print_info: ssm_dt_rank           = 48
+0.00.597.131 I print_info: ssm_n_group           = 16
+0.00.597.131 I print_info: ssm_dt_b_c_rms        = 0
+0.00.597.132 I print_info: model type            = 27B
+0.00.597.133 I print_info: model params          = 27.32 B
+0.00.597.133 I print_info: general.name          = Qwen3.8-27B
+0.00.597.135 I print_info: vocab type            = BPE
+0.00.597.135 I print_info: n_vocab               = 248320
+0.00.597.135 I print_info: n_merges              = 247587
+0.00.597.135 I print_info: BOS token             = 248044 '<|endoftext|>'
+0.00.597.135 I print_info: EOS token             = 248046 '<|im_end|>'
+0.00.597.135 I print_info: EOT token             = 248046 '<|im_end|>'
+0.00.597.135 I print_info: PAD token             = 248055 '<|vision_pad|>'
+0.00.597.136 I print_info: LF token              = 198 'Ċ'
+0.00.597.136 I print_info: FIM PRE token         = 248060 '<|fim_prefix|>'
+0.00.597.136 I print_info: FIM SUF token         = 248062 '<|fim_suffix|>'
+0.00.597.136 I print_info: FIM MID token         = 248061 '<|fim_middle|>'
+0.00.597.136 I print_info: FIM PAD token         = 248063 '<|fim_pad|>'
+0.00.597.136 I print_info: FIM REP token         = 248064 '<|repo_name|>'
+0.00.597.136 I print_info: FIM SEP token         = 248065 '<|file_sep|>'
+0.00.597.136 I print_info: EOG token             = 248044 '<|endoftext|>'
+0.00.597.137 I print_info: EOG token             = 248046 '<|im_end|>'
+0.00.597.137 I print_info: EOG token             = 248063 '<|fim_pad|>'
+0.00.597.137 I print_info: EOG token             = 248064 '<|repo_name|>'
+0.00.597.137 I print_info: EOG token             = 248065 '<|file_sep|>'
+0.00.597.137 I print_info: max token length      = 256
+0.00.597.317 I load_tensors: loading model tensors, this can take a while... (load_mode = mmap)
+0.00.597.473 I load_arch_tensors: MTP configured with d2t vocabulary map (draft_vocab_size = 32768)
+0.00.768.387 I load_tensors: offloading output layer to GPU
+0.00.768.390 I load_tensors: offloading 64 repeating layers to GPU
+0.00.768.390 I load_tensors: offloaded 66/66 layers to GPU
+0.00.768.395 I load_tensors:   CPU_Mapped model buffer size =   682.03 MiB
+0.00.768.396 I load_tensors:      Vulkan1 model buffer size = 16532.06 MiB
+.............................................................................................
+0.02.811.078 I load_tensors: slicing 32768 rows from output.weight into nextn.shared_head_head...
+0.04.060.977 I cmn  common_init_: added <|endoftext|> logit bias = -inf
+0.04.060.982 I cmn  common_init_: added <|im_end|> logit bias = -inf
+0.04.060.983 I cmn  common_init_: added <|fim_pad|> logit bias = -inf
+0.04.060.983 I cmn  common_init_: added <|repo_name|> logit bias = -inf
+0.04.060.984 I cmn  common_init_: added <|file_sep|> logit bias = -inf
+0.04.061.053 I llama_context: constructing llama_context
+0.04.061.056 I llama_context: n_seq_max             = 1
+0.04.061.057 I llama_context: n_ctx                 = 8192
+0.04.061.057 I llama_context: n_ctx_seq             = 8192
+0.04.061.058 I llama_context: n_batch               = 2048
+0.04.061.058 I llama_context: n_ubatch              = 512
+0.04.061.058 I llama_context: causal_attn           = 1
+0.04.061.059 I llama_context: flash_attn            = enabled
+0.04.061.059 I llama_context: kv_unified            = false
+0.04.061.062 I llama_context: freq_base             = 10000000.0
+0.04.061.064 I llama_context: freq_scale            = 1
+0.04.061.064 I llama_context: n_rs_seq              = 2
+0.04.061.064 I llama_context: n_outputs_max         = 3
+0.04.061.064 I llama_context: n_outputs_max_per_seq = 3
+0.04.061.065 I llama_context: n_ctx_seq (8192) < n_ctx_train (262144) -- the full capacity of the model will not be utilized
+0.04.061.229 I llama_context: Vulkan_Host  output buffer size =     0.95 MiB
+0.04.061.814 I llama_kv_cache:    Vulkan1 KV buffer size =   512.00 MiB
+0.04.081.848 I llama_kv_cache: size =  512.00 MiB (  8192 cells,  16 layers,  1/1 seqs), K (f16):  256.00 MiB, V (f16):  256.00 MiB
+0.04.081.852 I llama_kv_cache: attn_rot_k = 0, n_embd_head_k_all = 256
+0.04.081.853 I llama_kv_cache: attn_rot_v = 0, n_embd_head_k_all = 256
+0.04.099.405 I llama_memory_recurrent:    Vulkan1 RS buffer size =   448.88 MiB
+0.04.099.414 I llama_memory_recurrent: size =  448.88 MiB (     1 cells,  64 layers,  1 seqs  2 rs_seq), R (f32):   16.88 MiB, S (f32):  432.00 MiB
+0.04.099.424 I sched_reserve: reserving ...
+0.04.103.518 I resolve_fused_ops: resolving fused Gated Delta Net support:
+0.04.105.044 I resolve_fused_ops: fused Gated Delta Net (autoregressive) enabled
+0.04.106.202 I resolve_fused_ops: fused Gated Delta Net (chunked) enabled
+0.04.106.203 I resolve_fused_ops: resolving fused Lightning Indexer support:
+0.04.107.329 I resolve_fused_ops: Lightning Indexer enabled
+0.04.107.330 I resolve_fused_ops: resolving fused DeepSeek V4 HC support:
+0.04.108.465 I resolve_fused_ops: fused DeepSeek V4 HC pre enabled
+0.04.109.582 I resolve_fused_ops: fused DeepSeek V4 HC comb enabled
+0.04.110.691 I resolve_fused_ops: fused DeepSeek V4 HC post enabled
+0.04.116.119 I sched_reserve:    Vulkan1 compute buffer size =   142.13 MiB
+0.04.116.121 I sched_reserve: Vulkan_Host compute buffer size =    28.03 MiB
+0.04.116.121 I sched_reserve: graph nodes  = 3943
+0.04.116.121 I sched_reserve: graph splits = 2
+0.04.116.122 I sched_reserve: reserve took 16.70 ms, sched copies = 1
+0.04.116.175 I cmn          init: llama threadpool init, n_threads = 8
+0.04.116.202 I cmn  common_init_: warming up the model with an empty run - please wait ... (--no-warmup to disable)
+0.04.275.839 I common_speculative_init_result: creating MTP draft context against the target model '/ai/models/Qwen3.8-27B-UD-Q4_K_XL/Qwen3.8-27B-UD-Q4_K_XL.gguf'
+0.04.275.861 I llama_context: constructing llama_context
+0.04.275.864 I llama_context: n_seq_max             = 1
+0.04.275.864 I llama_context: n_ctx                 = 8192
+0.04.275.865 I llama_context: n_ctx_seq             = 8192
+0.04.275.865 I llama_context: n_batch               = 2048
+0.04.275.865 I llama_context: n_ubatch              = 512
+0.04.275.866 I llama_context: causal_attn           = 1
+0.04.275.867 I llama_context: flash_attn            = enabled
+0.04.275.867 I llama_context: kv_unified            = false
+0.04.275.872 I llama_context: freq_base             = 10000000.0
+0.04.275.875 I llama_context: freq_scale            = 1
+0.04.275.875 I llama_context: n_rs_seq              = 0
+0.04.275.875 I llama_context: n_outputs_max         = 1
+0.04.275.875 I llama_context: n_outputs_max_per_seq = 1
+0.04.275.876 I llama_context: n_ctx_seq (8192) < n_ctx_train (262144) -- the full capacity of the model will not be utilized
+0.04.276.073 I llama_context: Vulkan_Host  output buffer size =     0.95 MiB
+0.04.276.170 I llama_kv_cache:    Vulkan1 KV buffer size =    32.00 MiB
+0.04.276.271 I llama_kv_cache: size =   32.00 MiB (  8192 cells,   1 layers,  1/1 seqs), K (f16):   16.00 MiB, V (f16):   16.00 MiB
+0.04.276.273 I llama_kv_cache: attn_rot_k = 0, n_embd_head_k_all = 256
+0.04.276.273 I llama_kv_cache: attn_rot_v = 0, n_embd_head_k_all = 256
+0.04.276.278 I sched_reserve: reserving ...
+0.04.281.105 I resolve_fused_ops: resolving fused Gated Delta Net support:
+0.04.281.235 I resolve_fused_ops: fused Gated Delta Net (autoregressive) enabled
+0.04.281.298 I resolve_fused_ops: fused Gated Delta Net (chunked) enabled
+0.04.281.299 I resolve_fused_ops: resolving fused Lightning Indexer support:
+0.04.281.348 I resolve_fused_ops: Lightning Indexer enabled
+0.04.281.349 I resolve_fused_ops: resolving fused DeepSeek V4 HC support:
+0.04.281.391 I resolve_fused_ops: fused DeepSeek V4 HC pre enabled
+0.04.281.431 I resolve_fused_ops: fused DeepSeek V4 HC comb enabled
+0.04.281.471 I resolve_fused_ops: fused DeepSeek V4 HC post enabled
+0.04.283.171 I sched_reserve:    Vulkan1 compute buffer size =   130.96 MiB
+0.04.283.172 I sched_reserve: Vulkan_Host compute buffer size =    28.02 MiB
+0.04.283.173 I sched_reserve: graph nodes  = 56
+0.04.283.173 I sched_reserve: graph splits = 2
+0.04.283.174 I sched_reserve: reserve took 6.89 ms, sched copies = 1
+0.04.427.910 I cmn  common_conte: the context supports bounded partial sequence removal
+0.04.482.051 I spec common_specu: adding speculative implementation 'draft-mtp'
+0.04.482.056 I spec common_specu: - n_max=2, n_min=0, p_min=0.00, n_embd=5120, backend_sampling=1
+0.04.482.058 I spec common_specu: - gpu_layers=-1, cache_k=f16, cache_v=f16, ctx_tgt=yes, ctx_dft=yes, devices=[default]
+0.04.738.212 I sched_reserve: reserving ...
+0.04.744.259 I sched_reserve:    Vulkan1 compute buffer size =   130.96 MiB
+0.04.744.261 I sched_reserve: Vulkan_Host compute buffer size =    28.02 MiB
+0.04.744.262 I sched_reserve: graph nodes  = 62
+0.04.744.262 I sched_reserve: graph splits = 2
+0.04.744.263 I sched_reserve: reserve took 6.05 ms, sched copies = 1
+
+[DIAG MTP STEP 0 | Seq 0 | Iter 0]
+  Hidden State: norm=130.562120, sum=-36.846560, h[0..3]=[-0.1976, 1.7099, -0.4684, -1.6261]
+  Logits Stats: total=248320, finite=248320, -INF=0, NaN=0
+  Timing (us): decode=35457, get_logits=10, sampler=29
+  Top-10 Candidates (after sampler):
+    [ 1] id=     9 (raw_logit=    0.0000, p=0.100000) '*'
+    [ 2] id=    10 (raw_logit=    0.0000, p=0.100000) '+'
+    [ 3] id=     5 (raw_logit=    0.0000, p=0.100000) '&'
+    [ 4] id=     8 (raw_logit=    0.0000, p=0.100000) ')'
+    [ 5] id=     6 (raw_logit=    0.0000, p=0.100000) '''
+    [ 6] id=     4 (raw_logit=    0.0000, p=0.100000) '%'
+    [ 7] id=     1 (raw_logit=    0.0000, p=0.100000) '"'
+    [ 8] id=     0 (raw_logit=    0.0000, p=0.100000) '!'
+    [ 9] id=     2 (raw_logit=    0.0000, p=0.100000) '#'
+    [10] id=     7 (raw_logit=    0.0000, p=0.100000) '('
+  Decision: top_p=0.100000 vs p_min=0.000000 -> ACCEPT_DRAFT
+
+[DIAG MTP STEP 1 | Seq 0 | Iter 1]
+  Hidden State: norm=130.562120, sum=-36.846560, h[0..3]=[-0.1976, 1.7099, -0.4684, -1.6261]
+  Logits Stats: total=248320, finite=248320, -INF=0, NaN=0
+  Timing (us): decode=16844, get_logits=11, sampler=11
+  Top-10 Candidates (after sampler):
+    [ 1] id=    11 (raw_logit=    0.0000, p=0.100000) ','
+    [ 2] id=    14 (raw_logit=    0.0000, p=0.100000) '/'
+    [ 3] id=     6 (raw_logit=    0.0000, p=0.100000) '''
+    [ 4] id=    10 (raw_logit=    0.0000, p=0.100000) '+'
+    [ 5] id=     7 (raw_logit=    0.0000, p=0.100000) '('
+    [ 6] id=     4 (raw_logit=    0.0000, p=0.100000) '%'
+    [ 7] id=     1 (raw_logit=    0.0000, p=0.100000) '"'
+    [ 8] id=     0 (raw_logit=    0.0000, p=0.100000) '!'
+    [ 9] id=     2 (raw_logit=    0.0000, p=0.100000) '#'
+    [10] id=     8 (raw_logit=    0.0000, p=0.100000) ')'
+  Decision: top_p=0.100000 vs p_min=0.000000 -> ACCEPT_DRAFT
+
+[DIAG MTP STEP 2 | Seq 0 | Iter 0]
+  Hidden State: norm=138.391018, sum=-60.628247, h[0..3]=[1.2959, -3.3713, 1.7532, 0.7641]
+  Logits Stats: total=248320, finite=248320, -INF=0, NaN=0
+  Timing (us): decode=24952, get_logits=27, sampler=21
+  Top-10 Candidates (after sampler):
+    [ 1] id=     8 (raw_logit=    0.0000, p=0.100000) ')'
+    [ 2] id=     9 (raw_logit=    0.0000, p=0.100000) '*'
+    [ 3] id=     4 (raw_logit=    0.0000, p=0.100000) '%'
+    [ 4] id=     7 (raw_logit=    0.0000, p=0.100000) '('
+    [ 5] id=     5 (raw_logit=    0.0000, p=0.100000) '&'
+    [ 6] id=     3 (raw_logit=    0.0000, p=0.100000) '$'
+    [ 7] id=     1 (raw_logit=    0.0000, p=0.100000) '"'
+    [ 8] id=     0 (raw_logit=    0.0000, p=0.100000) '!'
+    [ 9] id=     2 (raw_logit=    0.0000, p=0.100000) '#'
+    [10] id=     6 (raw_logit=    0.0000, p=0.100000) '''
+  Decision: top_p=0.100000 vs p_min=0.000000 -> ACCEPT_DRAFT
+
+[DIAG MTP STEP 3 | Seq 0 | Iter 1]
+  Hidden State: norm=138.391018, sum=-60.628247, h[0..3]=[1.2959, -3.3713, 1.7532, 0.7641]
+  Logits Stats: total=248320, finite=248320, -INF=0, NaN=0
+  Timing (us): decode=17031, get_logits=15, sampler=10
+  Top-10 Candidates (after sampler):
+    [ 1] id=    13 (raw_logit=    0.0000, p=0.100000) '.'
+    [ 2] id=    14 (raw_logit=    0.0000, p=0.100000) '/'
+    [ 3] id=     6 (raw_logit=    0.0000, p=0.100000) '''
+    [ 4] id=    11 (raw_logit=    0.0000, p=0.100000) ','
+    [ 5] id=     8 (raw_logit=    0.0000, p=0.100000) ')'
+    [ 6] id=     3 (raw_logit=    0.0000, p=0.100000) '$'
+    [ 7] id=     1 (raw_logit=    0.0000, p=0.100000) '"'
+    [ 8] id=     0 (raw_logit=    0.0000, p=0.100000) '!'
+    [ 9] id=     2 (raw_logit=    0.0000, p=0.100000) '#'
+    [10] id=    10 (raw_logit=    0.0000, p=0.100000) '+'
+  Decision: top_p=0.100000 vs p_min=0.000000 -> ACCEPT_DRAFT
+
+[DIAG MTP STEP 4 | Seq 0 | Iter 0]
+  Hidden State: norm=138.729237, sum=69.273971, h[0..3]=[0.7800, -2.9402, 0.7406, 1.6886]
+  Logits Stats: total=248320, finite=248320, -INF=0, NaN=0
+  Timing (us): decode=27441, get_logits=6, sampler=8
+  Top-10 Candidates (after sampler):
+    [ 1] id=     8 (raw_logit=    0.0000, p=0.100000) ')'
+    [ 2] id=     9 (raw_logit=    0.0000, p=0.100000) '*'
+    [ 3] id=     4 (raw_logit=    0.0000, p=0.100000) '%'
+    [ 4] id=     7 (raw_logit=    0.0000, p=0.100000) '('
+    [ 5] id=     5 (raw_logit=    0.0000, p=0.100000) '&'
+    [ 6] id=     3 (raw_logit=    0.0000, p=0.100000) '$'
+    [ 7] id=     1 (raw_logit=    0.0000, p=0.100000) '"'
+    [ 8] id=     0 (raw_logit=    0.0000, p=0.100000) '!'
+    [ 9] id=     2 (raw_logit=    0.0000, p=0.100000) '#'
+    [10] id=     6 (raw_logit=    0.0000, p=0.100000) '''
+  Decision: top_p=0.100000 vs p_min=0.000000 -> ACCEPT_DRAFT
+
+[DIAG MTP STEP 5 | Seq 0 | Iter 1]
+  Hidden State: norm=138.729237, sum=69.273971, h[0..3]=[0.7800, -2.9402, 0.7406, 1.6886]
+  Logits Stats: total=248320, finite=248320, -INF=0, NaN=0
+  Timing (us): decode=16758, get_logits=7, sampler=7
+  Top-10 Candidates (after sampler):
+    [ 1] id=    20 (raw_logit=    0.0000, p=0.100000) '5'
+    [ 2] id=    21 (raw_logit=    0.0000, p=0.100000) '6'
+    [ 3] id=    16 (raw_logit=    0.0000, p=0.100000) '1'
+    [ 4] id=    19 (raw_logit=    0.0000, p=0.100000) '4'
+    [ 5] id=    17 (raw_logit=    0.0000, p=0.100000) '2'
+    [ 6] id=    15 (raw_logit=    0.0000, p=0.100000) '0'
+    [ 7] id=     1 (raw_logit=    0.0000, p=0.100000) '"'
+    [ 8] id=     0 (raw_logit=    0.0000, p=0.100000) '!'
+    [ 9] id=     8 (raw_logit=    0.0000, p=0.100000) ')'
+    [10] id=    18 (raw_logit=    0.0000, p=0.100000) '3'
+  Decision: top_p=0.100000 vs p_min=0.000000 -> ACCEPT_DRAFT
+
+[DIAG MTP STEP 6 | Seq 0 | Iter 0]
+  Hidden State: norm=138.642644, sum=75.422972, h[0..3]=[-0.5314, -0.6394, -1.6975, -0.6479]
+  Logits Stats: total=248320, finite=248320, -INF=0, NaN=0
+  Timing (us): decode=27328, get_logits=11, sampler=10
+  Top-10 Candidates (after sampler):
+    [ 1] id=     8 (raw_logit=    0.0000, p=0.100000) ')'
+    [ 2] id=     9 (raw_logit=    0.0000, p=0.100000) '*'
+    [ 3] id=     4 (raw_logit=    0.0000, p=0.100000) '%'
+    [ 4] id=     7 (raw_logit=    0.0000, p=0.100000) '('
+    [ 5] id=     5 (raw_logit=    0.0000, p=0.100000) '&'
+    [ 6] id=     3 (raw_logit=    0.0000, p=0.100000) '$'
+    [ 7] id=     1 (raw_logit=    0.0000, p=0.100000) '"'
+    [ 8] id=     0 (raw_logit=    0.0000, p=0.100000) '!'
+    [ 9] id=     2 (raw_logit=    0.0000, p=0.100000) '#'
+    [10] id=     6 (raw_logit=    0.0000, p=0.100000) '''
+  Decision: top_p=0.100000 vs p_min=0.000000 -> ACCEPT_DRAFT
+
+[DIAG MTP STEP 7 | Seq 0 | Iter 1]
+  Hidden State: norm=138.642644, sum=75.422972, h[0..3]=[-0.5314, -0.6394, -1.6975, -0.6479]
+  Logits Stats: total=248320, finite=248320, -INF=0, NaN=0
+  Timing (us): decode=16833, get_logits=11, sampler=9
+  Top-10 Candidates (after sampler):
+    [ 1] id=    19 (raw_logit=    0.0000, p=0.100000) '4'
+    [ 2] id=    20 (raw_logit=    0.0000, p=0.100000) '5'
+    [ 3] id=    15 (raw_logit=    0.0000, p=0.100000) '0'
+    [ 4] id=    18 (raw_logit=    0.0000, p=0.100000) '3'
+    [ 5] id=    16 (raw_logit=    0.0000, p=0.100000) '1'
+    [ 6] id=    13 (raw_logit=    0.0000, p=0.100000) '.'
+    [ 7] id=     8 (raw_logit=    0.0000, p=0.100000) ')'
+    [ 8] id=     0 (raw_logit=    0.0000, p=0.100000) '!'
+    [ 9] id=    11 (raw_logit=    0.0000, p=0.100000) ','
+    [10] id=    17 (raw_logit=    0.0000, p=0.100000) '2'
+  Decision: top_p=0.100000 vs p_min=0.000000 -> ACCEPT_DRAFT
+
+[DIAG MTP STEP 8 | Seq 0 | Iter 0]
+  Hidden State: norm=136.950471, sum=-164.492592, h[0..3]=[-2.2790, -2.3148, -0.9731, -0.8796]
+  Logits Stats: total=248320, finite=248320, -INF=0, NaN=0
+  Timing (us): decode=27269, get_logits=5, sampler=8
+  Top-10 Candidates (after sampler):
+    [ 1] id=     8 (raw_logit=    0.0000, p=0.100000) ')'
+    [ 2] id=     9 (raw_logit=    0.0000, p=0.100000) '*'
+    [ 3] id=     4 (raw_logit=    0.0000, p=0.100000) '%'
+    [ 4] id=     7 (raw_logit=    0.0000, p=0.100000) '('
+    [ 5] id=     5 (raw_logit=    0.0000, p=0.100000) '&'
+    [ 6] id=     3 (raw_logit=    0.0000, p=0.100000) '$'
+    [ 7] id=     1 (raw_logit=    0.0000, p=0.100000) '"'
+    [ 8] id=     0 (raw_logit=    0.0000, p=0.100000) '!'
+    [ 9] id=     2 (raw_logit=    0.0000, p=0.100000) '#'
+    [10] id=     6 (raw_logit=    0.0000, p=0.100000) '''
+  Decision: top_p=0.100000 vs p_min=0.000000 -> ACCEPT_DRAFT
+
+[DIAG MTP STEP 9 | Seq 0 | Iter 1]
+  Hidden State: norm=136.950471, sum=-164.492592, h[0..3]=[-2.2790, -2.3148, -0.9731, -0.8796]
+  Logits Stats: total=248320, finite=248320, -INF=0, NaN=0
+  Timing (us): decode=16713, get_logits=3, sampler=7
+  Top-10 Candidates (after sampler):
+    [ 1] id=    21 (raw_logit=    0.0000, p=0.100000) '6'
+    [ 2] id=    22 (raw_logit=    0.0000, p=0.100000) '7'
+    [ 3] id=    17 (raw_logit=    0.0000, p=0.100000) '2'
+    [ 4] id=    20 (raw_logit=    0.0000, p=0.100000) '5'
+    [ 5] id=    18 (raw_logit=    0.0000, p=0.100000) '3'
+    [ 6] id=    16 (raw_logit=    0.0000, p=0.100000) '1'
+    [ 7] id=     8 (raw_logit=    0.0000, p=0.100000) ')'
+    [ 8] id=     0 (raw_logit=    0.0000, p=0.100000) '!'
+    [ 9] id=    11 (raw_logit=    0.0000, p=0.100000) ','
+    [10] id=    19 (raw_logit=    0.0000, p=0.100000) '4'
+  Decision: top_p=0.100000 vs p_min=0.000000 -> ACCEPT_DRAFT
+0.09.544.723 I encoded   34 tokens in    0.263 seconds, speed:  129.046 t/s
+0.09.544.724 I decoded   33 tokens in    4.799 seconds, speed:    6.876 t/s
+0.09.544.724 I 
+0.09.544.724 I n_draft   = 2
+0.09.544.725 I n_predict = 33
+0.09.544.725 I n_drafted = 65
+0.09.544.725 I n_accept  = 0
+0.09.544.725 I accept    = 0.000%
+0.09.544.726 I 
+0.09.544.726 I draft:
+
+0.09.544.787 I spec common_specu: statistics        draft-mtp: #calls(b,g,a) =    1     33     33, #gen drafts =     33, #acc drafts =     0, #gen tokens =     65, #acc tokens =     0, #mean acc len = 1.00, #acc rate/pos = (), dur(b,g,a) = 0.003, 1484.841, 0.044 ms
+0.09.544.787 I 
+0.09.544.787 I target:
+
+0.09.544.793 I common_perf_print:    sampling time =      10.70 ms
+0.09.544.794 I common_perf_print:    samplers time =       3.01 ms /    33 tokens
+0.09.544.802 I common_perf_print:        load time =    3878.18 ms
+0.09.544.803 I common_perf_print: prompt eval time =    3316.11 ms /   133 tokens (   24.93 ms per token,    40.11 tokens per second)
+0.09.544.805 I common_perf_print:        eval time =       0.00 ms /     1 runs   (    0.00 ms per token,      inf tokens per second)
+0.09.544.806 I common_perf_print:       total time =    5269.01 ms /   134 tokens
+0.09.544.807 I common_perf_print: unaccounted time =    1942.20 ms /  36.9 %      (total - sampling - prompt eval - eval) / (total)
+0.09.544.807 I common_perf_print:    graphs reused =         31
+0.09.545.180 I common_memory_breakdown_print: | memory breakdown [MiB]                    | total   free     self   model   context   compute    unaccounted |
+0.09.545.180 I common_memory_breakdown_print: |   - Vulkan1 (AI PRO R9700 (RADV GFX1201)) | 32624 =  265 + (17635 = 16532 +     960 +     142) +       14723 |
+0.09.545.180 I common_memory_breakdown_print: |   - Host                                  |                   710 =   682 +       0 +      28                |
+
+

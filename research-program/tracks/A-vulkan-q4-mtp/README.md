@@ -1,6 +1,6 @@
 # Track A — Vulkan / GGUF Q4 / Native MTP
 
-## Status: PAUSED / PRESERVED
+## Status: PAUSED AT ENTRY 19 EARLY GATE
 
 This track indexes and preserves the deeply characterized Vulkan/RADV Qwen3.8-27B research line.
 
@@ -24,7 +24,7 @@ This track indexes and preserves the deeply characterized Vulkan/RADV Qwen3.8-27
 
 ## Primary Authoritative Artifacts
 
-* **Main Experiment Log**: [`docs/qwen3-8-27b-experiment-log.md`](../../../docs/qwen3-8-27b-experiment-log.md) (Entries 1 through 17)
+* **Main Experiment Log**: [`docs/qwen3-8-27b-experiment-log.md`](../../../docs/qwen3-8-27b-experiment-log.md) (Entries 1 through 19)
 * **Proposer Forward Baseline Data**: [`data/experimental/qwen3-8-27b-mtp-proposer.tsv`](../../../data/experimental/qwen3-8-27b-mtp-proposer.tsv)
 * **Round Cost Trace**: [`experiments/qwen3-8-27b/round_cost.jsonl`](../../../experiments/qwen3-8-27b/round_cost.jsonl)
 * **Experiment Scripts**: [`experiments/qwen3-8-27b/`](../../../experiments/qwen3-8-27b/)
@@ -43,7 +43,7 @@ This track indexes and preserves the deeply characterized Vulkan/RADV Qwen3.8-27
 
 ## Current Stop Point
 
-* **Accepted Log State**: Entries 1 through 18 are formally logged and locked.
+* **Accepted Log State**: Entries 1 through 18B are formally logged and locked. Entry 19 is logged but `BLOCKED`.
 * **Verification Exhaustion**: Verification-side GPU micro-optimizations on the Q4_K_XL trunk are largely exhausted ($41.26\text{ ms}$ verification floor).
 * **Proposer Identification**: The $\approx 5.06\text{ ms}$ proposer forward was identified as the largest remaining optimization target, with the Q6_K LM-head matvec ($[248320, 5120]$, $1.04\text{ GB}$) accounting for $1,652\ \mu\text{s}$ per dispatch.
 * **Pause Condition**: Broader multi-workload holdout validation and production acceptance were **NOT completed** before pausing to establish Track B.
