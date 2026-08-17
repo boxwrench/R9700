@@ -3,7 +3,7 @@
 ### TRACK A — Vulkan / GGUF Q4 / Native MTP
 * **Status**: `PAUSED` (Preserved authoritative state)
 * **Evidence Base**: Mature (Entries 1–17 logged)
-* **Authoritative Log**: [`docs/qwen3-8-27b-experiment-log.md`](../../docs/qwen3-8-27b-experiment-log.md)
+* **Authoritative Log**: [`docs/qwen3-8-27b-experiment-log.md`](../docs/qwen3-8-27b-experiment-log.md)
 * **Latest Accepted Entry**: Entry 17 (`Tiny-N MUL_MAT + ADD fusion evaluation`)
 * **Experimental / Unaccepted**: Preliminary draft-vocabulary trimming ($64\text{K} / 32\text{K}$) holdout validation paused
 
