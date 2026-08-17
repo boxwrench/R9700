@@ -849,6 +849,95 @@ reduce work per byte.
 that the end-to-end validation gate worked: component timings and acceptance
 rates looked favourable, and only the wall-clock holdout exposed the collapse.
 
+## 19. Direct Reduced-Vocabulary MTP Sampling
+
+**Status**: `BLOCKED AT EARLY GATE — IMPLEMENTATION INCOMPLETE`
+
+**Hypothesis**: the reduced 64K/32K MTP heads can yield a real end-to-end gain if
+sampled *directly* — sample in the reduced space, map the local index through
+`d2t`, and never allocate, fill, or scatter into a 248,320-logit destination.
+
+### Implementation state
+
+The direct-sampling path already existed, uncommitted and **never compiled**, in
+the experimental worktree (`/ai/scratch/llamacpp-probe`, detached at `ad1de39`).
+It was built and exercised for the first time here. Captured as
+[`qwen38_entry19_direct_sampling.patch`](../data/experimental/qwen38_entry19_direct_sampling.patch).
+
+Confirmed working:
+
+* The reduced heads are genuinely materialized — the MTP proposer reports
+  `nextn.shared_head_head rows=65536` and `rows=32768`, versus `model.output
+  rows=248320` for FULL. They are built by slicing rows out of `output.weight`
+  through `d2t`, which is why copied rows are bit-exact.
+* `d2t` mapping produces plausible target IDs (e.g. local `39882` → target
+  `39138`).
+* No reconstruction, no FILL, no `SET_ROWS` remains in the trimmed path.
+
+### Blocking defect found in the pre-existing baseline
+
+> [!WARNING]
+> An uncommitted modification to `src/llama-context.cpp` in the worktree had
+> **silently corrupted the FULL arm**. It dropped the `needs_raw_logits()` guard
+> for all contexts and replaced the per-row logits copy with a single clamped
+> flat copy. Effects, both measured here:
+>
+> * **Target output became two interleaved token streams** — e.g. `"WeThe need
+>   user answer wants in complete English production.-ready Need Python produce
+>   async code task."` — draft tokens committed alongside target tokens instead
+>   of being verified against them.
+> * **Throughput read a false 42.32 tok/s.** With the change reverted and a
+>   correct patch applied, FULL returns coherent output at **52.96–53.08 tok/s**,
+>   matching the historical Track A native-MTP reference of ~53.2–53.8.
+>
+> Any measurement taken from this worktree before this fix is invalid.
+
+The corrected patch keeps the guard for the target path, widens it only for a
+narrower-than-`n_vocab` head, and copies row-by-row because `logits.data` is
+strided by `n_vocab` while `t_logits` is only `n_vocab_res` wide.
+
+### Early gate result: FAIL
+
+| Arm | decode tok/s | draft acceptance | drafts |
+|---|---:|---|---|
+| FULL 248K | **52.96** | 0.747 (118 acc / 158 gen), mean len 2.48 | yes |
+| 64K DIRECT | 27.58 | *no acceptance reported* | **none** |
+| 32K DIRECT | 27.79 | *no acceptance reported* | **none** |
+
+Both trimmed arms collapse to serial decoding. **64K and 32K are within 0.2
+tok/s of each other despite a 2× vocabulary difference**, which rules out
+vocabulary-dependent cost (the host-side sort) as the explanation and points at a
+fixed per-step defect.
+
+**Root cause, traced**: the reduced logits reach the sampler on only *alternate*
+draft steps. On the others the extraction block is skipped (`n_outputs = 0`) and
+the sampler reads an **all-zero** buffer. Ten equal zeros give
+$p_{\text{top}} = 1/\text{top\_k} = 0.1000$, which fails $p_{\text{min}} = 0.3$,
+so drafting stops on that step every time. Trace excerpt:
+
+```
+[E19] step=1 p_top=0.5810 max_l=17.1758 local0=39882 tgt=39138   <- valid
+[E19] step=2 p_top=0.1000 max_l=0.0000  local0=8     tgt=18      <- all-zero
+[E19] step=3 p_top=0.1687 max_l=3.9074  local0=3457  tgt=18865   <- valid
+[E19] step=4 p_top=0.1000 max_l=0.0000  local0=8     tgt=18      <- all-zero
+```
+
+Making the reduced-head copy synchronous fixed the *first* head's decode but not
+the second, consistent with `n_max=2` alternating between the two MTP heads.
+
+### Decision
+
+**STOP at the Phase 9 early gate**, as pre-registered. No holdout was run: the
+gate exists precisely to prevent another 16-prompt holdout on an implementation
+that cannot generate drafts. Phases 4–6 (top-1 coverage, retained probability
+mass, $p_{\text{min}}$ agreement) were **not** measured, because they require a
+proposer that produces valid logits on every step.
+
+**Nothing here disproves the direct-sampling concept.** The one step that did
+receive valid logits behaved exactly as intended — a confident draft
+($p_{\text{top}} = 0.58$) correctly mapped through `d2t`. The defect is in logits
+extraction for the second MTP head, not in the sampling architecture.
+
 ## Open threads
 
 - Reducing bytes moved during verification, the only lever entries 15–17 did not

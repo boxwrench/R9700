@@ -1,0 +1,924 @@
+diff --git a/common/common.cpp b/common/common.cpp
+index cea6d3f..f58a50a 100644
+--- a/common/common.cpp
++++ b/common/common.cpp
+@@ -1697,6 +1697,14 @@ struct llama_context_params common_context_params_to_llama(const common_params &
+     cparams.n_ctx             = params.n_ctx;
+     cparams.n_seq_max         = params.n_parallel;
+     cparams.n_rs_seq          = params.speculative.need_n_rs_seq();
++    // PROBE CONTROL (log-only elsewhere; this one intentionally changes cparams):
++    // force recurrent-state snapshot slots without enabling a drafter, to test
++    // whether n_rs_seq>0 alone reproduces the MTP output shift.
++    if (const char * e = getenv("LLAMA_FORCE_N_RS_SEQ")) {
++        const uint32_t was = cparams.n_rs_seq;
++        cparams.n_rs_seq = (uint32_t) atoi(e);
++        fprintf(stderr, "[PROBE] forcing cparams.n_rs_seq = %u (was %u)\n", cparams.n_rs_seq, was);
++    }
+     cparams.n_outputs_max     = std::max(params.n_outputs_max, 0);
+     cparams.n_outputs_max_per_seq = std::max(params.n_outputs_max_per_seq, 0);
+     cparams.n_batch           = params.n_batch;
+diff --git a/common/sampling.cpp b/common/sampling.cpp
+index 06dea1e..a6ae36d 100644
+--- a/common/sampling.cpp
++++ b/common/sampling.cpp
+@@ -628,6 +628,45 @@ llama_token common_sampler_sample(struct common_sampler * gsmpl, struct llama_co
+         }
+     }
+ 
++    // PROBE: log-only. Dumps the raw pre-sampler-chain target distribution so the
++    // same committed position can be compared across evaluation paths.
++    if (const char * p = getenv("LLAMA_PROBE_LOGITS")) {
++        if (*p == '1') {
++            static int probe_step = 0;
++            const int n_probe = 32;
++            std::vector<llama_token_data> tmp(cur_p.data, cur_p.data + cur_p.size);
++            std::partial_sort(tmp.begin(), tmp.begin() + std::min<size_t>(n_probe, tmp.size()), tmp.end(),
++                              [](const llama_token_data & a, const llama_token_data & b) {
++                                  return a.logit > b.logit;
++                              });
++            fprintf(stderr, "[LOGIT] step=%d sampler_idx=%d n_cand=%zu", probe_step, idx, cur_p.size);
++            for (int i = 0; i < n_probe && i < (int) tmp.size(); i++) {
++                fprintf(stderr, " | %d:%.6f", tmp[i].id, tmp[i].logit);
++            }
++            if (tmp.size() >= 2) {
++                fprintf(stderr, " || margin=%.6f", tmp[0].logit - tmp[1].logit);
++            }
++            fprintf(stderr, "\n");
++
++            // Optional full-vocabulary dump at one step, for exact cross-arm logit deltas.
++            const char * ds = getenv("LLAMA_PROBE_DUMP_STEP");
++            const char * df = getenv("LLAMA_PROBE_DUMP_FILE");
++            if (ds && df && probe_step == atoi(ds)) {
++                if (FILE * fp = fopen(df, "wb")) {
++                    const uint32_t n = (uint32_t) cur_p.size;
++                    fwrite(&n, sizeof(n), 1, fp);
++                    for (uint32_t i = 0; i < n; i++) {
++                        fwrite(&cur_p.data[i].id, sizeof(int32_t), 1, fp);
++                        fwrite(&cur_p.data[i].logit, sizeof(float), 1, fp);
++                    }
++                    fclose(fp);
++                    fprintf(stderr, "[LOGIT] full dump written: %s (%u candidates)\n", df, n);
++                }
++            }
++            probe_step++;
++        }
++    }
++
+     // apply reasoning budget first
+     llama_sampler_apply(rbudget, &cur_p);
+ 
+diff --git a/common/speculative.cpp b/common/speculative.cpp
+index cd2dfc7..fb7641b 100644
+--- a/common/speculative.cpp
++++ b/common/speculative.cpp
+@@ -14,6 +14,7 @@
+ 
+ #include <algorithm>
+ #include <cassert>
++#include <cmath>
+ #include <cstring>
+ #include <iomanip>
+ #include <map>
+@@ -1306,6 +1307,7 @@ struct common_speculative_impl_draft_mtp : public common_speculative_impl {
+ 
+     std::vector<int>                i_last;
+     std::vector<std::vector<float>> chain_h;
++    std::vector<int64_t>            d2t_map;
+ 
+     common_speculative_impl_draft_mtp(const common_params_speculative & params, uint32_t n_seq)
+         : common_speculative_impl(COMMON_SPECULATIVE_TYPE_DRAFT_MTP, n_seq)
+@@ -1320,6 +1322,25 @@ struct common_speculative_impl_draft_mtp : public common_speculative_impl {
+                 "MTP input row width must match the target h_nextn width");
+         n_mtp_layers = std::max(1, (int) llama_model_n_layer_nextn(llama_get_model(ctx_dft)));
+ 
++        const char * d2t_path = getenv("LLAMA_MTP_D2T_FILE");
++        if (d2t_path && strlen(d2t_path) > 0) {
++            FILE * f = fopen(d2t_path, "rb");
++            if (f) {
++                fseek(f, 0, SEEK_END);
++                size_t sz = ftell(f);
++                fseek(f, 0, SEEK_SET);
++                size_t n_entries = sz / sizeof(int64_t);
++                d2t_map.resize(n_entries);
++                if (fread(d2t_map.data(), sizeof(int64_t), n_entries, f) != n_entries) {
++                    d2t_map.clear();
++                }
++                fclose(f);
++                if (!d2t_map.empty()) {
++                    SPC_INF("loaded MTP d2t map (%zu entries) for direct reduced-vocabulary sampling\n", d2t_map.size());
++                }
++            }
++        }
++
+         SPC_TRC("%s", "adding speculative implementation 'draft-mtp'\n");
+         SPC_TRC("- n_max=%d, n_min=%d, p_min=%.2f, n_embd=%d, backend_sampling=%d\n", this->params.n_max, this->params.n_min, this->params.p_min, n_embd, (int) this->params.backend_sampling);
+         SPC_TRC("- gpu_layers=%d, cache_k=%s, cache_v=%s, ctx_tgt=%s, ctx_dft=%s, devices=[%s]\n",
+@@ -1347,7 +1368,7 @@ struct common_speculative_impl_draft_mtp : public common_speculative_impl {
+ 
+         // offload draft sampling to the backend
+         backend_chains.assign(n_seq, nullptr);
+-        if (this->params.backend_sampling) {
++        if (this->params.backend_sampling && d2t_map.empty()) {
+             for (llama_seq_id seq_id = 0; seq_id < (llama_seq_id) n_seq; ++seq_id) {
+                 llama_sampler * chain = llama_sampler_chain_init(llama_sampler_chain_default_params());
+                 llama_sampler_chain_add(chain, llama_sampler_init_top_k(10));
+@@ -1593,7 +1614,10 @@ struct common_speculative_impl_draft_mtp : public common_speculative_impl {
+                 llama_set_nextn_layer_offset(ctx_dft, i);
+             }
+ 
++            int64_t t_decode_start = ggml_time_us();
+             int ret = llama_decode(ctx_dft, batch);
++            llama_synchronize(ctx_dft);
++            int64_t t_decode_end = ggml_time_us();
+             if (ret != 0) {
+                 SPC_ERR("llama_decode[%d] returned %d\n", i, ret);
+                 break;
+@@ -1609,36 +1633,77 @@ struct common_speculative_impl_draft_mtp : public common_speculative_impl {
+                     continue;
+                 }
+ 
+-                auto * smpl = smpls[seq_id].get();
+-
+-                common_sampler_sample(smpl, ctx_dft, i_last[seq_id], true);
++                auto & dp = dparams.at(seq_id);
++                auto & result = *dp.result;
+                 const float * h_row = llama_get_embeddings_nextn_ith(ctx_dft, i_last[seq_id]);
++                llama_token id;
+ 
+-                const auto * cur_p = common_sampler_get_candidates(smpl, true);
+-
+-                for (int k = 0; k < std::min(3, (int) cur_p->size); ++k) {
+-                    SPC_DBG(" - seq_id %d, draft candidate %3d, pos %3d: %6d (%8.3f) '%s'\n",
+-                            seq_id, k, i, cur_p->data[k].id, cur_p->data[k].p,
+-                            common_token_to_piece(ctx_dft, cur_p->data[k].id).c_str());
+-                }
++                if (!d2t_map.empty()) {
++                    const float * raw_logits = llama_get_logits_ith(ctx_dft, i_last[seq_id]);
++                    const int64_t n_vocab_draft = (int64_t) d2t_map.size();
+ 
+-                // add drafted token for each sequence
+-                const llama_token id = cur_p->data[0].id;
+-
+-                // only collect very high-confidence draft tokens
+-                if (cur_p->data[0].p < params.p_min) {
+-                    drafting[seq_id] = false;
+-                    n_drafting--;
++                    // Find top-10 candidates (matching sparams.top_k = 10)
++                    std::vector<std::pair<float, int64_t>> cands;
++                    cands.reserve(n_vocab_draft);
++                    for (int64_t v = 0; v < n_vocab_draft; ++v) {
++                        cands.push_back({ raw_logits[v], v });
++                    }
++                    std::partial_sort(cands.begin(), cands.begin() + std::min((size_t)10, cands.size()), cands.end(),
++                                      [](const std::pair<float, int64_t> & a, const std::pair<float, int64_t> & b) {
++                                          return a.first > b.first;
++                                      });
++
++                    float max_l = cands[0].first;
++                    double sum_exp = 0.0;
++                    const int k_top = std::min((int)10, (int)cands.size());
++                    for (int k = 0; k < k_top; ++k) {
++                        sum_exp += std::exp(cands[k].first - max_l);
++                    }
++                    float p_top = (sum_exp > 0.0) ? (float)(1.0 / sum_exp) : 0.0f;
++
++                    // EXPERIMENT (Entry 19): trace the first draft steps so a
++                    // collapse can be attributed to p_min vs invalid logits.
++                    if (getenv("LLAMA_E19_TRACE")) {
++                        static int n_trace = 0;
++                        if (n_trace < 20) {
++                            n_trace++;
++                            fprintf(stderr, "[E19] step=%d p_top=%.4f max_l=%.4f l0=%.4f l1=%.4f local0=%lld tgt=%lld finite=%d\n",
++                                    n_trace, p_top, max_l, cands[0].first, cands[1].first,
++                                    (long long) cands[0].second,
++                                    (long long) d2t_map[cands[0].second],
++                                    (int) std::isfinite(cands[0].first));
++                        }
++                    }
+ 
+-                    continue;
+-                }
++                    if (p_top < params.p_min) {
++                        drafting[seq_id] = false;
++                        n_drafting--;
++                        continue;
++                    }
+ 
+-                common_sampler_accept(smpl, id, true);
++                    int64_t best_local_idx = cands[0].second;
++                    id = (llama_token) d2t_map[best_local_idx];
++                    static int draft_cnt = 0;
++                    if (draft_cnt++ < 10) {
++                        fprintf(stderr, "[DRAFT EMIT] local_idx=%ld, target_id=%d, p=%.4f '%s'\n",
++                                (long)best_local_idx, id, p_top, common_token_to_piece(ctx_dft, id).c_str());
++                    }
++                    result.push_back(id);
++                } else {
++                    auto * smpl = smpls[seq_id].get();
++                    common_sampler_sample(smpl, ctx_dft, i_last[seq_id], true);
++                    const auto * cur_p = common_sampler_get_candidates(smpl, true);
++                    id = cur_p->data[0].id;
+ 
+-                auto & dp = dparams.at(seq_id);
+-                auto & result = *dp.result;
++                    if (cur_p->data[0].p < params.p_min) {
++                        drafting[seq_id] = false;
++                        n_drafting--;
++                        continue;
++                    }
+ 
+-                result.push_back(id);
++                    common_sampler_accept(smpl, id, true);
++                    result.push_back(id);
++                }
+ 
+                 if (params.n_max <= (int) result.size()) {
+                     drafting[seq_id] = false;
+diff --git a/examples/CMakeLists.txt b/examples/CMakeLists.txt
+index 39f802d..78d64fc 100644
+--- a/examples/CMakeLists.txt
++++ b/examples/CMakeLists.txt
+@@ -27,6 +27,7 @@ else()
+     add_subdirectory(parallel)
+     add_subdirectory(passkey)
+     add_subdirectory(retrieval)
++    add_subdirectory(vbench)
+     add_subdirectory(simple)
+     add_subdirectory(simple-chat)
+     add_subdirectory(speculative)
+diff --git a/ggml/src/ggml-vulkan/ggml-vulkan.cpp b/ggml/src/ggml-vulkan/ggml-vulkan.cpp
+index 585e10d..2342457 100644
+--- a/ggml/src/ggml-vulkan/ggml-vulkan.cpp
++++ b/ggml/src/ggml-vulkan/ggml-vulkan.cpp
+@@ -389,6 +389,48 @@ static void ggml_vk_synchronize(ggml_backend_vk_context * ctx);
+ static constexpr uint32_t mul_mat_vec_max_cols = 8;
+ static constexpr uint32_t p021_max_gqa_ratio = 8;
+ 
++// Experimental (not upstream): IQ4_XS tiny-N dequant-reuse path. When enabled, a
++// second set of mul_mat_vec pipelines is created for IQ4_XS with the TINYN_REUSE
++// specialization constant set, and narrow-N dispatches are routed to them. When
++// disabled nothing extra is created and the incumbent path is bit-identical.
++//   GGML_VK_IQ4XS_TINYN=0 (or unset)  incumbent
++//   GGML_VK_IQ4XS_TINYN=1             experimental reuse path for NUM_COLS 2..5
++static constexpr uint32_t tinyn_min_cols = 2;
++static constexpr uint32_t tinyn_max_cols = 5;
++
++static bool ggml_vk_iq4xs_tinyn_enabled() {
++    static int v = -1;
++    if (v < 0) {
++        const char * e = getenv("GGML_VK_IQ4XS_TINYN");
++        v = (e && atoi(e) != 0) ? 1 : 0;
++    }
++    return v != 0;
++}
++
++// Rows per workgroup for the experimental tiny-N pipelines. Lowering it shrinks the
++// per-workgroup accumulator array, which is what costs occupancy as NUM_COLS grows.
++// GGML_VK_IQ4XS_ROWS=0 or unset keeps the incumbent value.
++static uint32_t ggml_vk_iq4xs_tinyn_rows(uint32_t dflt) {
++    static int v = -1;
++    if (v < 0) {
++        const char * e = getenv("GGML_VK_IQ4XS_ROWS");
++        v = e ? atoi(e) : 0;
++        if (v < 0) v = 0;
++    }
++    return v ? (uint32_t) v : dflt;
++}
++
++// Experimental: enable tiny-N (N=2..8) MUL_MAT + ADD fusion on the mul_mat_vec path.
++// When unset or 0, keeps incumbent behavior (nrows == 1 only).
++static bool ggml_vk_mm_add_tinyn_enabled() {
++    static int v = -1;
++    if (v < 0) {
++        const char * e = getenv("GGML_VK_MM_ADD_TINYN");
++        v = (e && atoi(e) != 0) ? 1 : 0;
++    }
++    return v != 0;
++}
++
+ enum vk_device_architecture {
+     OTHER,
+     AMD_GCN,
+@@ -915,6 +957,8 @@ struct vk_device_struct {
+     vk_pipeline pipeline_dequant[GGML_TYPE_COUNT];
+     vk_pipeline pipeline_dequant_mul_mat_vec_f32_f32[DMMV_WG_SIZE_COUNT][GGML_TYPE_COUNT][mul_mat_vec_max_cols];
+     vk_pipeline pipeline_dequant_mul_mat_vec_f16_f32[DMMV_WG_SIZE_COUNT][GGML_TYPE_COUNT][mul_mat_vec_max_cols];
++    // experimental IQ4_XS tiny-N reuse path; only populated when GGML_VK_IQ4XS_TINYN is set
++    vk_pipeline pipeline_dequant_mul_mat_vec_tinyn_f32_f32[DMMV_WG_SIZE_COUNT][GGML_TYPE_COUNT][mul_mat_vec_max_cols];
+     vk_pipeline pipeline_dequant_mul_mat_vec_id_f32[DMMV_WG_SIZE_COUNT][GGML_TYPE_COUNT];
+ 
+     vk_pipeline pipeline_dequant_mul_mat_vec_q8_1_f32[DMMV_WG_SIZE_COUNT][GGML_TYPE_COUNT][mul_mat_vec_max_cols];
+@@ -5259,6 +5303,11 @@ static void ggml_vk_load_shaders(vk_device& device, vk_pipeline requested) {
+             ggml_vk_create_pipeline(device, device->pipeline_dequant_mul_mat_vec_f32_f32[w][GGML_TYPE_IQ3_S][i],   "mul_mat_vec_iq3_s_f32_f32",   arr_dmmv_iq3_s_f32_f32_len[reduc16],   arr_dmmv_iq3_s_f32_f32_data[reduc16],   "main", mul_mat_vec_num_bindings, sizeof(vk_mat_vec_push_constants), {rm_iq, 1, 1}, {wg_size_subgroup16, rm_iq, i+1}, 1, true, use_subgroups16, force_subgroup_size16);
+             ggml_vk_create_pipeline(device, device->pipeline_dequant_mul_mat_vec_f32_f32[w][GGML_TYPE_IQ4_XS][i],  "mul_mat_vec_iq4_xs_f32_f32",  arr_dmmv_iq4_xs_f32_f32_len[reduc16],  arr_dmmv_iq4_xs_f32_f32_data[reduc16],  "main", mul_mat_vec_num_bindings, sizeof(vk_mat_vec_push_constants), {rm_iq, 1, 1}, {wg_size_subgroup16, rm_iq, i+1}, 1, true, use_subgroups16, force_subgroup_size16);
+             ggml_vk_create_pipeline(device, device->pipeline_dequant_mul_mat_vec_f32_f32[w][GGML_TYPE_IQ4_NL][i],  "mul_mat_vec_iq4_nl_f32_f32",  arr_dmmv_iq4_nl_f32_f32_len[reduc16],  arr_dmmv_iq4_nl_f32_f32_data[reduc16],  "main", mul_mat_vec_num_bindings, sizeof(vk_mat_vec_push_constants), {rm_iq, 1, 1}, {wg_size_subgroup16, rm_iq, i+1}, 1, true, use_subgroups16, force_subgroup_size16);
++            // Experimental IQ4_XS tiny-N reuse variant: same SPIR-V module, TINYN_REUSE=1.
++            if (ggml_vk_iq4xs_tinyn_enabled() && i+1 >= tinyn_min_cols && i+1 <= tinyn_max_cols) {
++                const uint32_t tinyn_rm = ggml_vk_iq4xs_tinyn_rows(rm_iq);
++                ggml_vk_create_pipeline(device, device->pipeline_dequant_mul_mat_vec_tinyn_f32_f32[w][GGML_TYPE_IQ4_XS][i], "mul_mat_vec_iq4_xs_f32_f32_tinyn", arr_dmmv_iq4_xs_f32_f32_len[reduc16], arr_dmmv_iq4_xs_f32_f32_data[reduc16], "main", mul_mat_vec_num_bindings, sizeof(vk_mat_vec_push_constants), {tinyn_rm, 1, 1}, {wg_size_subgroup16, tinyn_rm, i+1, 1}, 1, true, use_subgroups16, force_subgroup_size16);
++            }
+             ggml_vk_create_pipeline(device, device->pipeline_dequant_mul_mat_vec_f32_f32[w][GGML_TYPE_MXFP4][i],   "mul_mat_vec_mxfp4_f32_f32",   OCP_DMMV_LEN(arr_dmmv_mxfp4_f32_f32, reduc16), OCP_DMMV_DATA(arr_dmmv_mxfp4_f32_f32, reduc16), "main", mul_mat_vec_num_bindings, sizeof(vk_mat_vec_push_constants), {rm_iq, 1, 1}, {wg_size_subgroup16, rm_iq, i+1}, 1, true, use_subgroups16, force_subgroup_size16);
+             ggml_vk_create_pipeline(device, device->pipeline_dequant_mul_mat_vec_f32_f32[w][GGML_TYPE_NVFP4][i],   "mul_mat_vec_nvfp4_f32_f32",   OCP_DMMV_LEN(arr_dmmv_nvfp4_f32_f32, reduc16), OCP_DMMV_DATA(arr_dmmv_nvfp4_f32_f32, reduc16), "main", mul_mat_vec_num_bindings, sizeof(vk_mat_vec_push_constants), {rm_iq, 1, 1}, {wg_size_subgroup16, rm_iq, i+1}, 1, true, use_subgroups16, force_subgroup_size16);
+ 
+@@ -7837,6 +7886,17 @@ static vk_pipeline ggml_vk_get_dequantize_mul_mat_vec(ggml_backend_vk_context *
+         return ctx->device->pipeline_dequant_mul_mat_vec_q8_1_f32[dmmv_wg][a_type][num_cols-1];
+     }
+ 
++    // Experimental IQ4_XS tiny-N reuse path, narrow N only. Falls through to the
++    // incumbent whenever the pipeline was not created.
++    if (a_type == GGML_TYPE_IQ4_XS && b_type == GGML_TYPE_F32 &&
++        num_cols >= tinyn_min_cols && num_cols <= tinyn_max_cols &&
++        ggml_vk_iq4xs_tinyn_enabled()) {
++        vk_pipeline tinyn = ctx->device->pipeline_dequant_mul_mat_vec_tinyn_f32_f32[dmmv_wg][a_type][num_cols-1];
++        if (tinyn) {
++            return tinyn;
++        }
++    }
++
+     return b_type == GGML_TYPE_F32 ? ctx->device->pipeline_dequant_mul_mat_vec_f32_f32[dmmv_wg][a_type][num_cols-1] : ctx->device->pipeline_dequant_mul_mat_vec_f16_f32[dmmv_wg][a_type][num_cols-1];
+ }
+ 
+@@ -9410,6 +9470,22 @@ static void ggml_vk_mul_mat_q_f16(ggml_backend_vk_context * ctx, vk_context& sub
+     }
+ }
+ 
++// Diagnostic only (not upstream): force MUL_MAT off the mul_mat_vec path and onto
++// the mul_mm (dequant + GEMM / coopmat) path, so the two existing implementations
++// can be A/B'd at the same shape. Applies to narrow-N cases that would otherwise
++// have taken mul_mat_vec.
++//   GGML_VK_FORCE_MUL_MM=1   force all such cases through mul_mm
++//   GGML_VK_FORCE_MUL_MM=N   force only cases with dst->ne[1] >= N
++static uint32_t ggml_vk_force_mul_mm_threshold() {
++    static int v = -1;
++    if (v < 0) {
++        const char * e = getenv("GGML_VK_FORCE_MUL_MM");
++        v = e ? atoi(e) : 0;
++        if (v < 0) v = 0;
++    }
++    return (uint32_t) v;
++}
++
+ // Device tuning
+ static bool ggml_vk_should_use_mmvq(const vk_device& device, uint32_t m, uint32_t n, uint32_t k, ggml_type src0_type) {
+     if (device->mmvq_mode == 1) {
+@@ -10040,7 +10116,8 @@ static void ggml_vk_mul_mat(ggml_backend_vk_context * ctx, vk_context& subctx, c
+     // mul_mat_vec supports batching ne12*ne13 when ne11==1, or treating ne11 as the batch size (up to four)
+     // when ne12 and ne13 are one.
+     } else if ((dst->ne[1] == 1 || (dst->ne[1] <= mul_mat_vec_max_cols && src1->ne[2] * src1->ne[3] == 1)) &&
+-               (src0->type == GGML_TYPE_F32 || src0->type == GGML_TYPE_F16 || src0->type == GGML_TYPE_BF16 || ggml_is_quantized(src0->type))) {
++               (src0->type == GGML_TYPE_F32 || src0->type == GGML_TYPE_F16 || src0->type == GGML_TYPE_BF16 || ggml_is_quantized(src0->type)) &&
++               !(ggml_vk_force_mul_mm_threshold() && (uint32_t) dst->ne[1] >= ggml_vk_force_mul_mm_threshold())) {
+         ggml_vk_mul_mat_vec_q_f16(ctx, subctx, cgraph, node_idx);
+     } else {
+         ggml_vk_mul_mat_q_f16(ctx, subctx, src0, src1, dst, false);
+@@ -16432,20 +16509,32 @@ static bool ggml_vk_can_fuse(const ggml_backend_vk_context * ctx, const struct g
+             return false;
+         }
+     }
+-    auto const &mm_add_ok = [&](const ggml_tensor *mul, const ggml_tensor *add) {
+-        const ggml_tensor *bias = add->src[0] == mul ? add->src[1] : add->src[0];
++    auto const &mm_add_ok = [&](const ggml_tensor *first, const ggml_tensor *add) {
++        const ggml_tensor *bias = add->src[0] == first ? add->src[1] : add->src[0];
+ 
+         // mat-vec only
+-        if (ggml_nrows(mul) != 1) {
++        bool mat_vec_ok = (ggml_nrows(first) == 1);
++        if (!mat_vec_ok && ggml_vk_mm_add_tinyn_enabled()) {
++            const ggml_tensor *mul = first->op == GGML_OP_MUL_MAT ? first : cgraph->nodes[node_idx];
++            mat_vec_ok = (first->ne[1] <= mul_mat_vec_max_cols &&
++                          first->ne[2] * first->ne[3] == 1 &&
++                          mul->src[1]->ne[2] * mul->src[1]->ne[3] == 1 &&
++                          (ggml_is_quantized(mul->src[0]->type) ||
++                           mul->src[0]->type == GGML_TYPE_F32 ||
++                           mul->src[0]->type == GGML_TYPE_F16 ||
++                           mul->src[0]->type == GGML_TYPE_BF16) &&
++                          !(ggml_vk_force_mul_mm_threshold() && (uint32_t)first->ne[1] >= ggml_vk_force_mul_mm_threshold()));
++        }
++        if (!mat_vec_ok) {
+             return false;
+         }
+         // shaders assume the types match
+-        if (mul->type != bias->type) {
++        if (first->type != bias->type) {
+             return false;
+         }
+         // shaders reuse the D shape for bias
+-        if (!ggml_are_same_shape(mul, bias) ||
+-            !ggml_are_same_stride(mul, bias)) {
++        if (!ggml_are_same_shape(first, bias) ||
++            !ggml_are_same_stride(first, bias)) {
+             return false;
+         }
+         // unaligned bias isn't handled
+diff --git a/ggml/src/ggml-vulkan/vulkan-shaders/mul_mat_vec.comp b/ggml/src/ggml-vulkan/vulkan-shaders/mul_mat_vec.comp
+index 5a9d0e7..90444d4 100644
+--- a/ggml/src/ggml-vulkan/vulkan-shaders/mul_mat_vec.comp
++++ b/ggml/src/ggml-vulkan/vulkan-shaders/mul_mat_vec.comp
+@@ -42,8 +42,69 @@ vec4 load_b(const uint j, const uint iybs, const uint iqs, const bool lastiter,
+     }
+ }
+ 
++#if K_PER_ITER == 8
++// Experimental tiny-N path: identical arithmetic to iter(), with the row loop
++// moved outside the column loop so each weight fragment is dequantized once and
++// then consumed by every column. Only one decoded fragment (v/v2) stays live
++// across the column loop, so decoded state does not grow with NUM_COLS. Selected
++// by the TINYN_REUSE specialization constant; the incumbent pipeline sets it to
++// zero and is unaffected.
++void iter_reuse(inout FLOAT_TYPE temp[NUM_COLS][NUM_ROWS], const uint first_row, const uint num_rows, const uint tid, const uint i)
++{
++    const uint col = i*BLOCK_SIZE + K_PER_ITER*tid;
++    const uint iqs = (col%QUANT_K)/QUANT_R; // quant index
++    const uint iybs = col - col%QUANT_K;    // y block start index
++
++    uint ibi = first_row*p.ncols;
++    [[unroll]] for (uint n = 0; n < num_rows; ++n) {
++        const uint ib = (ibi + col)/QUANT_K; // block index
++        ibi += p.ncols;
++
++        // Dequantize this fragment exactly once, regardless of NUM_COLS.
++        vec4 v  = dequantize4(ib, iqs, a_offset);
++        vec4 v2 = dequantize4(ib, iqs+(4/QUANT_R), a_offset);
++
++        const vec2 dm = get_dm(ib, a_offset);
++        if (dm.y != 0) { // quant has min component
++            v  = v  * dm.x + dm.y;
++            v2 = v2 * dm.x + dm.y;
++        }
++
++        [[unroll]] for (uint j = 0; j < NUM_COLS; ++j) {
++#if QUANT_R == 2
++            // Note that we end up fetching bogus elements here, but its fine as they'll be
++            // within an accessible block.
++            const vec4 bv02 = vec4(data_b_v4[(j*p.batch_stride_b + b_offset + iybs + iqs) / 4]);
++            const vec4 bv13 = vec4(data_b_v4[(j*p.batch_stride_b + b_offset + iybs + iqs + y_offset) / 4]);
++            const vec4 bv0 = vec4(bv02.x, bv13.x, bv02.y, bv13.y);
++            const vec4 bv1 = vec4(bv02.z, bv13.z, bv02.w, bv13.w);
++#else
++            const vec4 bv0 = vec4(data_b_v4[(j*p.batch_stride_b + b_offset + iybs + iqs) / 4]);
++            const vec4 bv1 = vec4(data_b_v4[(j*p.batch_stride_b + b_offset + iybs + iqs) / 4 + 1]);
++#endif
++
++            FLOAT_TYPE rowtmp = dot(bv0, v);
++            rowtmp += dot(bv1, v2);
++
++            if (dm.y == 0)
++                rowtmp *= dm.x;
++
++            temp[j][n] += rowtmp;
++        }
++    }
++}
++#endif
++
+ void iter(inout FLOAT_TYPE temp[NUM_COLS][NUM_ROWS], const uint first_row, const uint num_rows, const uint tid, const uint i, bool lastiter)
+ {
++#if K_PER_ITER == 8
++    // TINYN_REUSE is a specialization constant, so this branch folds at pipeline
++    // creation and the unused body is dead-code eliminated.
++    if (TINYN_REUSE != 0) {
++        iter_reuse(temp, first_row, num_rows, tid, i);
++        return;
++    }
++#endif
+     [[unroll]] for (uint j = 0; j < NUM_COLS; ++j) {
+         const uint col = i*BLOCK_SIZE + K_PER_ITER*tid;
+         const uint iqs = (col%QUANT_K)/QUANT_R; // quant index
+diff --git a/ggml/src/ggml-vulkan/vulkan-shaders/mul_mat_vec_base.glsl b/ggml/src/ggml-vulkan/vulkan-shaders/mul_mat_vec_base.glsl
+index 4aeda68..49bfa81 100644
+--- a/ggml/src/ggml-vulkan/vulkan-shaders/mul_mat_vec_base.glsl
++++ b/ggml/src/ggml-vulkan/vulkan-shaders/mul_mat_vec_base.glsl
+@@ -89,6 +89,11 @@ void get_offsets(out uint a_offset, out uint b_offset, out uint d_offset) {
+ layout (constant_id = 0) const uint BLOCK_SIZE = 32;
+ layout (constant_id = 1) const uint NUM_ROWS = 1;
+ layout (constant_id = 2) const uint NUM_COLS = 1;
++// Experimental (not upstream): when non-zero, mul_mat_vec.comp hoists weight
++// dequantization above the column loop so each decoded fragment is reused across
++// all NUM_COLS instead of being recomputed per column. Defaults to 0, so every
++// pipeline that does not explicitly set it keeps the incumbent behaviour.
++layout (constant_id = 3) const uint TINYN_REUSE = 0;
+ 
+ #ifdef USE_SUBGROUP_ADD_NO_SHMEM
+ void reduce_result(inout FLOAT_TYPE temp[NUM_COLS][NUM_ROWS], const in uint32_t d_offset, const in uint32_t first_row, const in uint32_t num_rows, const in uint32_t tid) {
+diff --git a/src/llama-context.cpp b/src/llama-context.cpp
+index 792bb6c..f676c64 100644
+--- a/src/llama-context.cpp
++++ b/src/llama-context.cpp
+@@ -878,6 +878,13 @@ int64_t llama_context::output_resolve_row(int32_t i) const {
+ float * llama_context::get_logits_ith(int32_t i) {
+     output_reorder();
+ 
++    // EXPERIMENT (Entry 19): logits are copied out with an async backend get, so a
++    // host read must wait for it. The target path never noticed because backend
++    // sampling returns candidates by a different route; the reduced-vocabulary MTP
++    // draft path reads these logits directly and otherwise sees an all-zero buffer
++    // (which yields a uniform p_top = 1/top_k = 0.1 and collapses drafting).
++    synchronize();
++
+     try {
+         if (logits.data == nullptr) {
+             throw std::runtime_error("no logits");
+@@ -1860,7 +1867,33 @@ int llama_context::decode(const llama_batch & batch_inp) {
+         }
+ 
+         // extract logits
+-        if (logits.data && t_logits && n_outputs > 0 && needs_raw_logits(ubatch, sampling.samplers)) {
++        //
++        // EXPERIMENT (Entry 19): a reduced-vocabulary MTP draft head makes t_logits
++        // narrower than n_vocab. Two things must hold, and an earlier revision of
++        // this patch broke both:
++        //   1. the raw-logits guard must still gate the *target* path exactly as
++        //      upstream does - dropping it changes target logits extraction and
++        //      corrupts verification (observed as draft/target token interleaving
++        //      and a false ~42 tok/s reading against a ~53 tok/s true baseline);
++        //   2. the copy width must follow t_logits, not n_vocab, or a reduced head
++        //      over-reads its own tensor.
++        // So: widen the guard only for the narrow-head case, and clamp the width.
++        const int64_t n_vocab_res = t_logits ? t_logits->ne[0] : n_vocab;
++        const bool is_reduced_head = t_logits && n_vocab_res < n_vocab;
++
++        if (getenv("LLAMA_E19_TRACE")) {
++            static int n_x = 0;
++            if (n_x < 6) {
++                n_x++;
++                fprintf(stderr, "[E19-ctx] t_logits=%p ne0=%lld n_vocab=%lld reduced=%d logits.data=%p n_outputs=%d raw_needed=%d\n",
++                        (void *) t_logits, (long long) n_vocab_res, (long long) n_vocab,
++                        (int) is_reduced_head, (void *) logits.data, (int) n_outputs,
++                        (int) needs_raw_logits(ubatch, sampling.samplers));
++            }
++        }
++
++        if (logits.data && t_logits && n_outputs > 0 &&
++                (needs_raw_logits(ubatch, sampling.samplers) || is_reduced_head)) {
+             ggml_backend_t backend_res = ggml_backend_sched_get_tensor_backend(sched.get(), t_logits);
+             GGML_ASSERT(backend_res != nullptr);
+             GGML_ASSERT(logits.data != nullptr);
+@@ -1870,7 +1903,32 @@ int llama_context::decode(const llama_batch & batch_inp) {
+             if (n_outputs) {
+                 GGML_ASSERT( n_outputs_prev + n_outputs <= n_outputs_all);
+                 GGML_ASSERT((n_outputs_prev + n_outputs)*n_vocab <= (int64_t) logits.size);
+-                ggml_backend_tensor_get_async(backend_res, t_logits, logits_out, 0, n_outputs*n_vocab*sizeof(float));
++
++                // rows are strided by n_vocab in logits.data but only n_vocab_res
++                // wide in t_logits, so a single flat copy is only valid when they
++                // match. Otherwise copy row by row.
++                if (n_vocab_res == n_vocab) {
++                    ggml_backend_tensor_get_async(backend_res, t_logits, logits_out, 0, n_outputs*n_vocab*sizeof(float));
++                } else {
++                    // synchronous: the draft path reads these logits on the host
++                    // immediately after decode, and an async get would still be in
++                    // flight (observed as an all-zero buffer).
++                    for (int32_t k = 0; k < n_outputs; ++k) {
++                        ggml_backend_tensor_get(t_logits,
++                                logits_out + (size_t) k*n_vocab,
++                                (size_t) k*n_vocab_res*sizeof(float),
++                                n_vocab_res*sizeof(float));
++                    }
++                    if (getenv("LLAMA_E19_TRACE")) {
++                        static int n_c = 0;
++                        if (n_c < 4) {
++                            n_c++;
++                            fprintf(stderr, "[E19-copy] rows=%d wrote l[0]=%.4f l[1]=%.4f l[2]=%.4f into %p\n",
++                                    (int) n_outputs, logits_out[0], logits_out[1], logits_out[2],
++                                    (void *) logits_out);
++                        }
++                    }
++                }
+             }
+         }
+ 
+diff --git a/src/llama-model-loader.cpp b/src/llama-model-loader.cpp
+index 1ca6987..2ce8be1 100644
+--- a/src/llama-model-loader.cpp
++++ b/src/llama-model-loader.cpp
+@@ -915,7 +915,7 @@ const struct ggml_tensor * llama_model_loader::check_tensor_dims(
+ static bool weight_buft_supported(const llama_hparams & hparams, ggml_tensor * w, ggml_op op, ggml_backend_buffer_type_t buft, ggml_backend_dev_t dev) {
+     GGML_ASSERT(w != nullptr);
+ 
+-    if (op == GGML_OP_NONE) {
++    if (op == GGML_OP_NONE || (w->name && strcmp(w->name, "d2t") == 0)) {
+         return true;
+     }
+ 
+@@ -1276,9 +1276,39 @@ struct ggml_tensor * llama_model_loader::create_tensor(
+         return ret;
+     }
+ 
+-    LLAMA_LOG_DEBUG("%s: loading tensor %s\n", __func__, tn.str().c_str());
+     const struct ggml_tensor * cur = check_tensor_dims(tn.str(), ne, !(flags & TENSOR_NOT_REQUIRED), flags & TENSOR_ALLOW_RESHAPE);
+     if (cur == NULL) {
++        if ((tn.tensor == LLM_TENSOR_NEXTN_SHARED_HEAD_HEAD || tn.tensor == LLM_TENSOR_D2T) && (flags & TENSOR_NOT_REQUIRED)) {
++            ggml_type type = GGML_TYPE_F32;
++            if (tn.tensor == LLM_TENSOR_D2T) {
++                type = GGML_TYPE_I64;
++            } else if (tn.tensor == LLM_TENSOR_NEXTN_SHARED_HEAD_HEAD) {
++                if (tn.suffix != nullptr && (strcmp(tn.suffix, "scale") == 0 || strcmp(tn.suffix, "input_scale") == 0)) {
++                    type = GGML_TYPE_F32;
++                } else {
++                    type = GGML_TYPE_Q6_K;
++                }
++            }
++            ggml_tensor t_meta;
++            memset(&t_meta, 0, sizeof(ggml_tensor));
++            t_meta.type = type;
++            for (size_t dim = 0; dim < GGML_MAX_DIMS; dim++) {
++                t_meta.ne[dim] = dim < ne.size() ? ne.begin()[dim] : 1;
++            }
++            t_meta.nb[0] = ggml_type_size(type);
++            t_meta.nb[1] = t_meta.nb[0] * (t_meta.ne[0] / ggml_blck_size(type));
++            if (t_meta.nb[1] == 0) t_meta.nb[1] = t_meta.nb[0];
++            for (size_t dim = 2; dim < GGML_MAX_DIMS; dim++) {
++                t_meta.nb[dim] = t_meta.nb[dim - 1] * t_meta.ne[dim - 1];
++            }
++            ggml_set_name(&t_meta, tn.str().c_str());
++            ggml_backend_buffer_type_t buft = buft_for_tensor(&t_meta);
++            if (buft == nullptr) return nullptr;
++            ggml_context * ctx = ctx_for_buft(buft);
++            ggml_tensor * ret = ggml_dup_tensor(ctx, &t_meta);
++            ggml_set_name(ret, tn.str().c_str());
++            return ret;
++        }
+         return NULL;
+     }
+ 
+diff --git a/src/llama-model.cpp b/src/llama-model.cpp
+index 25df273..fbef23f 100644
+--- a/src/llama-model.cpp
++++ b/src/llama-model.cpp
+@@ -1690,6 +1690,42 @@ bool llama_model_base::load_tensors(llama_model_loader & ml) {
+         }
+     }
+ 
++    if (d2t) {
++        const char * d2t_path = getenv("LLAMA_MTP_D2T_FILE");
++        if (d2t_path && strlen(d2t_path) > 0) {
++            FILE * f = fopen(d2t_path, "rb");
++            if (f) {
++                size_t n_entries = d2t->ne[0];
++                std::vector<int64_t> d2t_vec(n_entries);
++                if (fread(d2t_vec.data(), sizeof(int64_t), n_entries, f) == n_entries) {
++                    ggml_backend_tensor_set(d2t, d2t_vec.data(), 0, n_entries * sizeof(int64_t));
++
++                    for (auto & l : layers) {
++                        if (l.nextn.shared_head_head && output) {
++                            LLAMA_LOG_INFO("%s: bulk slicing %zu rows from output.weight into nextn.shared_head_head...\n", __func__, n_entries);
++                            size_t row_bytes = ggml_row_size(output->type, output->ne[0]);
++                            size_t output_total_bytes = ggml_nbytes(output);
++                            std::vector<uint8_t> output_host(output_total_bytes);
++                            ggml_backend_tensor_get(output, output_host.data(), 0, output_total_bytes);
++
++                            std::vector<uint8_t> trimmed_host(n_entries * row_bytes, 0);
++                            for (size_t j = 0; j < n_entries; ++j) {
++                                int64_t target_row = d2t_vec[j];
++                                if (target_row >= 0 && target_row < output->ne[1]) {
++                                    std::memcpy(trimmed_host.data() + j * row_bytes,
++                                                output_host.data() + (size_t) target_row * row_bytes,
++                                                row_bytes);
++                                }
++                            }
++                            ggml_backend_tensor_set(l.nextn.shared_head_head, trimmed_host.data(), 0, n_entries * row_bytes);
++                        }
++                    }
++                }
++                fclose(f);
++            }
++        }
++    }
++
+     if (use_mmap_buffer) {
+         for (auto & mapping : ml.mappings) {
+             pimpl->mappings.emplace_back(std::move(mapping));
+diff --git a/src/models/delta-net-base.cpp b/src/models/delta-net-base.cpp
+index ad66126..edf0a8a 100644
+--- a/src/models/delta-net-base.cpp
++++ b/src/models/delta-net-base.cpp
+@@ -432,6 +432,42 @@ std::pair<ggml_tensor *, ggml_tensor *> llm_build_delta_net_base::build_delta_ne
+         int           il) {
+     const int64_t n_seq_tokens = q->ne[2];
+ 
++    // PROBE: log-only. Records which GDN branch a given batch shape selects,
++    // together with the ubatch positions/sequence ids and recurrent state shape.
++    if (const char * p = getenv("LLAMA_PROBE_GDN")) {
++        if (*p == '1') {
++            const bool ar = (n_seq_tokens == 1);
++            const char * branch = ar ? "AR" : "CHUNKED";
++            const char * path = ar
++                ? (cparams.fused_gdn_ar ? "fused_gdn_ar" : "build_delta_net_autoregressive")
++                : (cparams.fused_gdn_ch ? "fused_gdn_ch" : "build_delta_net_chunking");
++            fprintf(stderr,
++                    "[GDN] il=%3d ubatch_n_tokens=%u ubatch_n_seq_tokens=%u ubatch_n_seqs=%u "
++                    "q_n_seq_tokens=%lld q_n_seqs=%lld branch=%s path=%s "
++                    "state_ne=[%lld,%lld,%lld,%lld]",
++                    il, ubatch.n_tokens, ubatch.n_seq_tokens, ubatch.n_seqs,
++                    (long long) n_seq_tokens, (long long) q->ne[3], branch, path,
++                    (long long) s->ne[0], (long long) s->ne[1],
++                    (long long) s->ne[2], (long long) s->ne[3]);
++            if (ubatch.pos) {
++                fprintf(stderr, " pos=[");
++                for (uint32_t t = 0; t < ubatch.n_tokens && t < 8; t++) {
++                    fprintf(stderr, "%s%d", t ? "," : "", (int) ubatch.pos[t]);
++                }
++                fprintf(stderr, "]");
++            }
++            if (ubatch.seq_id && ubatch.n_tokens > 0) {
++                fprintf(stderr, " seq=[");
++                for (uint32_t t = 0; t < ubatch.n_tokens && t < 8; t++) {
++                    fprintf(stderr, "%s%d", t ? "," : "",
++                            ubatch.seq_id[t] ? (int) ubatch.seq_id[t][0] : -1);
++                }
++                fprintf(stderr, "]");
++            }
++            fprintf(stderr, "\n");
++        }
++    }
++
+     if (n_seq_tokens == 1) {
+         if (cparams.fused_gdn_ar) {
+             return build_delta_net_fused(q, k, v, g, b, s, il);
+@@ -563,6 +599,31 @@ ggml_tensor * llm_build_delta_net_base::build_recurrent_attn(
+     const int64_t D = S_v * S_v * H_v;
+     const int64_t K = cparams.n_rs_seq + 1;
+ 
++    // PROBE: log-only. Records the snapshot-path invocation that bypasses build_delta_net.
++    if (const char * p = getenv("LLAMA_PROBE_GDN")) {
++        if (*p == '1') {
++            fprintf(stderr,
++                    "[GDNSNAP] il=%3d n_rs_seq=%u K=%lld n_seq_tokens=%lld n_seqs=%lld "
++                    "branch=%s state_ne=[%lld,%lld,%lld,%lld] D=%lld n_embd_s=%u "
++                    "ssm_states_all_ne=[%lld,%lld] mem_size=%u kv_head=%u",
++                    il, cparams.n_rs_seq, (long long) K, (long long) n_seq_tokens,
++                    (long long) n_seqs, (n_seq_tokens > 1 ? "CHUNKED" : "AR"),
++                    (long long) s->ne[0], (long long) s->ne[1],
++                    (long long) s->ne[2], (long long) s->ne[3],
++                    (long long) D, hparams.n_embd_s(),
++                    (long long) ssm_states_all->ne[0], (long long) ssm_states_all->ne[1],
++                    mem_size, kv_head);
++            if (ubatch.pos) {
++                fprintf(stderr, " pos=[");
++                for (uint32_t t = 0; t < ubatch.n_tokens && t < 8; t++) {
++                    fprintf(stderr, "%s%d", t ? "," : "", (int) ubatch.pos[t]);
++                }
++                fprintf(stderr, "]");
++            }
++            fprintf(stderr, "\n");
++        }
++    }
++
+     // state s is 4D [S_v, S_v, H_v, n_seqs]; K snapshot slots are written into the output.
+     ggml_tensor * gdn_out = ggml_gated_delta_net(ctx0, q, k, v, g, b, s, K);
+     if (n_seq_tokens > 1) {
+diff --git a/src/models/qwen35.cpp b/src/models/qwen35.cpp
+index 309dd43..70939bb 100644
+--- a/src/models/qwen35.cpp
++++ b/src/models/qwen35.cpp
+@@ -41,6 +41,20 @@ void llama_model_qwen35::load_arch_tensors(llama_model_loader & ml) {
+     const int trunk_flags = mtp_only ? TENSOR_NOT_REQUIRED : 0;
+     int mtp_flags = !ml.load_mtp ? TENSOR_SKIP : 0;
+ 
++    const char * d2t_env = getenv("LLAMA_MTP_D2T_FILE");
++    if (d2t_env && strlen(d2t_env) > 0) {
++        FILE * f = fopen(d2t_env, "rb");
++        if (f) {
++            fseek(f, 0, SEEK_END);
++            size_t sz = ftell(f);
++            fseek(f, 0, SEEK_SET);
++            int64_t n_draft_vocab = sz / sizeof(int64_t);
++            d2t = create_tensor(tn(LLM_TENSOR_D2T), { n_draft_vocab }, TENSOR_NOT_REQUIRED);
++            fclose(f);
++            LLAMA_LOG_INFO("%s: MTP configured with d2t vocabulary map (draft_vocab_size = %lld)\n", __func__, (long long)n_draft_vocab);
++        }
++    }
++
+     tok_embd = create_tensor(tn(LLM_TENSOR_TOKEN_EMBD, "weight"), { n_embd, n_vocab }, 0);
+ 
+     // output
+@@ -115,7 +129,8 @@ void llama_model_qwen35::load_arch_tensors(llama_model_loader & ml) {
+         layer.nextn.enorm            = create_tensor(tn(LLM_TENSOR_NEXTN_ENORM,            "weight", il), { n_embd },              mtp_flags);
+         layer.nextn.hnorm            = create_tensor(tn(LLM_TENSOR_NEXTN_HNORM,            "weight", il), { n_embd },              mtp_flags);
+         layer.nextn.embed_tokens     = create_tensor(tn(LLM_TENSOR_NEXTN_EMBED_TOKENS,     "weight", il), { n_embd, n_vocab },     mtp_flags|TENSOR_NOT_REQUIRED);
+-        layer.nextn.shared_head_head = create_tensor(tn(LLM_TENSOR_NEXTN_SHARED_HEAD_HEAD, "weight", il), { n_embd, n_vocab },     mtp_flags|TENSOR_NOT_REQUIRED);
++        int64_t head_vocab = d2t ? d2t->ne[0] : n_vocab;
++        layer.nextn.shared_head_head = d2t ? create_tensor(tn(LLM_TENSOR_NEXTN_SHARED_HEAD_HEAD, "weight", il), { n_embd, head_vocab }, mtp_flags|TENSOR_NOT_REQUIRED) : nullptr;
+         layer.nextn.shared_head_norm = create_tensor(tn(LLM_TENSOR_NEXTN_SHARED_HEAD_NORM, "weight", il), { n_embd },              mtp_flags|TENSOR_NOT_REQUIRED);
+     };
+ 
+@@ -138,6 +153,7 @@ llama_model_qwen35::graph::graph(const llama_model & model, const llm_graph_para
+     llm_build_delta_net_base(params), model(model) {
+     const int64_t n_embd_head = hparams.n_embd_head_v();
+ 
++
+     GGML_ASSERT(n_embd_head == hparams.n_embd_head_k());
+ 
+     int sections[4];
+@@ -637,7 +653,24 @@ llama_model_qwen35::graph_mtp::graph_mtp(const llama_model & model, const llm_gr
+     ggml_tensor * head_w = layer.nextn.shared_head_head ? layer.nextn.shared_head_head : model.output;
+     ggml_tensor * head_s = layer.nextn.shared_head_head ? layer.nextn.shared_head_head_s : model.output_s;
+     GGML_ASSERT(head_w && "QWEN35 MTP: missing LM head (nextn.shared_head_head or model.output)");
++
++    // EXPERIMENT (Entry 19): report which head the MTP proposer actually got, once.
++    // Without this the reduced-head path fails silently: speculative.cpp will read
++    // the first N logits of a full-width head and map them through d2t, producing
++    // wrong draft tokens that the target then rejects.
++    {
++        static bool reported = false;
++        if (!reported) {
++            reported = true;
++            fprintf(stderr, "[E19] QWEN35 MTP head: %s rows=%lld (reduced=%s)\n",
++                    layer.nextn.shared_head_head ? "nextn.shared_head_head" : "model.output",
++                    (long long) head_w->ne[1],
++                    layer.nextn.shared_head_head ? "yes" : "NO");
++        }
++    }
++
+     cur = build_lora_mm(head_w, cur, head_s);
++
+     cb(cur, "result_output", -1);
+ 
+     res->t_logits = cur;
+diff --git a/tests/test-backend-ops.cpp b/tests/test-backend-ops.cpp
+index 3349a64..1424723 100644
+--- a/tests/test-backend-ops.cpp
++++ b/tests/test-backend-ops.cpp
+@@ -9106,6 +9106,14 @@ static std::vector<std::unique_ptr<test_case>> make_test_cases_eval() {
+     test_cases.emplace_back(new test_mul_mat(GGML_TYPE_Q8_0, GGML_TYPE_F32, 8192, 512, 5120, {128, 1}, {1, 1}));
+ #endif
+ 
++    // Qwen3.8-27B-UD-Q4_K_XL FFN shapes at N=1..5 (speculative verification widths).
++    // ffn_gate is iq4_xs; ffn_up and ffn_down are q5_K in this quant mix.
++    for (int64_t n = 1; n <= 5; ++n) {
++        test_cases.emplace_back(new test_mul_mat(GGML_TYPE_IQ4_XS, GGML_TYPE_F32, 17408, n,  5120, {1, 1}, {1, 1})); // ffn_gate
++        test_cases.emplace_back(new test_mul_mat(GGML_TYPE_Q5_K,   GGML_TYPE_F32, 17408, n,  5120, {1, 1}, {1, 1})); // ffn_up
++        test_cases.emplace_back(new test_mul_mat(GGML_TYPE_Q5_K,   GGML_TYPE_F32,  5120, n, 17408, {1, 1}, {1, 1})); // ffn_down
++    }
++
+     for (ggml_type type_a : all_types) {
+         for (int i = 1; i < 10; ++i) {
+             test_cases.emplace_back(new test_mul_mat(type_a,    GGML_TYPE_F32, 16,  i, 1*256, { 1,  1}, {1, 1}));
+@@ -10033,6 +10041,18 @@ static std::vector<std::unique_ptr<test_case>> make_test_cases_eval() {
+ static std::vector<std::unique_ptr<test_case>> make_test_cases_perf() {
+     std::vector<std::unique_ptr<test_case>> test_cases;
+ 
++    // Qwen3.8-27B-UD-Q4_K_XL FFN shapes at N=1..5 (speculative verification widths).
++    // ffn_gate is iq4_xs; ffn_up and ffn_down are q5_K in this quant mix.
++    // Each case is emitted twice: the first pass absorbs GPU clock ramp, the second
++    // is the one to read. Comparing the two also gives a free repeatability check.
++    for (int rep = 0; rep < 2; ++rep) {
++        for (int64_t n = 1; n <= 5; ++n) {
++            test_cases.emplace_back(new test_mul_mat(GGML_TYPE_IQ4_XS, GGML_TYPE_F32, 17408, n,  5120, {1, 1}, {1, 1})); // ffn_gate
++            test_cases.emplace_back(new test_mul_mat(GGML_TYPE_Q5_K,   GGML_TYPE_F32, 17408, n,  5120, {1, 1}, {1, 1})); // ffn_up
++            test_cases.emplace_back(new test_mul_mat(GGML_TYPE_Q5_K,   GGML_TYPE_F32,  5120, n, 17408, {1, 1}, {1, 1})); // ffn_down
++        }
++    }
++
+     // SWIGLU at a 27B-class FFN width, fused [gate|up] vs split operands
+     // note: same bytes either way, so a backend that indexes them differently shows it here
+     for (ggml_type type : {GGML_TYPE_F16, GGML_TYPE_F32}) {
+diff --git a/tools/server/server-context.cpp b/tools/server/server-context.cpp
+index fdc8f2b..a2ebe04 100644
+--- a/tools/server/server-context.cpp
++++ b/tools/server/server-context.cpp
+@@ -3816,11 +3816,44 @@ private:
+                 common_sampler_ptr smpl_save(common_sampler_clone(slot.smpl.get()));
+ 
+                 GGML_ASSERT(slot.spec_i_batch.size() == n_draft + 1);
++
++                // PROBE: log-only. Emits the exact committed prefix and the frozen
++                // proposals for offline re-scoring under a different verifier.
++                const bool probe_spec = [] {
++                    const char * p = getenv("LLAMA_PROBE_SPEC");
++                    return p && *p == '1';
++                }();
++                std::vector<llama_token> probe_prefix;
++                if (probe_spec) {
++                    const size_t n_pre = slot.prompt.n_tokens();
++                    probe_prefix.reserve(n_pre);
++                    for (size_t i = 0; i < n_pre; i++) {
++                        probe_prefix.push_back(slot.prompt.tokens[i]);
++                    }
++                }
++
+                 auto accepted = common_sampler_sample_and_accept_n(slot.smpl.get(), slot.ctx_tgt, slot.spec_i_batch, slot.spec_draft);
+                 slot.spec_i_batch.clear();
+ 
+                 GGML_ASSERT(accepted.size() >= 1);
+ 
++                if (probe_spec) {
++                    fprintf(stderr, "[SPEC] prefix_len=%zu n_draft=%zu draft=[",
++                            probe_prefix.size(), n_draft);
++                    for (size_t i = 0; i < slot.spec_draft.size(); i++) {
++                        fprintf(stderr, "%s%d", i ? "," : "", slot.spec_draft[i]);
++                    }
++                    fprintf(stderr, "] committed=[");
++                    for (size_t i = 0; i < accepted.size(); i++) {
++                        fprintf(stderr, "%s%d", i ? "," : "", accepted[i]);
++                    }
++                    fprintf(stderr, "] n_accepted=%zu prefix=[", accepted.size() - 1);
++                    for (size_t i = 0; i < probe_prefix.size(); i++) {
++                        fprintf(stderr, "%s%d", i ? "," : "", probe_prefix[i]);
++                    }
++                    fprintf(stderr, "]\n");
++                }
++
+                 const uint32_t n_rollback = slot.spec_draft.size() + 1 - accepted.size();
+ 
+                 const bool use_ckpt_tgt =
