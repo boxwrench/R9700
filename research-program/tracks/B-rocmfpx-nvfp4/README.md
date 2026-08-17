@@ -1,6 +1,27 @@
 # Track B — ROCmFPX / Native NVFP4
 
-## Status: NEW / BASELINE NOT YET ESTABLISHED
+## Status: PREPARATION COMPLETE — BASELINE NOT YET ESTABLISHED
+
+**Start here:**
+
+| Document | What it is |
+|---|---|
+| [`upstream-audit/2026-08-17-upstream-audit.md`](upstream-audit/2026-08-17-upstream-audit.md) | Read-only source audit of upstream at `f4b2c5a`, answering ten structural questions, with every claim tagged SOURCE FACT / COMMIT CLAIM / INFERRED / UNKNOWN. |
+| [`PLAN.md`](PLAN.md) | The staged protocol, B0 through B6, with entry and exit conditions. |
+| [`CHECKLIST.md`](CHECKLIST.md) | Per-stage checkboxes. |
+| [`snapshot.md`](snapshot.md) | Environment freeze — partial; model fields still `PENDING`. |
+| [`scripts/`](scripts/README.md) | Reproducibility harness. |
+
+**Two things to know before going further:**
+
+1. Upstream's build docs state that *"published benchmark numbers and regression
+   guards assume Strix Halo / `gfx1151`"*, and gfx1151 (RDNA3.5) takes a
+   different HIP code path from gfx1201 (RDNA4). **NVFP4 on the R9700 is
+   effectively untested upstream**, so B1 is original measurement rather than
+   confirmation of a known result.
+2. Preparation established that NVFP4 matmul is **numerically correct** on
+   gfx1201 on both Vulkan and HIP. **No performance number exists for this
+   track**, and B1 is blocked pending a reproduction model.
 
 ## Mission
 
@@ -38,6 +59,8 @@ All optimization mechanisms from Track A remain quarantined until the pure stock
 ## Workspace Structure
 
 * [`snapshot.md`](snapshot.md): Hardware, driver, toolchain, commit, and model hash freeze.
+* [`upstream-audit/`](upstream-audit/): Read-only audits of upstream source and history, dated and SHA-pinned.
+* [`scripts/`](scripts/README.md): Reproducibility harness — environment snapshot, model hashing, command recording, repeated runs, metric extraction with provenance, and run comparison.
 * `reproduction/`: Initial stock verification logs, build logs, and basic correctness tests.
 * `matched-benchmark/`: Matched serial and native-MTP decode benchmarks against Track A hardware conditions.
 * `decomposition/`: Profiled forward pass latency decomposition (verifier vs proposer, kernel breakdown).

@@ -57,6 +57,40 @@ To avoid ambiguity in reporting, all research tracks use the following unified d
 
 ---
 
+## Round & Draft Counters
+
+* **Verification Rounds ($N_{\text{rounds}}$)**:
+  The number of target-model verification passes executed during a generation. One round verifies one batch of drafts and commits at least one token.
+* **Drafts Generated per Round**:
+  $$\text{Drafts Generated / Round} = \frac{N_{\text{drafted}}}{N_{\text{rounds}}}$$
+  For a fixed $n_{\text{max}}$ with no early termination this equals $n_{\text{max}}$. Where it does not, the discrepancy is itself a finding and must be reported, not assumed away.
+
+> [!WARNING]
+> **Committed Tokens / Round is not "expected drafts".** It includes the base
+> verified token, which is not a draft and is committed whether or not any
+> speculation succeeds. Calling it "expected drafts" overstates the speculative
+> contribution by exactly $+1$ token per round — close to a factor of two at the
+> acceptance rates this program observes. Use the term defined above.
+
+---
+
+## Statistical Reporting
+
+Reported over the repetitions of a single experiment arm. Sample statistics use
+$n-1$ in the denominator.
+
+* **Mean**: arithmetic mean, $\bar{x} = \frac{1}{n}\sum x_i$.
+* **Median**: the 50th percentile; for even $n$, the mean of the two central values.
+* **Standard Deviation (`stdev`)**: sample standard deviation, $s = \sqrt{\frac{1}{n-1}\sum (x_i - \bar{x})^2}$. **Undefined when $n = 1$ — report `n/a`, never $0$.**
+* **p10 / p90**: the 10th and 90th percentiles, by linear interpolation between order statistics.
+
+**Reporting rules.** Never report a mean without its spread. A difference in
+means smaller than the spread of either arm does **not** establish a difference
+and must not be described as an improvement or a regression. Minimum repetition
+counts are set in [`benchmark-contract.md`](benchmark-contract.md) §2.
+
+---
+
 ## Resource Metrics
 
 * **VRAM Usage (`MiB` or `GB`)**:
