@@ -4,8 +4,20 @@
 
 ---
 
+## Dashboard
+
+| Lane | Status | Next / note |
+|---|---|---|
+| **Track A** — Vulkan / Q4 / MTP | `ACTIVE` | Finish true 64K/32K n_max=2 speculative holdout |
+| **Track B** — ROCmFPX / NVFP4 | `ARCHIVED / REOPENABLE` | B1 reproduced; uniform primary within Track B; **not adopted as program foundation** |
+| **ROCmFP4 FAST** | `WATCH ITEM` | ~72 tok/s claim requires exact reproducible configuration |
+| **Upstream ROCmFPX** | `POTENTIAL CONTRIBUTION` | gfx1201 reproduction + unresolved greedy MTP divergence |
+
+---
+
 ### TRACK A — Vulkan / GGUF Q4 / Native MTP
-* **Status**: `PAUSED / PRESERVED`
+* **Status**: `ACTIVE` — primary optimization effort
+* **Next**: finish the true 64K/32K n_max=2 speculative holdout
 * **Evidence Base**: Mature (Entries 1–17 logged)
 * **Authoritative Log**: [`docs/qwen3-8-27b-experiment-log.md`](../docs/qwen3-8-27b-experiment-log.md)
 * **Latest Accepted Entry**: **Entry 17** (`Tiny-N MUL_MAT + ADD fusion evaluation`)
@@ -15,7 +27,9 @@
 ---
 
 ### TRACK B — ROCmFPX / Native NVFP4
-* **Status**: `B1 REPRODUCED — UNIFORM PRIMARY`. Stopped at the B1 boundary per the work package.
+* **Status**: `ARCHIVED / REOPENABLE` — B1 reproduced, characterized, and deprioritized. **[Closeout](tracks/B-rocmfpx-nvfp4/CLOSEOUT.md)**
+* **Within-track outcome**: `B1 REPRODUCED — UNIFORM PRIMARY`
+* **Not adopted** as the program foundation; primary effort returns to Track A
 * **Upstream snapshot**: `f4b2c5a3edfd183274641094d0db0fcc8092c0ad` (`charlie12345/ROCmFPX`, branch `main`, fetched 2026-08-17T03:53:08Z)
 * **Upstream audit**: [complete](tracks/B-rocmfpx-nvfp4/upstream-audit/2026-08-17-upstream-audit.md)
 * **Staged protocol**: [`PLAN.md`](tracks/B-rocmfpx-nvfp4/PLAN.md) (B0–B6), [`CHECKLIST.md`](tracks/B-rocmfpx-nvfp4/CHECKLIST.md)
@@ -45,17 +59,31 @@ either arm by ≥72×.
 `--spec-mtp-strict-qwen` does not close the gap on Vulkan. The cause is
 `UNRESOLVED`. The MTP numbers must not be presented as "same output, faster".
 
+**Cross-track.** Track A historical ~29.4 tok/s serial / ~53 tok/s MTP was
+measured under a different implementation and configuration, so it is **not a
+formal matched B2 comparison** — but B1 shows no advantage large enough to
+justify replacing Track A. B2 remains available if needed.
+
+---
+
+### ROCmFP4 FAST — watch item
+* **Status**: `WATCH ITEM`
+* The ~72.4 tok/s R9700 figure was reported for **ROCmFP4 FAST**, a different and
+  lossy quantization path — **not** the native NVFP4 configuration B1 tested. The
+  two figures were never measuring the same thing, and must not be compared.
+* Reopen Track B if the exact model and configuration become available.
+
 ---
 
 ### INTEGRATION
-* **Status**: `BLOCKED` (awaiting a stable Track B baseline)
+* **Status**: `BLOCKED / DEFERRED` — Track B is archived, so there is nothing to integrate into
 * **Rule**: no Track A optimization is imported or assumed portable without independent Track B A/B validation
-* **First candidate when unblocked**: draft-vocabulary trimming — as a **fresh experiment**, carrying its Track A caveats, with 32K-vs-64K undecided
+* **First candidate if Track B reopens**: draft-vocabulary trimming — as a **fresh experiment**, carrying its Track A caveats, with 32K-vs-64K undecided
 
 ---
 
 ### UPSTREAM ROCmFPX LANE
-* **Status**: `READY FOR FINDINGS`
+* **Status**: `READY FOR FINDINGS` — potential contribution: the gfx1201 reproduction plus the unresolved greedy MTP divergence
 * **Templates**: [finding](upstream-rocmfpx/findings/FINDING-TEMPLATE.md), [reproducer](upstream-rocmfpx/reproducers/REPRODUCER-TEMPLATE.md)
 * **Findings filed**: none. One operational issue (HIP segfault on a mixed-arch host without `HIP_VISIBLE_DEVICES`) was diagnosed and recorded as a **local configuration matter**, not an upstream defect.
 
@@ -70,9 +98,9 @@ either arm by ≥72×.
 2. ~~**Which model does B1 reproduce against?**~~ **RESOLVED** — the user
    authorized the download. `RadixArk/Qwen3.8-27B-NVFP4` is confirmed to be the
    same checkpoint upstream tested (193 NVFP4 tensors, matching `5290625`).
-3. **The ~72 tok/s R9700 figure is still unsubstantiated.** B1 did not reproduce
-   it; the fastest measured arm is 37.26 tok/s. Nothing measured explains a 2×
-   gap. If that figure is real, its configuration is still unknown.
+3. ~~**The ~72 tok/s R9700 figure is unsubstantiated.**~~ **RESOLVED as a
+   category error** — it was a ROCmFP4 FAST result, not native NVFP4. Now
+   tracked as a watch item rather than an anomaly in B1.
 4. **Should the Vulkan MTP/serial greedy divergence be filed upstream?** It is
    measured and reproducible but its cause is not isolated, so it would be an
    observation rather than a bug report. A draft is staged at

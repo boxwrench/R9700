@@ -1,11 +1,22 @@
 # Track B — ROCmFPX / Native NVFP4
 
-## Status: PREPARATION COMPLETE — BASELINE NOT YET ESTABLISHED
+## Status: ARCHIVED / REOPENABLE — B1 reproduced, characterized, deprioritized
+
+> [!IMPORTANT]
+> **Read [`CLOSEOUT.md`](CLOSEOUT.md) first.** B1 succeeded: native NVFP4 runs on
+> gfx1201, and the uniform derivative is the preferred artifact *within this
+> track*. Track B was nonetheless **not adopted** as the program foundation;
+> primary effort returned to Track A. Reopen conditions are in the closeout.
+>
+> Passages below describing B1 as pending or blocked are **historical**.
 
 **Start here:**
 
 | Document | What it is |
 |---|---|
+| [`CLOSEOUT.md`](CLOSEOUT.md) | **Current.** Result, established findings, decision, reopen conditions. |
+| [`reproduction/2026-08-17-b1-results.md`](reproduction/2026-08-17-b1-results.md) | The B1 four-arm baseline measurement. |
+| [`reproduction/2026-08-17-b1-gates.md`](reproduction/2026-08-17-b1-gates.md) | Gate 1 (lm_head scale) and Gate 2 (model identity) evidence. |
 | [`upstream-audit/2026-08-17-upstream-audit.md`](upstream-audit/2026-08-17-upstream-audit.md) | Read-only source audit of upstream at `f4b2c5a`, answering ten structural questions, with every claim tagged SOURCE FACT / COMMIT CLAIM / INFERRED / UNKNOWN. |
 | [`PLAN.md`](PLAN.md) | The staged protocol, B0 through B6, with entry and exit conditions. |
 | [`CHECKLIST.md`](CHECKLIST.md) | Per-stage checkboxes. |
@@ -20,8 +31,9 @@
    effectively untested upstream**, so B1 is original measurement rather than
    confirmation of a known result.
 2. Preparation established that NVFP4 matmul is **numerically correct** on
-   gfx1201 on both Vulkan and HIP. **No performance number exists for this
-   track**, and B1 is blocked pending a reproduction model.
+   gfx1201 on both Vulkan and HIP. ~~No performance number exists for this
+   track, and B1 is blocked pending a reproduction model.~~ **Superseded:** B1
+   measured four arms; see [`CLOSEOUT.md`](CLOSEOUT.md).
 
 ## Mission
 
