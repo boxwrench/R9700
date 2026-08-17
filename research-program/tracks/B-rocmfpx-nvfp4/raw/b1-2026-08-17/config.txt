@@ -1,0 +1,6 @@
+bin=/ai/scratch/ROCmFPX-audit/build-vulkan/bin/llama-cli
+sha=f4b2c5a3edfd183274641094d0db0fcc8092c0ad
+device=Vulkan1 n_predict=128 ctx=4096 batch=512 ubatch=512 seed=1234
+spec: n_max=4 n_min=0 p_min=0.0 p_split=0.10
+prompt=Explain why quantization speeds up large language model inference.
+reps=7 warmups=1

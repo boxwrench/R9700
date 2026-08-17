@@ -1,23 +1,42 @@
 # Local Model Inventory — Track B candidates
 
 **Date:** 2026-08-17
-**Scope:** inventory only. Nothing was downloaded, converted, benchmarked, or modified.
+**Scope:** inventory. Written as inventory-only; partly superseded once the
+download was authorized.
+
+> [!NOTE]
+> **SUPERSEDED IN PART.** This document was written while the NVFP4 model was
+> absent and B1 was blocked on it. The user subsequently authorized the
+> download. The section below records the outcome; the inventory of other local
+> models further down is unchanged and still accurate.
 
 ---
 
-## Result: no native NVFP4 Qwen3.8-27B model is present locally
+## ~~Result: no native NVFP4 Qwen3.8-27B model is present locally~~ — RESOLVED
 
-`RadixArk/Qwen3.8-27B-NVFP4` — the only real model named in upstream's NVFP4
-commits (`7b02624`, `5290625`) — **is not on this machine.** A search of `/ai`
-for `nvfp4`, `fp4`, `ROCmFP4`, `ROCmFPX`, and `RadixArk` returned no Qwen3.8
-NVFP4 GGUF.
+Originally: `RadixArk/Qwen3.8-27B-NVFP4` — the only real model named in
+upstream's NVFP4 commits (`7b02624`, `5290625`) — was not on this machine, and
+acquiring it was an explicit user decision, so it was not started.
 
-Acquiring it is a large download and an explicit user decision, so it was not
-started.
+**It has since been acquired, converted, and quantized.** Identity and
+provenance evidence: [`2026-08-17-b1-gates.md`](2026-08-17-b1-gates.md) (Gate 2).
+Results: [`2026-08-17-b1-results.md`](2026-08-17-b1-results.md).
+
+| Artifact | Bytes | SHA256 (prefix) |
+|---|---:|---|
+| `/ai/models/Qwen3.8-27B-NVFP4/` (HF safetensors) | ~21 GB | — |
+| `…-GGUF/Qwen3.8-27B-NVFP4.gguf` (mixed) | 28,230,539,776 | `cfcff7f6e965a207…` |
+| `…-GGUF/Qwen3.8-27B-NVFP4-uniform.gguf` | 15,547,030,016 | `f529c734266ff579…` |
+
+Conversion required a new CPU-only virtualenv at `/ai/environments/gguf-convert`
+(torch 2.13.0+cpu, transformers 5.15.0). The three pre-existing
+`/ai/environments/*` venvs all fail with `ImportError: libroctx64.so.4` — their
+ROCm-torch builds target an older ROCm than the installed 7.2.1. **None of them
+was modified**; a fresh environment was created alongside them.
 
 ---
 
-## Qwen3.8-27B models present
+## Other Qwen3.8-27B models present
 
 | Path | Bytes | Quant | Relevance |
 |---|---:|---|---|

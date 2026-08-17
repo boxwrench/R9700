@@ -1,0 +1,34 @@
+--no-conversation is not supported by llama-cli
+please use llama-completion instead
+
+Loading model... 
+
+
+▄▄ ▄▄
+██ ██
+██ ██  ▀▀█▄ ███▄███▄  ▀▀█▄    ▄████ ████▄ ████▄
+██ ██ ▄█▀██ ██ ██ ██ ▄█▀██    ██    ██ ██ ██ ██
+██ ██ ▀█▄██ ██ ██ ██ ▀█▄██ ██ ▀████ ████▀ ████▀
+                                    ██    ██
+                                    ▀▀    ▀▀
+
+build      : b240-f4b2c5a
+model      : Qwen3.8-27B-NVFP4.gguf
+modalities : text
+
+available commands:
+  /exit or Ctrl+C     stop or exit
+  /regen              regenerate the last response
+  /clear              clear the chat history
+  /read <file>        add a text file
+  /glob <pattern>     add text files using globbing pattern
+
+
+> Explain why quantization speeds up large language model inference.
+
+[Start thinking]
+We need answer user: "Explain why quantization speeds up large language model inference." Need provide explanation. Need final. Need be accurate. Discuss quantization reduces numerical precision (FP32/FP16/BF16 to INT8/INT4 etc). Benefits: smaller memory footprint, better memory bandwidth, cache, fewer bytes moved, less memory capacity enabling larger batches/models, faster matrix multiplications with low-precision kernels, reduced compute. But nuance: inference often memory-bandwidth bound, especially autoregressive token generation where each token loads weights; quantization reduces bytes read per token. Also compute: lower precision arithmetic
+
+[ Prompt: 118.8 t/s | Generation: 30.7 t/s ]
+
+Exiting...
