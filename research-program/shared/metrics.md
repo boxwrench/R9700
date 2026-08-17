@@ -49,11 +49,20 @@ To avoid ambiguity in reporting, all research tracks use the following unified d
 > **Accepted Drafts / Round** and **Committed Tokens / Round** are distinct quantities differing by the target verifier's base token ($+1$). Do not interchange these metrics.
 
 * **Accepted Drafts per Round**:
-  The expected number of *speculative draft tokens* accepted per MTP round (excluding the base verified token):
-  $$\text{Accepted Drafts / Round} = p_0 + \text{joint-}p_1$$
+  The expected number of *speculative draft tokens* accepted per MTP round (excluding the base verified token). Acceptance is prefix-based, so with $P_i = P(\text{at least } i{+}1 \text{ drafts accepted})$:
+  $$\text{Accepted Drafts / Round} = \sum_{i=0}^{n_{\max}-1} P_i$$
+  For $n_{\max}=2$ this reduces to the familiar $p_0 + \text{joint-}p_1$.
 * **Committed Tokens per Round**:
   The total number of *output tokens committed to context* per MTP round (1 base verified token $+$ accepted draft tokens):
-  $$\text{Committed Tokens / Round} = 1 + p_0 + \text{joint-}p_1$$
+  $$\text{Committed Tokens / Round} = 1 + \sum_{i=0}^{n_{\max}-1} P_i$$
+
+> [!WARNING]
+> **The two-term form $p_0 + \text{joint-}p_1$ is the $n_{\max}=2$ special case, not the definition.**
+> Applying it at $n_{\max}=4$ silently discards positions 2 and 3 and understates
+> acceptance. B1 hit exactly this: the two-term form gave 1.077 accepted drafts/round
+> where the true value was 1.442. Always sum over all $n_{\max}$ positions, and
+> cross-check against the raw counters ($N_{\text{accepted}} / N_{\text{rounds}}$),
+> which do not depend on the per-position reporting at all.
 
 ---
 

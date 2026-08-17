@@ -1,0 +1,90 @@
+snapshot_utc: 2026-08-17T05:37:06Z
+hostname: Nautilus
+
+===== KERNEL / OS =====
+Linux Nautilus 7.0.0-28-generic #28~24.04.1-Ubuntu SMP PREEMPT_DYNAMIC Wed Jul  1 15:50:57 UTC 2 x86_64 x86_64 x86_64 GNU/Linux
+distro: Ubuntu 24.04.4 LTS
+glibc: ldd (Ubuntu GLIBC 2.39-0ubuntu8.8) 2.39
+
+===== CPU =====
+Architecture:                            x86_64
+CPU(s):                                  16
+Model name:                              AMD Ryzen 7 9800X3D 8-Core Processor
+Thread(s) per core:                      2
+Core(s) per socket:                      8
+CPU(s) scaling MHz:                      66%
+CPU max MHz:                             5271.6221
+
+===== MEMORY =====
+               total        used        free      shared  buff/cache   available
+Mem:           186Gi        26Gi       7.1Gi       368Mi       155Gi       160Gi
+Swap:          8.0Gi       348Ki       8.0Gi
+
+===== GPU — PCI enumeration =====
+03:00.0 VGA compatible controller [0300]: Advanced Micro Devices, Inc. [AMD/ATI] Navi 31 [Radeon RX 7900 XT/7900 XTX/7900M] [1002:744c] (rev cc)
+06:00.0 VGA compatible controller [0300]: Advanced Micro Devices, Inc. [AMD/ATI] Device [1002:7551] (rev c0)
+7e:00.0 VGA compatible controller [0300]: Advanced Micro Devices, Inc. [AMD/ATI] Device [1002:13c0] (rev cb)
+
+===== GPU — ROCm / HIP =====
+hipconfig --version:
+  7.2.53211-e1a6bc5663hipcc --version:
+  HIP version: 7.2.53211-e1a6bc5663
+  AMD clang version 22.0.0git (https://github.com/RadeonOpenCompute/llvm-project roc-7.2.1 26084 f58b06dce1f9c15707c5f808fd002e18c2accf7e)
+  Target: x86_64-unknown-linux-gnu
+  Thread model: posix
+  InstalledDir: /opt/rocm-7.2.1/lib/llvm/bin
+  Configuration file: /opt/rocm-7.2.1/lib/llvm/bin/clang++.cfg
+rocm_version_file: 7.2.1
+rocm_install_dirs: /opt/rocm /opt/rocm-7.2.1 
+rocminfo (agent names / gfx targets):
+    Name:                    AMD Ryzen 7 9800X3D 8-Core Processor
+    Marketing Name:          AMD Ryzen 7 9800X3D 8-Core Processor
+    Vendor Name:             CPU                                
+    Name:                    gfx1100                            
+    Marketing Name:          Radeon RX 7900 XT                  
+    Vendor Name:             AMD                                
+        Name:                    amdgcn-amd-amdhsa--gfx1100         
+        Name:                    amdgcn-amd-amdhsa--gfx11-generic   
+    Name:                    gfx1201                            
+    Marketing Name:          AMD Radeon AI PRO R9700            
+    Vendor Name:             AMD                                
+        Name:                    amdgcn-amd-amdhsa--gfx1201         
+        Name:                    amdgcn-amd-amdhsa--gfx12-generic   
+    Name:                    gfx1036                            
+    Marketing Name:          AMD Radeon Graphics                
+    Vendor Name:             AMD                                
+        Name:                    amdgcn-amd-amdhsa--gfx1036         
+        Name:                    amdgcn-amd-amdhsa--gfx10-3-generic 
+
+===== GPU — Vulkan / RADV =====
+  	apiVersion         = 1.4.318
+  	deviceName         = Radeon RX 7900 XT (RADV NAVI31)
+  	driverName         = radv
+  	driverInfo         = Mesa 25.2.8-0ubuntu0.24.04.2
+  	apiVersion         = 1.4.318
+  	deviceName         = AMD Radeon AI PRO R9700 (RADV GFX1201)
+  	driverName         = radv
+  	driverInfo         = Mesa 25.2.8-0ubuntu0.24.04.2
+  	apiVersion         = 1.4.318
+  	deviceName         = AMD Radeon Graphics (RADV RAPHAEL_MENDOCINO)
+  	driverName         = radv
+  	driverInfo         = Mesa 25.2.8-0ubuntu0.24.04.2
+  	apiVersion         = 1.4.318
+  	deviceName         = llvmpipe (LLVM 20.1.2, 256 bits)
+  	driverName         = llvmpipe
+  	driverInfo         = Mesa 25.2.8-0ubuntu0.24.04.2 (LLVM 20.1.2)
+
+NOTE: device ORDER above is the enumeration order. On this class of host the
+R9700 is not index 0. Record the index that actually resolved to gfx1201 in
+the run record (field: gpu_index) and pin the device explicitly at run time.
+
+===== REPOSITORY STATE =====
+--- /ai/scratch/ROCmFPX-audit ---
+  remote: https://github.com/charlie12345/ROCmFPX.git
+  branch: main
+  sha:    f4b2c5a3edfd183274641094d0db0fcc8092c0ad
+  shallow: false
+  dirty:  no
+
+===== END =====
+snapshot complete
