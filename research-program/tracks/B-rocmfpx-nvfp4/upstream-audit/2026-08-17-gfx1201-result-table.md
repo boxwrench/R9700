@@ -94,5 +94,7 @@ two labels look contradictory until you find that activations stay in f32.
 * Nothing here measures the ROCm/HIP backend. A single-arch gfx1201-only HIP
   build segfaults on this mixed-GPU host unless `HIP_VISIBLE_DEVICES` restricts
   visibility; that is a local configuration matter, not an upstream issue.
-* We could not reproduce, and make no claim about, a ~72 tok/s R9700 figure.
-  Our fastest measured arm is 37.26 tok/s.
+* We make no claim about the ~72 tok/s R9700 figure. We understand it to be a
+  **ROCmFP4 FAST** result — a different, lossy quantization path — rather than
+  native NVFP4 execution of the released checkpoint, so it is not comparable to
+  anything above. Our fastest measured NVFP4 arm is 37.26 tok/s.
