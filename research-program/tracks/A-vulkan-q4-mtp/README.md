@@ -26,7 +26,7 @@ This track indexes and preserves the deeply characterized Vulkan/RADV Qwen3.8-27
 
 * **Main Experiment Log**: [`docs/qwen3-8-27b-experiment-log.md`](../../../docs/qwen3-8-27b-experiment-log.md) (Entries 1 through 17)
 * **Proposer Forward Baseline Data**: [`data/experimental/qwen3-8-27b-mtp-proposer.tsv`](../../../data/experimental/qwen3-8-27b-mtp-proposer.tsv)
-* **Round Cost Trace**: [`data/experimental/round_cost.jsonl`](../../../data/experimental/round_cost.jsonl)
+* **Round Cost Trace**: [`experiments/qwen3-8-27b/round_cost.jsonl`](../../../experiments/qwen3-8-27b/round_cost.jsonl)
 * **Experiment Scripts**: [`experiments/qwen3-8-27b/`](../../../experiments/qwen3-8-27b/)
 
 ---

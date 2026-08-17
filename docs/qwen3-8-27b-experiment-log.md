@@ -39,7 +39,9 @@ Device isolation is mandatory on this host. Both Vulkan and HIP enumerate the
 | 12 | Qwen3.6 vs Qwen3.8 native MTP | No proposer gap; hypothesis rejected | this document |
 | 13 | MTP round-cost decomposition | Verification is 89% of round cost | this document |
 | 14 | 1-token vs 3-token kernel profile | FFN matmul multi-column path is the lever | this document |
-| 15 | IQ4_XS tiny-column path A/B | No existing alternate wins; redundant dequant identified | this document |
+| 15 | IQ4_XS tiny-column path A/B | No existing alternate wins; dequant mechanism proposed, later refuted by 16 | this document |
+| 16 | IQ4_XS tiny-N dequant-reuse and occupancy | Both variants fail the gate; kernel is DRAM-bound | this document |
+| 17 | Tiny-N MUL_MAT + ADD fusion | Fusion restored and correct, but no throughput gain | this document |
 
 ## 1–6. Earlier entries
 
@@ -553,6 +555,17 @@ improvement to propagate, so no throughput projection is claimed.
 **Redundant dequantization is the mechanism.** RADV pipeline statistics, no
 spills and SGPR 128 throughout:
 
+> **Retraction (see entry 16).** The resource statistics below are correct and
+> stand. The inference drawn from them — that redundant dequantization was the
+> factor *limiting performance*, and that removing it was worth 1.77–2.98 ms per
+> round — was wrong. Entry 16 built the hoisted kernel: it cut shader code from
+> 81.2 KB to 48.9 KB and removed two thirds of the dequantization work, and the
+> in-graph kernel moved under 2.5%, failing the 0.2 ms wall-time gate. In full
+> graph execution the matmul is DRAM-bandwidth and latency bound, and the
+> redundant dequant was already hidden behind memory latency. Read the paragraphs
+> below as a measured description of the two shaders' code structure, not as a
+> diagnosis of the tax.
+
 | NUM_COLS | iq4_xs VGPR / code / occupancy | q5_K VGPR / code / occupancy |
 |---|---|---|
 | 1 | 48 / 38192 B / 32 | 60 / 5440 B / 24 |
@@ -577,30 +590,11 @@ kernel that amortized properly would cost the same at N=3 as at N=1 — worth
 1.77 ms per round, with a DRAM-bound floor of 2.98 ms. Both clear the >1.0 ms
 high-value threshold.
 
-The recommended change is a loop interchange in the generic `mul_mat_vec.comp`,
-hoisting IQ-type dequantization out of the `NUM_COLS` loop and staging it through
-LDS rather than registers, so it does not inherit the VGPR blowup that costs
-`q5_K` its occupancy. Two caveats: it must be A/B'd in-graph with `vbench`, since
-the isolated bench cannot validate it either; and it touches a shader shared by
-every IQ type on every backend, so scoping it behind a specialization constant
-would confine the blast radius.
-
-## Open threads
-
-- The loop-interchange A/B on `mul_mat_vec.comp` for IQ types, validated
-  in-graph. Entry 15 identified the mechanism and bounded the win at
-  1.77-2.98 ms per round; nothing has been changed.
-- The MUL_MAT+ADD fusion cliff at `ggml-vulkan.cpp:16438`, worth about 0.4 ms —
-  smaller than the dequant fix but lower risk, and the fallback if it stalls.
-- Whether a cheaper proposer at greater depth beats the current n-max 2 point,
-  given that verification is sublinear in batch size.
-- Which of the two K paths is closer to unquantized reference output. Requires
-  a reference the campaign does not currently have.
-- Whether the ~0.2 logit perturbation is quantization-sensitive. A Q6 repeat of
-  the localized prompt would test it.
-- Why prompt-cache reuse alters greedy output in serial decode.
-- llama.cpp reports `logprob = 0.0` for MTP-committed tokens, which would
-  mislead anyone scoring outputs from that path.
+The change recommended at the time was a loop interchange in the generic
+`mul_mat_vec.comp`, hoisting IQ-type dequantization out of the `NUM_COLS` loop and
+staging it so it does not inherit the VGPR blowup that costs `q5_K` its occupancy,
+A/B'd in-graph with `vbench` and scoped behind a specialization constant. Entry 16
+carried that out. It was built and measured, and it did not pay.
 
 ## 16. IQ4_XS tiny-N dequant-reuse and occupancy evaluation
 
@@ -643,6 +637,15 @@ Measured using `llama-vbench` on Qwen3.8-27B-UD-Q4_K_XL at matched conditions
 
 - Default Tiny-N reuse reduced V3 wall time by **0.1838 ms** (below the 0.2 ms minimum gate).
 - The `ROWS=2` occupancy variant was **0.0370 ms slower** than incumbent and **0.2208 ms slower** than default Tiny-N reuse.
+
+An independent run of the same A/B, three repetitions per arm on the same
+binaries, measured incumbent V3 41.080 ms against tiny-N 41.003 ms — a saving of
+**0.077 ms**, and an IQ4_XS kernel delta of 114.476 to 112.511 us/dispatch
+(-1.7%, -0.126 ms over 64 layers). The magnitudes differ from the table above by
+more than either run's internal spread, so treat the absolute saving as bounded
+somewhere under 0.2 ms rather than pinned at 0.18 ms. Both runs agree on the
+decision and on the mechanism, and in both the V1 arm — whose path is unchanged —
+drifted by 0.04 ms, which sets the floor on what this harness can resolve.
 
 ### Isolated kernel profiling (differenced 100 vs 200 iterations)
 
@@ -757,19 +760,63 @@ CLOSE FUSION BRANCH
 Tiny-N `MUL_MAT + ADD` fusion is technically correct and successfully removes 80 dispatches, but does not provide
 meaningful throughput acceleration due to the offsetting bias fetch overhead in `mul_mat_vec`.
 
+## Where this leaves the verification tax
+
+Entries 14–17 close the kernel-level attack on the +6.9 ms verification tax.
+Entry 14 attributed 72.6% of it to MUL_MAT and named two candidate levers;
+entries 15–17 tested both to exhaustion and neither paid:
+
+| lever | built and measured | wall effect | gate |
+|---|---|---|---|
+| alternate path (`mul_mm`) | entry 15 | 2.59x slower isolated | rejected |
+| IQ4_XS dequant reuse | entry 16 | under 0.2 ms | rejected |
+| tiny-N reuse + `ROWS=2` occupancy | entry 16 | slower than incumbent | rejected |
+| `MUL_MAT + ADD` fusion restore | entry 17 | under 0.1 ms | rejected |
+
+The common cause is the same in every case: at N=3 the FFN matmuls stream the
+same weight bytes as at N=1 from DRAM, and they are bandwidth and latency bound
+rather than limited by arithmetic, dispatch count, or shader code size. Work that
+removes ALU or dispatches therefore returns almost nothing. Any future gain has to
+reduce **bytes moved** — a smaller quantization for `ffn_gate`, weight residency
+across the three verified positions, or a different speculative mechanism — not
+reduce work per byte.
+
 ## Open threads
 
+- Reducing bytes moved during verification, the only lever entries 15–17 did not
+  close. Nothing has been designed here yet.
 - Whether a cheaper proposer at greater depth beats the current n-max 2 point,
   given that verification is sublinear in batch size.
-- Which of the two K paths is closer to unquantized reference output.
-- Whether the ~0.2 logit perturbation is quantization-sensitive.
+- Which of the two K paths is closer to unquantized reference output. Requires
+  a reference the campaign does not currently have.
+- Whether the ~0.2 logit perturbation is quantization-sensitive. A Q6 repeat of
+  the localized prompt would test it.
 - Why prompt-cache reuse alters greedy output in serial decode.
-- llama.cpp reports `logprob = 0.0` for MTP-committed tokens.
+- llama.cpp reports `logprob = 0.0` for MTP-committed tokens, which would
+  mislead anyone scoring outputs from that path.
 
 ## Reproduction
 
 Harnesses are under [`experiments/qwen3-8-27b/`](../experiments/qwen3-8-27b/):
-`bench.py`, `kvsweep.py`, `round_cost.py`, `kernel_profile.py`, and `examples/vbench`
-microbench. Data files are under [`data/experimental/`](../data/experimental/):
-`qwen3-8-27b-iq4xs-path.tsv`, `qwen3-8-27b-iq4xs-pipeline-stats.tsv`, `qwen3-8-27b-kv-cache.tsv`.
+`bench.py` (bucketed benchmark), `sweep.py` (parameter sweep), `kvsweep.py`
+(entry 7), `equiv_step1.py` and `equiv_localize.py` (entries 8–9),
+`rs_seq_test.py` (entry 10), `k1_vs_k3.py` (entry 11), `qwen36_control.py`
+(entry 12), `round_cost.py` (entry 13), `kernel_profile.py` with the
+`examples/vbench` microbench (entries 14 and 16–17). Data files are under
+[`data/experimental/`](../data/experimental/): `qwen3-8-27b-kv-cache.tsv`
+(entry 7), `qwen3-8-27b-iq4xs-path.tsv` and
+`qwen3-8-27b-iq4xs-pipeline-stats.tsv` (entries 15–16),
+`qwen3-8-27b-mtp-proposer.tsv`.
+
+Entries 9–11 and 14–17 require an instrumented llama.cpp build. Most probes are
+log-only; these three deliberately change behaviour and default to off:
+`LLAMA_FORCE_N_RS_SEQ` (changes `cparams`), `GGML_VK_FORCE_MUL_MM` (changes
+Vulkan path selection), and `GGML_VK_IQ4XS_TINYN` with `GGML_VK_IQ4XS_ROWS`
+(selects the experimental tiny-N pipelines). None exist in the production tree.
+
+**Line numbers.** Citations in entries 1–15 are against the production tree at
+`ad1de39`. Entries 16–17 cite the instrumented worktree, whose additions shift
+`ggml-vulkan.cpp` by roughly 70 lines: the fusion predicate cited there as
+`:16505` is `:16439` upstream, and entry 17 removes it outright, so it will not
+be found in the worktree at all. Resolve any citation against `ad1de39` first.
 
