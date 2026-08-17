@@ -29,7 +29,8 @@ Evidence: [B1 gates](reproduction/2026-08-17-b1-gates.md) ·
 
 | | MIXED | UNIFORM |
 |---|---:|---:|
-| Model bytes | 28.23 GB | 15.55 GB |
+| Model bytes | 28,230,539,776 (28.23 GB) | 15,547,030,016 (15.55 GB) |
+| Composition | 193 NVFP4 + higher-precision remainder | 505 NVFP4 + 1 Q5_K, ≈4.55 BPW |
 | Serial decode | 20.32 tok/s | **27.33 tok/s** |
 | Native MTP | 30.71 tok/s | **37.26 tok/s** |
 | MTP multiplier | 1.511 | 1.363 |
@@ -53,9 +54,13 @@ Evidence: [B1 gates](reproduction/2026-08-17-b1-gates.md) ·
    observed llama.cpp/ROCmFPX execution does not consume the activation input
    scales. Observed runtime behavior is therefore effectively **W4A16**.
    ([detail](upstream-audit/2026-08-17-w4a4-vs-w4a16.md))
-7. Native MTP greedy output **diverges** from serial target output.
-   `--spec-mtp-strict-qwen` does not eliminate the first observed divergence in
-   the tested configuration. **Cause: `UNRESOLVED`.**
+7. Native MTP greedy output **diverges** from serial target output under
+   deterministic decoding (`temp=0.0`, `top_k=1`). `--spec-mtp-strict-qwen` does
+   not eliminate the first observed divergence in the tested configuration — in
+   the traces, the mitigation becomes active only *after* the initial divergence
+   has already occurred. **Cause: `UNRESOLVED`.** This must not be attributed to
+   the Track A recurrent-state / K3 issue; that relationship is an unverified
+   hypothesis.
 
 ## Cross-track interpretation
 

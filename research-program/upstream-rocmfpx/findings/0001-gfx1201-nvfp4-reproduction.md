@@ -2,9 +2,10 @@
 
 * **Status**: PREPARED / NOT SUBMITTED
 * **Target Project**: `charlie12345/ROCmFPX`
-* **Base Upstream Commit**: `a71e6c8a63ab947399a315095e08c8d8ad043dda`
-* **Hardware Target**: AMD Radeon AI PRO R9700 (`gfx1201`, RDNA4, 32 GB VRAM)
-* **Backend**: Vulkan / RADV (Mesa 25.1.0-devel / LLVM 20.0.0git)
+* **Base Upstream Commit**: `f4b2c5a3edfd183274641094d0db0fcc8092c0ad` (`main`, fetched 2026-08-17T03:53:08Z)
+* **Hardware Target**: AMD Radeon AI PRO R9700 (`gfx1201`, RDNA4, 32624 MiB VRAM)
+* **Backend**: Vulkan / RADV, Mesa `25.2.8-0ubuntu0.24.04.2`
+* **Kernel**: Linux 7.0.0-28-generic
 
 ---
 

@@ -8,7 +8,7 @@
 
 | Lane | Status | Next / note |
 |---|---|---|
-| **Track A** — Vulkan / Q4 / MTP | `ACTIVE` | Finish true 64K/32K n_max=2 speculative holdout |
+| **Track A** — Vulkan / Q4 / MTP | `ACTIVE` | Vocab-trim holdout ran and **failed** (Entry 18); trimming closed. Next lever undecided |
 | **Track B** — ROCmFPX / NVFP4 | `ARCHIVED / REOPENABLE` | B1 reproduced; uniform primary within Track B; **not adopted as program foundation** |
 | **ROCmFP4 FAST** | `WATCH ITEM` | ~72 tok/s claim requires exact reproducible configuration |
 | **Upstream ROCmFPX** | `POTENTIAL CONTRIBUTION` | gfx1201 reproduction + unresolved greedy MTP divergence |
@@ -19,12 +19,20 @@
 * **Status**: `ACTIVE`
 * **Foundation**: Qwen3.8-27B-UD-Q4_K_XL / R9700 (gfx1201) / Vulkan RADV / Native MTP
 * **Historical Reference**: Serial ~29.4 tok/s, Native MTP ~53.2–53.8 tok/s (~1.83× acceleration)
-* **Authoritative Log**: [`docs/qwen3-8-27b-experiment-log.md`](../../docs/qwen3-8-27b-experiment-log.md) (Entries 1–17 locked)
-* **Draft-Vocabulary Trimming Status**: `PROMISING — NOT ACCEPTED` (Entering tonight's true speculative holdout validation)
+* **Authoritative Log**: [`docs/qwen3-8-27b-experiment-log.md`](../docs/qwen3-8-27b-experiment-log.md) (Entries 1–18 locked)
+* **Draft-Vocabulary Trimming Status**: `CLOSED — NO WIN`. The true unseen
+  `n_max=2` speculative holdout ran and **failed decisively**: speculation
+  collapsed to **zero accepted drafts** on both trimmed arms, and decode
+  throughput roughly halved (16.82 → 8.32 / 8.69 tok/s). Cause: scattering
+  trimmed logits into a 248,320-element `-INFINITY` buffer distorts the candidate
+  softmax, so nothing clears `p_min ≥ 0.3` at step 0 — and the failed proposer
+  graph is still evaluated every round, costing an unamortized 28–33 ms.
+  Recorded as **Entry 18**; the branch is closed and must not be deployed.
 
 ---
 
 ### TRACK B — ROCmFPX / Native NVFP4
+* **Status**: `ARCHIVED / REOPENABLE` — B1 reproduced, characterized, and deprioritized. **[Closeout](tracks/B-rocmfpx-nvfp4/CLOSEOUT.md)**
 * **Within-track outcome**: `B1 REPRODUCED — UNIFORM PRIMARY`
 * **Not adopted** as the program foundation; primary effort returns to Track A
 * **Upstream snapshot**: `f4b2c5a3edfd183274641094d0db0fcc8092c0ad` (`charlie12345/ROCmFPX`, branch `main`, fetched 2026-08-17T03:53:08Z)
@@ -75,13 +83,14 @@ justify replacing Track A. B2 remains available if needed.
 ### INTEGRATION
 * **Status**: `BLOCKED / DEFERRED` — Track B is archived, so there is nothing to integrate into
 * **Rule**: no Track A optimization is imported or assumed portable without independent Track B A/B validation
-* **First candidate if Track B reopens**: draft-vocabulary trimming — as a **fresh experiment**, carrying its Track A caveats, with 32K-vs-64K undecided
+* **First candidate if Track B reopens**: ~~draft-vocabulary trimming~~ **Withdrawn** — Entry 18 closed trimming as `NO WIN` on Track A, so there is nothing to port. No candidate is currently nominated.
 
 ---
 
 ### UPSTREAM ROCmFPX LANE
 * **Status**: `READY FOR FINDINGS` — potential contribution: the gfx1201 reproduction plus the unresolved greedy MTP divergence
 * **Templates**: [finding](upstream-rocmfpx/findings/FINDING-TEMPLATE.md), [reproducer](upstream-rocmfpx/reproducers/REPRODUCER-TEMPLATE.md)
+* **Drafted, `PREPARED / NOT SUBMITTED`**: [Finding 0001](upstream-rocmfpx/findings/0001-gfx1201-nvfp4-reproduction.md) (gfx1201 NVFP4 reproduction and baseline) and [Reproducer 0001](upstream-rocmfpx/reproducers/0001-mtp-divergence-reproducer.md) (greedy serial-vs-MTP divergence)
 * **Findings filed**: none. One operational issue (HIP segfault on a mixed-arch host without `HIP_VISIBLE_DEVICES`) was diagnosed and recorded as a **local configuration matter**, not an upstream defect.
 
 ---
