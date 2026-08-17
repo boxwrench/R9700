@@ -781,6 +781,49 @@ reduce **bytes moved** — a smaller quantization for `ffn_gate`, weight residen
 across the three verified positions, or a different speculative mechanism — not
 reduce work per byte.
 
+## 18. MTP Draft-Vocabulary Trimming Speculative Holdout Validation
+
+**Question**: Does reducing the MTP draft LM-head row count (from full $248,320$ to $65,536$ or $32,768$ rows via `d2t` remapping) yield real end-to-end multi-token speculative decode gains on the R9700?
+
+**Hypothesis**: Isolated microbenchmarks showed the Q6_K LM-head matvec drops from $1,652\ \mu\text{s} \to 452\ \mu\text{s}$ (64K) and $234\ \mu\text{s}$ (32K), saving $1.20\text{--}1.42\text{ ms}$ GPU kernel time per dispatch. If top-1 token coverage remains high ($>95\%$), multi-token speculative throughput should improve.
+
+**Experimental Setup**:
+* **Hardware**: AMD Radeon AI PRO R9700 (`gfx1201`, RDNA4, 32 GB VRAM), Vulkan/RADV
+* **Speculative Policy**: Genuine multi-token speculative decoding ($n_{\text{max}}=2, p_{\text{min}}=0.3, c=8192, ub=512, fa=1, ctk=f16, ctv=f16, temp=0.0, top\_k=1$)
+* **Arms**:
+  * `FULL`: Full vocabulary ($M=248320$)
+  * `64K`: Trimmed vocabulary ($M=65536$, map hash `3aa00816...`)
+  * `32K`: Trimmed vocabulary ($M=32768$, map hash `f6d89a06...`)
+* **Holdout Matrix**: 16 diverse, previously unseen prompts across 6 domains (Code, Structured JSON, Technical Architecture, Mathematics, Chat/Prose, Long-Context Continuation) evaluated in interleaved/rotated order (FULL-64K-32K, 64K-32K-FULL, 32K-FULL-64K) totaling $>1,500$ verification rounds per arm.
+
+### Measured Holdout Results (16 Unseen Prompts)
+
+| Metric | FULL (248K) | 64K TRIMMED | 32K TRIMMED | Classification |
+|---|---:|---:|---:|---|
+| **Direct Decode Throughput (tok/s)** | **16.82 ± 0.89** | **8.32 ± 0.04** | **8.69 ± 0.05** | **MEASURED** |
+| **Throughput Delta vs FULL** | — | **−50.5%** | **−48.3%** | **CALCULATED** |
+| **Verification Rounds ($N_{\text{rounds}}$)** | 1,253 | 3,088 | 3,088 | **MEASURED** |
+| **Draft Tokens Generated** | 2,437 | 0 | 0 | **MEASURED** |
+| **Draft Tokens Accepted** | 1,862 | 0 | 0 | **MEASURED** |
+| **Accepted Drafts / Round** | **1.486** | **0.000** | **0.000** | **CALCULATED** |
+| **Committed Tokens / Round** | **2.486** | **1.000** | **1.000** | **CALCULATED** |
+| **Step 0 Acceptance ($p_0$)** | **0.838** | **0.000** | **0.000** | **MEASURED** |
+| **Joint Step 1 Acceptance ($p_1$)** | **0.641** | **0.000** | **0.000** | **MEASURED** |
+| **Proposer Latency (`dur_g` / round)** | **5.58 ms** | **33.19 ms** | **27.91 ms** | **MEASURED** |
+| **Greedy Output Equivalence** | 16 / 16 match | 0 / 16 match (collapsed) | 0 / 16 match (collapsed) | **MEASURED** |
+
+### Findings & Root Cause Analysis
+
+1. **Speculative Collapse**: Across all 16 unseen holdout prompts, the trimmed vocabulary arms generated exactly zero accepted draft tokens (`#gen drafts = 0, #acc drafts = 0, p0 = 0.0`). The speculative engine completely collapsed to serial 1-token-at-a-time decoding.
+2. **Proposer Penalty**: Scattering trimmed logits into a 248,320-element `-INFINITY` buffer via `ggml_set_rows` distorted the candidate softmax probability distribution during `common_sampler_sample`, causing top candidate probabilities to fail the $p_{\text{min}} \ge 0.3$ threshold at step 0.
+3. **Severe End-to-End Regression**: In addition to zero speculative draft generation, evaluating the failed proposer graph on every round incurred an unamortized $28\text{--}33\text{ ms}$ latency penalty per token, cutting decode speed in half ($16.82 \to 8.69\text{ tok/s}$).
+4. **Proposer Duration Accounting (`dur_g`)**: Inspection of `common/speculative.cpp` confirms that `dur(g)` (`t_draft_us`) measures synchronized host wall time from the entry of `impl->draft()` to its return. It includes CPU batch construction, GPU graph execution, synchronous GPU-to-host readback (`llama_get_logits_ith`), and CPU softmax evaluation. It is not an isolated GPU kernel timer.
+
+### Pre-Registered Decision: VOCAB TRIMMING DOES NOT VALIDATE (CLOSED)
+
+* **Outcome**: **`NO WIN (≤0%)`**.
+* **Action**: Formally close the draft-vocabulary trimming branch. Do not deploy 32K or 64K trimming to production.
+
 ## Open threads
 
 - Reducing bytes moved during verification, the only lever entries 15–17 did not
