@@ -8,7 +8,7 @@
 
 | Lane | Status | Next / note |
 |---|---|---|
-| **Track A** — Vulkan / Q4 / MTP | `ACTIVE` | Vocab-trim holdout ran and **failed** (Entry 18); trimming closed. Next lever undecided |
+| **Track A** — Vulkan / Q4 / MTP | `ACTIVE` | Entry 18 disproved the *reconstruction* implementation; **Entry 19** tests direct reduced-vocabulary sampling |
 | **Track B** — ROCmFPX / NVFP4 | `ARCHIVED / REOPENABLE` | B1 reproduced; uniform primary within Track B; **not adopted as program foundation** |
 | **ROCmFP4 FAST** | `WATCH ITEM` | ~72 tok/s claim requires exact reproducible configuration |
 | **Upstream ROCmFPX** | `POTENTIAL CONTRIBUTION` | gfx1201 reproduction + unresolved greedy MTP divergence |
@@ -20,14 +20,17 @@
 * **Foundation**: Qwen3.8-27B-UD-Q4_K_XL / R9700 (gfx1201) / Vulkan RADV / Native MTP
 * **Historical Reference**: Serial ~29.4 tok/s, Native MTP ~53.2–53.8 tok/s (~1.83× acceleration)
 * **Authoritative Log**: [`docs/qwen3-8-27b-experiment-log.md`](../docs/qwen3-8-27b-experiment-log.md) (Entries 1–18 locked)
-* **Draft-Vocabulary Trimming Status**: `CLOSED — NO WIN`. The true unseen
-  `n_max=2` speculative holdout ran and **failed decisively**: speculation
-  collapsed to **zero accepted drafts** on both trimmed arms, and decode
-  throughput roughly halved (16.82 → 8.32 / 8.69 tok/s). Cause: scattering
-  trimmed logits into a 248,320-element `-INFINITY` buffer distorts the candidate
-  softmax, so nothing clears `p_min ≥ 0.3` at step 0 — and the failed proposer
-  graph is still evaluated every round, costing an unamortized 28–33 ms.
-  Recorded as **Entry 18**; the branch is closed and must not be deployed.
+* **Draft-Vocabulary Trimming Status**: `FAILED IMPLEMENTATION / CONCEPT REMAINS OPEN`.
+  Entry 18's unseen `n_max=2` holdout failed decisively — zero accepted drafts on
+  both trimmed arms, decode throughput roughly halved (16.82 → 8.32 / 8.69
+  tok/s). **The failure is located in the FILL(`-INFINITY`) + `SET_ROWS`
+  reconstruction and backend-sampling path, not in the reduced-vocabulary
+  concept.** The reduced head's logits are bit-exact for copied rows and its
+  isolated timing (1652 → 452 / 234 µs) still holds; the collapse came from
+  scattering into a 248,320-entry buffer, which distorted the candidate softmax
+  below `p_min`, plus severe graph-split latency. **Entry 19** tests direct
+  reduced-vocabulary sampling instead. The reconstruction implementation must not
+  be deployed.
 
 ---
 
@@ -83,7 +86,7 @@ justify replacing Track A. B2 remains available if needed.
 ### INTEGRATION
 * **Status**: `BLOCKED / DEFERRED` — Track B is archived, so there is nothing to integrate into
 * **Rule**: no Track A optimization is imported or assumed portable without independent Track B A/B validation
-* **First candidate if Track B reopens**: ~~draft-vocabulary trimming~~ **Withdrawn** — Entry 18 closed trimming as `NO WIN` on Track A, so there is nothing to port. No candidate is currently nominated.
+* **First candidate if Track B reopens**: draft-vocabulary trimming — **held pending Entry 19**. Entry 18 disproved the reconstruction implementation, not the concept, so nothing is portable yet; Entry 19's direct-sampling result decides whether this candidate survives.
 
 ---
 
