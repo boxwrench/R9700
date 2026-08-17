@@ -54,6 +54,16 @@ Every reported numeric value must be explicitly categorized as:
 * **`CALCULATED`**: Derived via exact mathematical formulas from measured quantities.
 * **`INFERRED`**: Deduced through differencing or model subtraction.
 * **`ESTIMATED`**: Projected or theoretical model values (never treated as measured proof).
+* **`UNEXPLAINED`**: Time or behavior that is real and measured but not accounted for by any identified component. **An unexplained residual stays labelled `UNEXPLAINED`.** It is never redistributed across known components, absorbed into a rounding note, or attributed to a plausible-sounding cause that was not isolated.
+
+### 4a. No Causal Claim Without Direct Evidence
+
+Reporting *what* changed is always permitted. Reporting *why* requires evidence that isolates the mechanism.
+
+* Correlation between a change and a result does **not** license naming a cause.
+* A mechanism that is structurally present is **not** thereby shown to be limiting. Track A entry 15 identified redundant `IQ4_XS` dequantization from pipeline statistics and shader source, inferred it was the performance limiter, and was **refuted by entry 16** when removing it changed almost nothing. The statistics were correct; the causal claim was not.
+* Where a cause is believed but unproven, state it as a hypothesis and name the measurement that would settle it.
+* Retractions are made **in place**, at the original claim, pointing forward to the evidence that overturned it.
 
 ---
 
