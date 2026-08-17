@@ -8,7 +8,7 @@
 
 | Lane | Status | Next / note |
 |---|---|---|
-| **Track A** — Vulkan / Q4 / MTP | `ACTIVE` | Entry 19 **blocked at early gate** — reduced logits reach the sampler on alternate steps only; fix extraction for the 2nd MTP head |
+| **Track A** — Vulkan / Q4 / MTP | `PAUSED AT ENTRY 19 EARLY GATE` | Entry 19 **blocked at early gate** — reduced logits reach the sampler on alternate steps only; fix extraction for the 2nd MTP head |
 | **Track B** — ROCmFPX / NVFP4 | `ARCHIVED / REOPENABLE` | B1 reproduced; uniform primary within Track B; **not adopted as program foundation** |
 | **ROCmFP4 FAST** | `WATCH ITEM` | ~72 tok/s claim requires exact reproducible configuration |
 | **Upstream ROCmFPX** | `POTENTIAL CONTRIBUTION` | gfx1201 reproduction + unresolved greedy MTP divergence |
@@ -16,10 +16,10 @@
 ---
 
 ### TRACK A — Vulkan / GGUF Q4 / Native MTP
-* **Status**: `ACTIVE`
+* **Status**: `PAUSED AT ENTRY 19 EARLY GATE`
 * **Foundation**: Qwen3.8-27B-UD-Q4_K_XL / R9700 (gfx1201) / Vulkan RADV / Native MTP
 * **Historical Reference**: Serial ~29.4 tok/s, Native MTP ~53.2–53.8 tok/s (~1.83× acceleration)
-* **Authoritative Log**: [`docs/qwen3-8-27b-experiment-log.md`](../docs/qwen3-8-27b-experiment-log.md) (Entries 1–18 locked)
+* **Authoritative Log**: [`docs/qwen3-8-27b-experiment-log.md`](../docs/qwen3-8-27b-experiment-log.md) (Entries 1–19 logged; 1–18B locked, 19 blocked)
 * **Draft-Vocabulary Trimming Status**: `FAILED IMPLEMENTATION / CONCEPT REMAINS OPEN`.
   Entry 18's unseen `n_max=2` holdout failed decisively — zero accepted drafts on
   both trimmed arms, decode throughput roughly halved (16.82 → 8.32 / 8.69
