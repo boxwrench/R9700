@@ -16,18 +16,15 @@
 ---
 
 ### TRACK A — Vulkan / GGUF Q4 / Native MTP
-* **Status**: `ACTIVE` — primary optimization effort
-* **Next**: finish the true 64K/32K n_max=2 speculative holdout
-* **Evidence Base**: Mature (Entries 1–17 logged)
-* **Authoritative Log**: [`docs/qwen3-8-27b-experiment-log.md`](../docs/qwen3-8-27b-experiment-log.md)
-* **Latest Accepted Entry**: **Entry 17** (`Tiny-N MUL_MAT + ADD fusion evaluation`)
-* **Experimental / Unaccepted**: draft-vocabulary trimming ($64\text{K} / 32\text{K}$) — `PROMISING / UNVALIDATED`; no true unseen $n_{\text{max}}=2$ speculative holdout exists. See [Track A README](tracks/A-vulkan-q4-mtp/README.md#experimental-work-at-pause--draft-vocabulary-trimming).
-* **Files**: unchanged. No experiment log, dataset, or script was moved, renamed, rewritten, or deleted while establishing Track B.
+* **Status**: `ACTIVE`
+* **Foundation**: Qwen3.8-27B-UD-Q4_K_XL / R9700 (gfx1201) / Vulkan RADV / Native MTP
+* **Historical Reference**: Serial ~29.4 tok/s, Native MTP ~53.2–53.8 tok/s (~1.83× acceleration)
+* **Authoritative Log**: [`docs/qwen3-8-27b-experiment-log.md`](../../docs/qwen3-8-27b-experiment-log.md) (Entries 1–17 locked)
+* **Draft-Vocabulary Trimming Status**: `PROMISING — NOT ACCEPTED` (Entering tonight's true speculative holdout validation)
 
 ---
 
 ### TRACK B — ROCmFPX / Native NVFP4
-* **Status**: `ARCHIVED / REOPENABLE` — B1 reproduced, characterized, and deprioritized. **[Closeout](tracks/B-rocmfpx-nvfp4/CLOSEOUT.md)**
 * **Within-track outcome**: `B1 REPRODUCED — UNIFORM PRIMARY`
 * **Not adopted** as the program foundation; primary effort returns to Track A
 * **Upstream snapshot**: `f4b2c5a3edfd183274641094d0db0fcc8092c0ad` (`charlie12345/ROCmFPX`, branch `main`, fetched 2026-08-17T03:53:08Z)

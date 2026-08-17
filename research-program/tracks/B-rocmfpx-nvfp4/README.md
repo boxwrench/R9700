@@ -1,6 +1,12 @@
 # Track B — ROCmFPX / Native NVFP4
 
-## Status: ARCHIVED / REOPENABLE — B1 reproduced, characterized, deprioritized
+## Status: ARCHIVED / REOPENABLE
+
+*For full reproduction, benchmark results, semantic findings, and archival decision details, see the [Track B Closeout Document](CLOSEOUT.md).*
+
+---
+
+## Mission & Retrospective
 
 > [!IMPORTANT]
 > **Read [`CLOSEOUT.md`](CLOSEOUT.md) first.** B1 succeeded: native NVFP4 runs on
