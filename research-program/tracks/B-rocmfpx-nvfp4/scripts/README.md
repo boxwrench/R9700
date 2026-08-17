@@ -18,6 +18,30 @@ command, or post-process logs.
 | `05_extract_basic_metrics.py` | Parses metrics out of raw logs, attaching file, line number, and verbatim source line to every value. |
 | `06_compare_runs.py` | Aggregates JSONL/CSV run records: n, mean, stdev, median, min, max, p10, p90, and paired deltas. |
 
+### B1 drivers
+
+Built for the B1 baseline and reusable for any four-arm model × mode sweep.
+
+| Script | Purpose |
+|---|---|
+| `b1_run_arms.sh` | Runs MIXED/UNIFORM × SERIAL/MTP with warmups and N repetitions on one pinned device. Parses nothing; refuses to overwrite an existing result set. |
+| `b1_parse.py` | Turns arm logs into JSONL records, attaching file, line number, and verbatim source line to every value. Unmatched required fields are reported, never defaulted. |
+| `b1_report.py` | Aggregates the JSONL into the four-arm table and the derived acceptance quantities. Cross-checks accepted-drafts/round against the raw counters and flags disagreement. |
+| `b1_check_outputs.py` | Determinism within an arm, MTP-vs-serial greedy agreement, NaN/inf, empty and degenerate output. |
+
+**Run correctness probes with stdout and stderr separated.** `b1_run_arms.sh`
+merges them (`> log 2>&1`) because timing needs both in one place, but llama-cli
+writes generated text and log records to the same stream, so log lines land
+*inside* the generated text. Comparing merged logs makes identical generations
+look non-deterministic. `b1_check_outputs.py` strips embedded log records
+defensively, but a split-stream probe is the reliable form.
+
+**`--verbosity 3`, not `-v`.** `-v` enables per-draft debug logging that costs
+about 3% of MTP decode throughput while adding nothing the metrics need.
+`--verbosity 3` still emits perf and the `statistics draft-mtp` counters. Note
+that neither level emits buffer-size lines — VRAM needs a separate `-v` probe
+run, which must not be used for timing.
+
 ## Design commitments
 
 These exist to prevent specific mistakes, most of which this program has already
