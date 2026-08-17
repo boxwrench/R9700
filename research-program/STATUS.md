@@ -8,7 +8,7 @@
 
 | Lane | Status | Next / note |
 |---|---|---|
-| **Track A** — Vulkan / Q4 / MTP | `ACTIVE` | Entry 18 disproved the *reconstruction* implementation; **Entry 19** tests direct reduced-vocabulary sampling |
+| **Track A** — Vulkan / Q4 / MTP | `ACTIVE` | Entry 19 **blocked at early gate** — reduced logits reach the sampler on alternate steps only; fix extraction for the 2nd MTP head |
 | **Track B** — ROCmFPX / NVFP4 | `ARCHIVED / REOPENABLE` | B1 reproduced; uniform primary within Track B; **not adopted as program foundation** |
 | **ROCmFP4 FAST** | `WATCH ITEM` | ~72 tok/s claim requires exact reproducible configuration |
 | **Upstream ROCmFPX** | `POTENTIAL CONTRIBUTION` | gfx1201 reproduction + unresolved greedy MTP divergence |
@@ -28,9 +28,20 @@
   concept.** The reduced head's logits are bit-exact for copied rows and its
   isolated timing (1652 → 452 / 234 µs) still holds; the collapse came from
   scattering into a 248,320-entry buffer, which distorted the candidate softmax
-  below `p_min`, plus severe graph-split latency. **Entry 19** tests direct
-  reduced-vocabulary sampling instead. The reconstruction implementation must not
-  be deployed.
+  below `p_min`, plus severe graph-split latency. The reconstruction
+  implementation must not be deployed.
+* **Entry 19 — direct reduced-vocabulary sampling**: `BLOCKED AT EARLY GATE`.
+  Reduced heads are correctly materialized (65536 / 32768 rows) and `d2t` mapping
+  works, but reduced logits reach the sampler on **alternate draft steps only**;
+  the others read an all-zero buffer, giving `p_top = 0.1` and stopping drafting.
+  Both trimmed arms collapse to serial (27.58 / 27.79 tok/s vs FULL 52.96) and
+  are within 0.2 tok/s of each other despite 2× vocabulary, ruling out
+  vocabulary-dependent cost. No holdout was run, per the pre-registered gate.
+* **Baseline defect found and fixed**: an uncommitted `llama-context.cpp` change
+  in the experimental worktree had corrupted the FULL arm — interleaved target /
+  draft output and a false 42.32 tok/s. Corrected; FULL now reads 52.96–53.08
+  tok/s, matching the historical ~53.2–53.8 reference. **Any measurement taken
+  from that worktree before this fix is invalid.**
 
 ---
 
