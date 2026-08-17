@@ -23,12 +23,12 @@ The program is formally split into two independent, decoupled research tracks:
      │      Native MTP Line      │                               │     Native MTP Line       │
      └─────────────┬─────────────┘                               └─────────────┬─────────────┘
                    │                                                           │
-                   │ (STATUS: PAUSED / PRESERVED)                              │ (STATUS: NEW / REPRODUCING)
+                   │ (STATUS: ACTIVE)                                          │ (STATUS: ARCHIVED / REOPENABLE)
                    │                                                           │
                    ▼                                                           ▼
      ┌───────────────────────────┐                               ┌───────────────────────────┐
      │ Deeply characterized line │                               │ Upstream-first baseline   │
-     │ Entries 1–17 logged       │                               │ Pure stock reproduction   │
+     │ Entries 1–18 logged       │                               │ Pure stock reproduction   │
      │ Authoritative reference   │                               │ Clean gfx1201 benchmarks  │
      └─────────────┬─────────────┘                               └─────────────┬─────────────┘
                    │                                                           │
@@ -55,9 +55,9 @@ The program is formally split into two independent, decoupled research tracks:
   * Vulkan kernel profiling and execution differencing
   * Entry 16: `IQ4_XS` dequant-reuse shader investigation (closed, $<0.2\text{ ms}$ gain)
   * Entry 17: Tiny-$N$ `MUL_MAT + ADD` fusion investigation (closed, neutral wall time)
-  * Preliminary draft-vocabulary trimming prototype ($64\text{K} / 32\text{K}$ rows, $1.42\text{ ms}$ GPU kernel reduction)
-* **Current Status**: **`PAUSED / PRESERVED`** while Track B is established.
-* **Important**: The preliminary 32K draft-vocabulary trimming result is **NOT production-approved**; full multi-workload holdout validation was paused. Existing Track A logs and datasets remain at their current repository paths and are authoritative.
+  * Entry 18: draft-vocabulary trimming ($64\text{K} / 32\text{K}$ rows) — closed, `NO WIN`; the $1.42\text{ ms}$ kernel reduction was real but speculation collapsed end-to-end
+* **Current Status**: **`ACTIVE`** — primary optimization effort, returned here after Track B was archived.
+* **Important**: Draft-vocabulary trimming is **closed and must not be deployed**. Entry 18's unseen $n_{\text{max}}=2$ holdout produced **zero accepted drafts** on both trimmed arms and roughly halved decode throughput. Existing Track A logs and datasets remain at their current repository paths and are authoritative.
 
 ### TRACK B — ROCmFPX / Native NVFP4
 

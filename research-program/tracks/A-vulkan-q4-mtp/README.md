@@ -43,7 +43,7 @@ This track indexes and preserves the deeply characterized Vulkan/RADV Qwen3.8-27
 
 ## Current Stop Point
 
-* **Accepted Log State**: Entries 1 through 17 are formally logged and locked.
+* **Accepted Log State**: Entries 1 through 18 are formally logged and locked.
 * **Verification Exhaustion**: Verification-side GPU micro-optimizations on the Q4_K_XL trunk are largely exhausted ($41.26\text{ ms}$ verification floor).
 * **Proposer Identification**: The $\approx 5.06\text{ ms}$ proposer forward was identified as the largest remaining optimization target, with the Q6_K LM-head matvec ($[248320, 5120]$, $1.04\text{ GB}$) accounting for $1,652\ \mu\text{s}$ per dispatch.
 * **Pause Condition**: Broader multi-workload holdout validation and production acceptance were **NOT completed** before pausing to establish Track B.
@@ -52,10 +52,19 @@ This track indexes and preserves the deeply characterized Vulkan/RADV Qwen3.8-27
 
 ## Experimental Work At Pause — Draft-Vocabulary Trimming
 
-### Status: `PROMISING — NOT ACCEPTED`
+### Status: `CLOSED — NO WIN`
 
-This work occurred **after** entry 17 and is **not** a numbered log entry. It is
-**not** an accepted production optimization and must not be described as one.
+> [!WARNING]
+> **This branch is closed.** The true unseen $n_{\text{max}}=2$ speculative
+> holdout was run and **failed decisively** — speculation collapsed to zero
+> accepted drafts on both trimmed arms and decode throughput roughly halved. See
+> **Entry 18** in the
+> [experiment log](../../../docs/qwen3-8-27b-experiment-log.md). Do not deploy
+> 32K or 64K trimming.
+>
+> The passages below record what was believed **before** that holdout and are
+> retained as history. The microbenchmark wins in "Established" are real; they
+> simply did not survive end-to-end.
 
 ### Established
 
@@ -72,12 +81,21 @@ This work occurred **after** entry 17 and is **not** a numbered log entry. It is
 * Scatter / `d2t` remap cost is small: $\approx 70\ \mu\text{s}$ per call.
 * Isolated / single-step proposer timing improves strongly.
 * An independent **non-multitoken** holdout showed roughly **+3–4%** direct throughput.
-* On the prompts tested, greedy committed output remained **identical**.
+* ~~On the prompts tested, greedy committed output remained **identical**.~~
+  **Contradicted by Entry 18:** on 16 unseen holdout prompts the trimmed arms
+  matched the full-vocabulary output **0 / 16** times, because speculation had
+  collapsed entirely.
 
 ### Unresolved
 
-* **No true unseen $n_{\text{max}}=2$ speculative holdout.** The $+5.7\%$ figure
-  under real MTP has not been demonstrated on independent data.
+* ~~**No true unseen $n_{\text{max}}=2$ speculative holdout.** The $+5.7\%$ figure
+  under real MTP has not been demonstrated on independent data.~~ **Resolved by
+  Entry 18** — the holdout ran and the trimmed arms produced **zero** accepted
+  drafts, so the $+5.7\%$ figure did not reproduce in any form. Root cause:
+  scattering trimmed logits into a $248{,}320$-element `-INFINITY` buffer
+  distorts the candidate softmax, so no candidate clears $p_{\text{min}} \ge 0.3$
+  at step 0; the failed proposer graph is then still evaluated every round, at an
+  unamortized $28\text{--}33\text{ ms}$ cost.
 * **Multi-draft proposer accounting is unreconciled.** The multi-draft
   proposer $\text{dur}(g)$ does not reconcile with the single-step measurements.
   **The cause of this residual is UNKNOWN.** It has not been attributed to CPU
@@ -87,13 +105,12 @@ This work occurred **after** entry 17 and is **not** a numbered log entry. It is
   acceptance distribution — as opposed to leaving it intact — is unmeasured.
 * **$32\text{K}$ vs $64\text{K}$ is undecided.** No production winner has been chosen.
 
-### Resumption Gate
+### Resumption Gate — satisfied, and failed
 
-Track A resumes on this thread only with a **true unseen $n_{\text{max}}=2$
-holdout** carrying:
+The gate required a **true unseen $n_{\text{max}}=2$ holdout** carrying raw round
+counters, paired proposal logging, and direct wall-clock throughput. Entry 18
+delivered all three across 16 unseen prompts in 6 domains with rotated arm order.
+**The result was `NO WIN (≤0%)`**, and the thread is closed rather than resumed.
 
-1. raw round counters,
-2. paired proposal logging, and
-3. direct wall-clock throughput.
-
-Component timings and acceptance rates are not sufficient to close this.
+The gate did its job: component timings and acceptance rates had looked
+favourable, and only the end-to-end wall-clock measurement exposed the collapse.
