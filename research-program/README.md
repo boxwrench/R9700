@@ -55,9 +55,9 @@ The program is formally split into two independent, decoupled research tracks:
   * Vulkan kernel profiling and execution differencing
   * Entry 16: `IQ4_XS` dequant-reuse shader investigation (closed, $<0.2\text{ ms}$ gain)
   * Entry 17: Tiny-$N$ `MUL_MAT + ADD` fusion investigation (closed, neutral wall time)
-  * Entry 18: draft-vocabulary trimming ($64\text{K} / 32\text{K}$ rows) — closed, `NO WIN`; the $1.42\text{ ms}$ kernel reduction was real but speculation collapsed end-to-end
+  * Entry 18: draft-vocabulary trimming via full-vocabulary reconstruction ($64\text{K} / 32\text{K}$ rows) — `FAILED IMPLEMENTATION`; the $1.42\text{ ms}$ kernel reduction was real, but the FILL + `SET_ROWS` reconstruction collapsed speculation end-to-end
 * **Current Status**: **`ACTIVE`** — primary optimization effort, returned here after Track B was archived.
-* **Important**: Draft-vocabulary trimming is **closed and must not be deployed**. Entry 18's unseen $n_{\text{max}}=2$ holdout produced **zero accepted drafts** on both trimmed arms and roughly halved decode throughput. Existing Track A logs and datasets remain at their current repository paths and are authoritative.
+* **Important**: The **reconstruction** implementation of draft-vocabulary trimming must not be deployed — Entry 18's unseen $n_{\text{max}}=2$ holdout produced **zero accepted drafts** on both trimmed arms and roughly halved decode throughput. The failure localized to the reconstruction and backend-sampling path, **not** to the reduced-vocabulary concept, which remains open and is tested by **Entry 19** (direct reduced-vocabulary sampling). Existing Track A logs and datasets remain at their current repository paths and are authoritative.
 
 ### TRACK B — ROCmFPX / Native NVFP4
 

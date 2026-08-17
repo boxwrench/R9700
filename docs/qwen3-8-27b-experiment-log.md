@@ -819,10 +819,35 @@ reduce work per byte.
 3. **Severe End-to-End Regression**: In addition to zero speculative draft generation, evaluating the failed proposer graph on every round incurred an unamortized $28\text{--}33\text{ ms}$ latency penalty per token, cutting decode speed in half ($16.82 \to 8.69\text{ tok/s}$).
 4. **Proposer Duration Accounting (`dur_g`)**: Inspection of `common/speculative.cpp` confirms that `dur(g)` (`t_draft_us`) measures synchronized host wall time from the entry of `impl->draft()` to its return. It includes CPU batch construction, GPU graph execution, synchronous GPU-to-host readback (`llama_get_logits_ith`), and CPU softmax evaluation. It is not an isolated GPU kernel timer.
 
-### Pre-Registered Decision: VOCAB TRIMMING DOES NOT VALIDATE (CLOSED)
+### Pre-Registered Decision: `FAILED IMPLEMENTATION / CONCEPT REMAINS OPEN`
 
-* **Outcome**: **`NO WIN (≤0%)`**.
-* **Action**: Formally close the draft-vocabulary trimming branch. Do not deploy 32K or 64K trimming to production.
+* **Outcome**: **`NO WIN (≤0%)`** for the *reconstruction* implementation as built.
+* **Action**: Do not deploy this implementation. Do **not** deploy 32K or 64K
+  trimming via the reconstruction path to production.
+
+> [!IMPORTANT]
+> **What this entry disproved, precisely.** The measured failure is located in
+> the FILL(`-INFINITY`) + `SET_ROWS` reconstruction and backend-sampling path,
+> **not** in the reduced-vocabulary concept. Specifically:
+>
+> * The reduced-head logits were subsequently proven **bit-exact for copied
+>   rows** — the head computes the right numbers.
+> * The reduced-head **mechanism timing remains valid** (1652 → 452 / 234 µs
+>   per dispatch, isolated).
+> * The failure occurred **downstream**, in reconstructing a 248,320-entry
+>   logit tensor and handing that view to the backend sampler. Scattering into
+>   a `-INFINITY` buffer distorted the candidate softmax so nothing cleared
+>   $p_{\text{min}}$.
+> * Severe **graph-split latency** made that architecture unsuitable
+>   regardless of the sampling distortion.
+>
+> The concept therefore **remains open**. **Entry 19** tests direct
+> reduced-vocabulary sampling — sampling in the reduced space and mapping the
+> local index through `d2t`, with no reconstruction at all.
+
+**The raw holdout results above are preserved unchanged.** They are evidence
+that the end-to-end validation gate worked: component timings and acceptance
+rates looked favourable, and only the wall-clock holdout exposed the collapse.
 
 ## Open threads
 

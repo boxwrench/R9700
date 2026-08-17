@@ -52,19 +52,25 @@ This track indexes and preserves the deeply characterized Vulkan/RADV Qwen3.8-27
 
 ## Experimental Work At Pause — Draft-Vocabulary Trimming
 
-### Status: `CLOSED — NO WIN`
+### Status: `FAILED IMPLEMENTATION / CONCEPT REMAINS OPEN`
 
 > [!WARNING]
-> **This branch is closed.** The true unseen $n_{\text{max}}=2$ speculative
-> holdout was run and **failed decisively** — speculation collapsed to zero
-> accepted drafts on both trimmed arms and decode throughput roughly halved. See
-> **Entry 18** in the
-> [experiment log](../../../docs/qwen3-8-27b-experiment-log.md). Do not deploy
-> 32K or 64K trimming.
+> **The reconstruction implementation is disproved and must not be deployed.**
+> Entry 18's unseen $n_{\text{max}}=2$ holdout collapsed to zero accepted drafts
+> on both trimmed arms, roughly halving decode throughput. See **Entry 18** in
+> the [experiment log](../../../docs/qwen3-8-27b-experiment-log.md).
 >
-> The passages below record what was believed **before** that holdout and are
-> retained as history. The microbenchmark wins in "Established" are real; they
-> simply did not survive end-to-end.
+> **What failed was the architecture, not the idea.** The reduced head's logits
+> are bit-exact for copied rows and its isolated timing still holds. The collapse
+> occurred downstream, where the trimmed logits were scattered into a
+> 248,320-entry FILL(`-INFINITY`) buffer via `SET_ROWS` and that reconstructed
+> view was handed to the backend sampler — distorting the candidate softmax below
+> $p_{\text{min}}$ and adding severe graph-split latency.
+>
+> **Entry 19** tests the architecture that should have been used originally:
+> sample directly in the reduced space, then map the local index through `d2t`.
+> The passages below record what was believed before Entry 18 and are retained as
+> history.
 
 ### Established
 
@@ -82,16 +88,18 @@ This track indexes and preserves the deeply characterized Vulkan/RADV Qwen3.8-27
 * Isolated / single-step proposer timing improves strongly.
 * An independent **non-multitoken** holdout showed roughly **+3–4%** direct throughput.
 * ~~On the prompts tested, greedy committed output remained **identical**.~~
-  **Contradicted by Entry 18:** on 16 unseen holdout prompts the trimmed arms
-  matched the full-vocabulary output **0 / 16** times, because speculation had
-  collapsed entirely.
+  **Contradicted by Entry 18 for the reconstruction path:** on 16 unseen holdout
+  prompts the trimmed arms matched full-vocabulary output **0 / 16** times — but
+  because speculation had collapsed entirely, not because trimming changed
+  predictions. The arms were not running comparable algorithms.
 
 ### Unresolved
 
 * ~~**No true unseen $n_{\text{max}}=2$ speculative holdout.** The $+5.7\%$ figure
-  under real MTP has not been demonstrated on independent data.~~ **Resolved by
+  under real MTP has not been demonstrated on independent data.~~ **Addressed by
   Entry 18** — the holdout ran and the trimmed arms produced **zero** accepted
-  drafts, so the $+5.7\%$ figure did not reproduce in any form. Root cause:
+  drafts, so the $+5.7\%$ figure did not reproduce under the reconstruction
+  implementation. It remains undemonstrated, not disproved. Root cause:
   scattering trimmed logits into a $248{,}320$-element `-INFINITY` buffer
   distorts the candidate softmax, so no candidate clears $p_{\text{min}} \ge 0.3$
   at step 0; the failed proposer graph is then still evaluated every round, at an
@@ -105,12 +113,15 @@ This track indexes and preserves the deeply characterized Vulkan/RADV Qwen3.8-27
   acceptance distribution — as opposed to leaving it intact — is unmeasured.
 * **$32\text{K}$ vs $64\text{K}$ is undecided.** No production winner has been chosen.
 
-### Resumption Gate — satisfied, and failed
+### Resumption Gate — satisfied, and failed for the reconstruction path
 
 The gate required a **true unseen $n_{\text{max}}=2$ holdout** carrying raw round
 counters, paired proposal logging, and direct wall-clock throughput. Entry 18
 delivered all three across 16 unseen prompts in 6 domains with rotated arm order.
-**The result was `NO WIN (≤0%)`**, and the thread is closed rather than resumed.
+**The result was `NO WIN (≤0%)`** — for the reconstruction implementation.
 
 The gate did its job: component timings and acceptance rates had looked
 favourable, and only the end-to-end wall-clock measurement exposed the collapse.
+Because the failure localized to the reconstruction and backend-sampling path
+rather than to the reduced head, the concept re-enters the gate as **Entry 19**
+under the same conditions.
