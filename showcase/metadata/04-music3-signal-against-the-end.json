@@ -1,0 +1,39 @@
+{
+  "run_order": 4,
+  "run_id": "04-music3-signal-against-the-end",
+  "name": "MiniMax Music 3 — Signal Against the End",
+  "workflow": "music3",
+  "workflow_file": "production/workflows/music3.json",
+  "previous_workflow": "h3_i2v",
+  "workload": "MiniMax Music 3",
+  "prompt_id": "51fad938-36bc-4d14-9ccf-851b8d8a6767",
+  "timestamp_utc": "2026-08-18T21:53:32Z",
+  "generated_at": "2026-08-18T14:53:32-0700",
+  "wall_time_s": 28.48,
+  "wall_seconds": 28.48,
+  "peak_vram_gib": "NA",
+  "artifact": "/ai/artifacts/runs/minimax-h3/r9700-final-showcase/04-music3-signal-against-the-end_00001.flac",
+  "output_file": "04-music3-signal-against-the-end_00001.flac",
+  "output_format": "FLAC",
+  "duration_s": 14.99,
+  "preflight_state": "PASS",
+  "models": {
+    "dit": "minimax_music3_dit_int8_convrot.safetensors",
+    "text_encoder": "minimax_music3_text_encoder_pruned_int8_convrot.safetensors",
+    "dav": "minimax_music3_dav.safetensors"
+  },
+  "parameters": {
+    "seed": 8112080,
+    "steps": 20,
+    "sampler": "res_multistep",
+    "scheduler": "simple",
+    "cfg_scale": 1.5,
+    "top_k": 50,
+    "max_duration": 15.0
+  },
+  "caption": "A defiant, high-energy classic galloping heavy metal song with a dark science-fiction atmosphere and a strong melodic sense.",
+  "gpu": "AMD Radeon AI PRO R9700",
+  "comfyui_version": "0.33.2",
+  "pytorch_version": "2.9.1+rocm7.2.1",
+  "launch_flags": ["--disable-mmap", "--disable-dynamic-vram", "--disable-smart-memory", "--bf16-vae", "--reserve-vram", "2"]
+}

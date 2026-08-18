@@ -1,0 +1,9 @@
+experiment	workload	config	load_s	cond_s	sampling_s	vae_s	wall_s	peak_vram_gib	notes
+encoder_ab	768x448_41f_8st	INT8_ConvRot	1.97	22.56	10.65	9.60	43.36	21.42	14.32 GiB disk, saves 7.2 GiB VRAM vs BF16
+encoder_ab	768x448_41f_8st	BF16	4.47	22.80	10.64	9.60	47.51	28.58	24.46 GiB disk, identical conditioning speed
+cond_accounting	768x448_41f_8st	pos_changed_only	0.00	11.46	10.65	9.60	31.71	21.42	negative prompt cached (0.00s)
+cond_accounting	768x448_41f_8st	both_changed	0.00	22.14	10.65	9.60	42.39	21.42	pos 10.59s + neg 11.55s (each Gemma pass ~11s)
+token_floor	768x448_41f_8st	floor_1024	0.00	22.51	10.62	9.60	43.78	21.42	baseline upstream ComfyUI pad floor
+token_floor	768x448_41f_8st	floor_256	0.00	5.35	10.70	9.60	25.69	21.42	SELECTED: -41.3% wall time, preserved semantics
+token_floor	768x448_41f_8st	floor_128	0.00	4.60	10.70	9.60	25.04	21.42	diminishing returns, tighter sequence margin
+historical	896x512_121f_11st	baseline_native	0.00	22.50	34.80	9.70	67.00	22.50	historical benchmark workload (different resolution/frames)

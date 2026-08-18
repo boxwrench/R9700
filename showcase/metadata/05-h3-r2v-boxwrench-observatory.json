@@ -1,0 +1,48 @@
+{
+  "run_order": 5,
+  "name": "MiniMax H3 Reference-to-Video — Observatory",
+  "workflow": "h3_r2v",
+  "workflow_file": "showcase/workflows/h3_r2v-showcase.json",
+  "previous_workflow": "music3",
+  "prompt_id": "6dd30fec-7d0c-47c6-a742-9e6408668975",
+  "wall_seconds": 81.47,
+  "peak_vram_gib": "NA",
+  "artifact": "/ai/artifacts/runs/minimax-h3/r9700-final-showcase/05-h3-r2v-boxwrench-observatory_00001_.mp4",
+  "parameters": {
+    "ref_image": "bx77-anchor.png",
+    "ref_image_size": "match",
+    "width": 608,
+    "height": 352,
+    "frames": 39,
+    "fps": 24.0,
+    "steps": 20,
+    "sampler": "res_multistep",
+    "scheduler": "simple",
+    "seed": 8112026
+  },
+  "models": [
+    "minimax_h3_ref2va_pruned_fp8_scaled.safetensors",
+    "qwen3vl_32b_minimax_h3_fp8.safetensors",
+    "minimax_h3_video_vae_fp16.safetensors",
+    "minimax_h3_audio_vae_fp32.safetensors"
+  ],
+  "generated_at": "2026-08-18T15:38:01-0700",
+  "gpu": "AMD Radeon AI PRO R9700 (gfx1201)",
+  "preflight_state": "PASS",
+  "failed_attempts": [
+    {"prompt_id": "8c766146-e35c-4802-9fab-2efe34356f12", "issue": "execute() got an unexpected keyword argument 'ref_image_1' (flat autogrow slot name attempted directly, without the 'ref_images.' dotted path prefix required by build_nested_inputs)"},
+    {"prompt_id": "1d6d7924-38f3-4a08-93e0-f0ef98b4db54", "issue": "RuntimeError: tensor a (3072) must match tensor b (128) at dim 2 — same deterministic VAEDecodeAudio shape-mismatch bug seen in LTX run 1"},
+    {"prompt_id": "8a80c8a8-6ef2-4a95-addf-0429b386f29b", "issue": "execute() got an unexpected keyword argument 'ref_image' (legacy singular key, not present in the live V3 Autogrow-based schema at all)"},
+    {"prompt_id": "e1270b7f-6cb5-4027-ab96-c7bed074b965", "issue": "same VAEDecodeAudio tensor-mismatch as above"},
+    {"prompt_id": "de0af02f-070a-45f2-8877-287a3bf79d0d", "issue": "execute() got an unexpected keyword argument 'ref_image_0' (flat key, still missing the required 'ref_images.' dotted prefix)"},
+    {"prompt_id": "7a71502d-1722-46e8-a6f3-46b217b2d416", "issue": "execute() got an unexpected keyword argument 'ref_image' (previous agent's carried-over handoff state; legacy key + audio_vae + ref_image_size, still missing the dotted autogrow path)"}
+  ],
+  "root_cause": "MiniMaxH3ReferenceToVideo.ref_images is an io.Autogrow.Input (prefix='ref_image_', min=0, max=9). ComfyUI's V3 dynamic-input machinery (comfy_api/latest/_io.py: parse_class_inputs / Autogrow._expand_schema_for_dynamic / build_nested_inputs) only recognizes an autogrow slot when the prompt JSON's flat input-dict key is the DOTTED path '<autogrow_field_id>.<slot_name>' (e.g. 'ref_images.ref_image_0') — not the bare slot name and not the legacy singular 'ref_image'. This exact convention is what the node's own frontend (custom_nodes/ComfyUI-ALLinONE-MinimaxH3/web/one_node_minimax_h3.js, wf['6'].inputs[`ref_images.ref_image_${idx}`]=[id,0]) already does; it was just never applied to the hand-built showcase R2V prompt JSON. audio_vae and ref_image_size are separate required/optional non-dynamic inputs that also had to be added — the production workflow predates both of these schema additions.",
+  "resolution": "Built showcase/workflows/h3_r2v-showcase.json as a copy of production/workflows/h3_r2v.json with: (1) 'ref_image' replaced by 'ref_images.ref_image_0', (2) 'audio_vae': ['4', 0] added, (3) 'ref_image_size': 'match' added, (4) LoadImage pointed at bx77-anchor.png, (5) showcase prompt/filename_prefix substituted. production/workflows/h3_r2v.json was left completely unmodified — git diff confirms no changes to any file under production/.",
+  "correctness_gate": {
+    "valid_video": true,
+    "has_audio_track": true,
+    "duration_matches_frame_count": "1.625s at 39 frames / 24fps, confirmed by ffprobe",
+    "identity_preserved": "yes — subject is a visibly gunmetal/brass armored robot knight matching the bx77 anchor's general silhouette and material language; single accepted take, no further iteration performed after success"
+  }
+}

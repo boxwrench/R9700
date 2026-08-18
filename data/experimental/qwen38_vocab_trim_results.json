@@ -1,0 +1,173 @@
+{
+  "BASELINE": [
+    {
+      "tps": 26.43,
+      "round_ms": 37.83720930232558,
+      "prop_ms": 3.088077519379845,
+      "dur_g": 398.362,
+      "p0": 0.0,
+      "p1": 0.0,
+      "acc_pct": 0.0,
+      "mean_acc_len": 1.0,
+      "hash": "071a39fe954dc91a8460500a333baaf14bf78eb812a2cacfd3b2129acc4b9f98"
+    },
+    {
+      "tps": 26.356,
+      "round_ms": 37.945736434108525,
+      "prop_ms": 3.035341085271318,
+      "dur_g": 391.559,
+      "p0": 0.0,
+      "p1": 0.0,
+      "acc_pct": 0.0,
+      "mean_acc_len": 1.0,
+      "hash": "071a39fe954dc91a8460500a333baaf14bf78eb812a2cacfd3b2129acc4b9f98"
+    },
+    {
+      "tps": 26.438,
+      "round_ms": 37.82170542635659,
+      "prop_ms": 3.0547596899224807,
+      "dur_g": 394.064,
+      "p0": 0.0,
+      "p1": 0.0,
+      "acc_pct": 0.0,
+      "mean_acc_len": 1.0,
+      "hash": "071a39fe954dc91a8460500a333baaf14bf78eb812a2cacfd3b2129acc4b9f98"
+    },
+    {
+      "tps": 26.568,
+      "round_ms": 37.63565891472868,
+      "prop_ms": 2.815480620155039,
+      "dur_g": 363.197,
+      "p0": 0.0,
+      "p1": 0.0,
+      "acc_pct": 0.0,
+      "mean_acc_len": 1.0,
+      "hash": "071a39fe954dc91a8460500a333baaf14bf78eb812a2cacfd3b2129acc4b9f98"
+    },
+    {
+      "tps": 26.412,
+      "round_ms": 37.86046511627907,
+      "prop_ms": 3.060527131782946,
+      "dur_g": 394.808,
+      "p0": 0.0,
+      "p1": 0.0,
+      "acc_pct": 0.0,
+      "mean_acc_len": 1.0,
+      "hash": "071a39fe954dc91a8460500a333baaf14bf78eb812a2cacfd3b2129acc4b9f98"
+    }
+  ],
+  "64K": [
+    {
+      "tps": 27.305,
+      "round_ms": 36.62015503875969,
+      "prop_ms": 1.849263565891473,
+      "dur_g": 238.555,
+      "p0": 0.0,
+      "p1": 0.0,
+      "acc_pct": 0.0,
+      "mean_acc_len": 1.0,
+      "hash": "071a39fe954dc91a8460500a333baaf14bf78eb812a2cacfd3b2129acc4b9f98"
+    },
+    {
+      "tps": 27.441,
+      "round_ms": 36.44186046511628,
+      "prop_ms": 1.5845658914728682,
+      "dur_g": 204.409,
+      "p0": 0.0,
+      "p1": 0.0,
+      "acc_pct": 0.0,
+      "mean_acc_len": 1.0,
+      "hash": "071a39fe954dc91a8460500a333baaf14bf78eb812a2cacfd3b2129acc4b9f98"
+    },
+    {
+      "tps": 27.299,
+      "round_ms": 36.627906976744185,
+      "prop_ms": 1.8557286821705428,
+      "dur_g": 239.389,
+      "p0": 0.0,
+      "p1": 0.0,
+      "acc_pct": 0.0,
+      "mean_acc_len": 1.0,
+      "hash": "071a39fe954dc91a8460500a333baaf14bf78eb812a2cacfd3b2129acc4b9f98"
+    },
+    {
+      "tps": 27.481,
+      "round_ms": 36.3875968992248,
+      "prop_ms": 1.5710542635658915,
+      "dur_g": 202.666,
+      "p0": 0.0,
+      "p1": 0.0,
+      "acc_pct": 0.0,
+      "mean_acc_len": 1.0,
+      "hash": "071a39fe954dc91a8460500a333baaf14bf78eb812a2cacfd3b2129acc4b9f98"
+    },
+    {
+      "tps": 27.297,
+      "round_ms": 36.63565891472868,
+      "prop_ms": 1.862875968992248,
+      "dur_g": 240.311,
+      "p0": 0.0,
+      "p1": 0.0,
+      "acc_pct": 0.0,
+      "mean_acc_len": 1.0,
+      "hash": "071a39fe954dc91a8460500a333baaf14bf78eb812a2cacfd3b2129acc4b9f98"
+    }
+  ],
+  "32K": [
+    {
+      "tps": 27.67,
+      "round_ms": 36.13953488372093,
+      "prop_ms": 1.3955426356589147,
+      "dur_g": 180.025,
+      "p0": 0.0,
+      "p1": 0.0,
+      "acc_pct": 0.0,
+      "mean_acc_len": 1.0,
+      "hash": "071a39fe954dc91a8460500a333baaf14bf78eb812a2cacfd3b2129acc4b9f98"
+    },
+    {
+      "tps": 27.63,
+      "round_ms": 36.1937984496124,
+      "prop_ms": 1.37968992248062,
+      "dur_g": 177.98,
+      "p0": 0.0,
+      "p1": 0.0,
+      "acc_pct": 0.0,
+      "mean_acc_len": 1.0,
+      "hash": "071a39fe954dc91a8460500a333baaf14bf78eb812a2cacfd3b2129acc4b9f98"
+    },
+    {
+      "tps": 27.648,
+      "round_ms": 36.17054263565891,
+      "prop_ms": 1.402186046511628,
+      "dur_g": 180.882,
+      "p0": 0.0,
+      "p1": 0.0,
+      "acc_pct": 0.0,
+      "mean_acc_len": 1.0,
+      "hash": "071a39fe954dc91a8460500a333baaf14bf78eb812a2cacfd3b2129acc4b9f98"
+    },
+    {
+      "tps": 27.676,
+      "round_ms": 36.13178294573643,
+      "prop_ms": 1.381860465116279,
+      "dur_g": 178.26,
+      "p0": 0.0,
+      "p1": 0.0,
+      "acc_pct": 0.0,
+      "mean_acc_len": 1.0,
+      "hash": "071a39fe954dc91a8460500a333baaf14bf78eb812a2cacfd3b2129acc4b9f98"
+    },
+    {
+      "tps": 27.622,
+      "round_ms": 36.201550387596896,
+      "prop_ms": 1.3814573643410852,
+      "dur_g": 178.208,
+      "p0": 0.0,
+      "p1": 0.0,
+      "acc_pct": 0.0,
+      "mean_acc_len": 1.0,
+      "hash": "071a39fe954dc91a8460500a333baaf14bf78eb812a2cacfd3b2129acc4b9f98"
+    }
+  ]
+}

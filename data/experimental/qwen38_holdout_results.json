@@ -1,0 +1,386 @@
+{
+  "BASELINE": [
+    {
+      "prompt_name": "Code/Async",
+      "dec_tokens": 193,
+      "dec_sec": 7.29,
+      "speed_tps": 26.474,
+      "stats": {
+        "n_draft": 193,
+        "gen_drafts": 0,
+        "acc_drafts": 0,
+        "gen_tokens": 0,
+        "acc_tokens": 0,
+        "mean_acc_len": 1.0,
+        "acc_rates": [
+          0.0,
+          0.0
+        ],
+        "dur_g": 588.63
+      },
+      "hash": "b4d8e3f08154e293484a4c12fa37a79bf8b136b246396c611bf981993b9d6dda",
+      "text_snippet": "\n\n<think>\nThe user wants a complete, production-ready Python asynchronous task pool with:\n1. Priorit"
+    },
+    {
+      "prompt_name": "JSON/ToolCall",
+      "dec_tokens": 193,
+      "dec_sec": 7.271,
+      "speed_tps": 26.546,
+      "stats": {
+        "n_draft": 193,
+        "gen_drafts": 0,
+        "acc_drafts": 0,
+        "gen_tokens": 0,
+        "acc_tokens": 0,
+        "mean_acc_len": 1.0,
+        "acc_rates": [
+          0.0,
+          0.0
+        ],
+        "dur_g": 584.989
+      },
+      "hash": "b519e518db6b750b207b49c6ae148ad6f095d8ff7e923b420046d99720e4354d",
+      "text_snippet": "\n\n<think>\nThe user wants a valid JSON object that defines an OpenAPI 3.1 specification for a databas"
+    },
+    {
+      "prompt_name": "Technical/RDNA4",
+      "dec_tokens": 193,
+      "dec_sec": 7.217,
+      "speed_tps": 26.742,
+      "stats": {
+        "n_draft": 193,
+        "gen_drafts": 0,
+        "acc_drafts": 0,
+        "gen_tokens": 0,
+        "acc_tokens": 0,
+        "mean_acc_len": 1.0,
+        "acc_rates": [
+          0.0,
+          0.0
+        ],
+        "dur_g": 536.793
+      },
+      "hash": "995cff7a9a0277553d2e5928d64af80453daf64e604f59fed75192536350c912",
+      "text_snippet": "Here is a visual explanation of the architectural differences between AMD's RDNA3 (Navi 31) and RDNA"
+    },
+    {
+      "prompt_name": "Reasoning/Math",
+      "dec_tokens": 193,
+      "dec_sec": 7.276,
+      "speed_tps": 26.524,
+      "stats": {
+        "n_draft": 193,
+        "gen_drafts": 0,
+        "acc_drafts": 0,
+        "gen_tokens": 0,
+        "acc_tokens": 0,
+        "mean_acc_len": 1.0,
+        "acc_rates": [
+          0.0,
+          0.0
+        ],
+        "dur_g": 541.344
+      },
+      "hash": "9853e53e89cc658edcada4fa3dbc0766308216282d7d7e288ec4cbb59e2f8952",
+      "text_snippet": "\n\nLet's break this down step by step.\n\n## 1. Data Volume for All-Reduce\n\nFor a 70B parameter model i"
+    },
+    {
+      "prompt_name": "Chat/Dialogue",
+      "dec_tokens": 193,
+      "dec_sec": 7.301,
+      "speed_tps": 26.434,
+      "stats": {
+        "n_draft": 193,
+        "gen_drafts": 0,
+        "acc_drafts": 0,
+        "gen_tokens": 0,
+        "acc_tokens": 0,
+        "mean_acc_len": 1.0,
+        "acc_rates": [
+          0.0,
+          0.0
+        ],
+        "dur_g": 586.618
+      },
+      "hash": "31c302be442bedaa3be898a00a4b08228778381b58ac2e554d8fdf8a59467462",
+      "text_snippet": "\n\n<think>\nThe user wants a creative dialogue between Ada Lovelace and Alan Turing on three specific "
+    },
+    {
+      "prompt_name": "LongContext/Continuation",
+      "dec_tokens": 193,
+      "dec_sec": 7.251,
+      "speed_tps": 26.616,
+      "stats": {
+        "n_draft": 193,
+        "gen_drafts": 0,
+        "acc_drafts": 0,
+        "gen_tokens": 0,
+        "acc_tokens": 0,
+        "mean_acc_len": 1.0,
+        "acc_rates": [
+          0.0,
+          0.0
+        ],
+        "dur_g": 548.301
+      },
+      "hash": "a2a684c830e5ce461485a27024c59758b1c9a84b8d2a2f89c3891cf9966151b7",
+      "text_snippet": "\n\nIn modern GPU architectures, the memory hierarchy is designed to maximize throughput by managing t"
+    }
+  ],
+  "64K": [
+    {
+      "prompt_name": "Code/Async",
+      "dec_tokens": 193,
+      "dec_sec": 7.029,
+      "speed_tps": 27.46,
+      "stats": {
+        "n_draft": 193,
+        "gen_drafts": 0,
+        "acc_drafts": 0,
+        "gen_tokens": 0,
+        "acc_tokens": 0,
+        "mean_acc_len": 1.0,
+        "acc_rates": [
+          0.0,
+          0.0
+        ],
+        "dur_g": 303.389
+      },
+      "hash": "b4d8e3f08154e293484a4c12fa37a79bf8b136b246396c611bf981993b9d6dda",
+      "text_snippet": "\n\n<think>\nThe user wants a complete, production-ready Python asynchronous task pool with:\n1. Priorit"
+    },
+    {
+      "prompt_name": "JSON/ToolCall",
+      "dec_tokens": 193,
+      "dec_sec": 7.063,
+      "speed_tps": 27.326,
+      "stats": {
+        "n_draft": 193,
+        "gen_drafts": 0,
+        "acc_drafts": 0,
+        "gen_tokens": 0,
+        "acc_tokens": 0,
+        "mean_acc_len": 1.0,
+        "acc_rates": [
+          0.0,
+          0.0
+        ],
+        "dur_g": 356.992
+      },
+      "hash": "b519e518db6b750b207b49c6ae148ad6f095d8ff7e923b420046d99720e4354d",
+      "text_snippet": "\n\n<think>\nThe user wants a valid JSON object that defines an OpenAPI 3.1 specification for a databas"
+    },
+    {
+      "prompt_name": "Technical/RDNA4",
+      "dec_tokens": 193,
+      "dec_sec": 7.018,
+      "speed_tps": 27.499,
+      "stats": {
+        "n_draft": 193,
+        "gen_drafts": 0,
+        "acc_drafts": 0,
+        "gen_tokens": 0,
+        "acc_tokens": 0,
+        "mean_acc_len": 1.0,
+        "acc_rates": [
+          0.0,
+          0.0
+        ],
+        "dur_g": 305.245
+      },
+      "hash": "995cff7a9a0277553d2e5928d64af80453daf64e604f59fed75192536350c912",
+      "text_snippet": "Here is a visual explanation of the architectural differences between AMD's RDNA3 (Navi 31) and RDNA"
+    },
+    {
+      "prompt_name": "Reasoning/Math",
+      "dec_tokens": 193,
+      "dec_sec": 7.071,
+      "speed_tps": 27.293,
+      "stats": {
+        "n_draft": 193,
+        "gen_drafts": 0,
+        "acc_drafts": 0,
+        "gen_tokens": 0,
+        "acc_tokens": 0,
+        "mean_acc_len": 1.0,
+        "acc_rates": [
+          0.0,
+          0.0
+        ],
+        "dur_g": 359.738
+      },
+      "hash": "9853e53e89cc658edcada4fa3dbc0766308216282d7d7e288ec4cbb59e2f8952",
+      "text_snippet": "\n\nLet's break this down step by step.\n\n## 1. Data Volume for All-Reduce\n\nFor a 70B parameter model i"
+    },
+    {
+      "prompt_name": "Chat/Dialogue",
+      "dec_tokens": 193,
+      "dec_sec": 7.021,
+      "speed_tps": 27.489,
+      "stats": {
+        "n_draft": 193,
+        "gen_drafts": 0,
+        "acc_drafts": 0,
+        "gen_tokens": 0,
+        "acc_tokens": 0,
+        "mean_acc_len": 1.0,
+        "acc_rates": [
+          0.0,
+          0.0
+        ],
+        "dur_g": 300.641
+      },
+      "hash": "31c302be442bedaa3be898a00a4b08228778381b58ac2e554d8fdf8a59467462",
+      "text_snippet": "\n\n<think>\nThe user wants a creative dialogue between Ada Lovelace and Alan Turing on three specific "
+    },
+    {
+      "prompt_name": "LongContext/Continuation",
+      "dec_tokens": 193,
+      "dec_sec": 7.023,
+      "speed_tps": 27.482,
+      "stats": {
+        "n_draft": 193,
+        "gen_drafts": 0,
+        "acc_drafts": 0,
+        "gen_tokens": 0,
+        "acc_tokens": 0,
+        "mean_acc_len": 1.0,
+        "acc_rates": [
+          0.0,
+          0.0
+        ],
+        "dur_g": 301.356
+      },
+      "hash": "a2a684c830e5ce461485a27024c59758b1c9a84b8d2a2f89c3891cf9966151b7",
+      "text_snippet": "\n\nIn modern GPU architectures, the memory hierarchy is designed to maximize throughput by managing t"
+    }
+  ],
+  "32K": [
+    {
+      "prompt_name": "Code/Async",
+      "dec_tokens": 193,
+      "dec_sec": 6.991,
+      "speed_tps": 27.609,
+      "stats": {
+        "n_draft": 193,
+        "gen_drafts": 0,
+        "acc_drafts": 0,
+        "gen_tokens": 0,
+        "acc_tokens": 0,
+        "mean_acc_len": 1.0,
+        "acc_rates": [
+          0.0,
+          0.0
+        ],
+        "dur_g": 263.302
+      },
+      "hash": "b4d8e3f08154e293484a4c12fa37a79bf8b136b246396c611bf981993b9d6dda",
+      "text_snippet": "\n\n<think>\nThe user wants a complete, production-ready Python asynchronous task pool with:\n1. Priorit"
+    },
+    {
+      "prompt_name": "JSON/ToolCall",
+      "dec_tokens": 193,
+      "dec_sec": 7.018,
+      "speed_tps": 27.502,
+      "stats": {
+        "n_draft": 193,
+        "gen_drafts": 0,
+        "acc_drafts": 0,
+        "gen_tokens": 0,
+        "acc_tokens": 0,
+        "mean_acc_len": 1.0,
+        "acc_rates": [
+          0.0,
+          0.0
+        ],
+        "dur_g": 314.17
+      },
+      "hash": "b519e518db6b750b207b49c6ae148ad6f095d8ff7e923b420046d99720e4354d",
+      "text_snippet": "\n\n<think>\nThe user wants a valid JSON object that defines an OpenAPI 3.1 specification for a databas"
+    },
+    {
+      "prompt_name": "Technical/RDNA4",
+      "dec_tokens": 193,
+      "dec_sec": 6.982,
+      "speed_tps": 27.643,
+      "stats": {
+        "n_draft": 193,
+        "gen_drafts": 0,
+        "acc_drafts": 0,
+        "gen_tokens": 0,
+        "acc_tokens": 0,
+        "mean_acc_len": 1.0,
+        "acc_rates": [
+          0.0,
+          0.0
+        ],
+        "dur_g": 263.868
+      },
+      "hash": "995cff7a9a0277553d2e5928d64af80453daf64e604f59fed75192536350c912",
+      "text_snippet": "Here is a visual explanation of the architectural differences between AMD's RDNA3 (Navi 31) and RDNA"
+    },
+    {
+      "prompt_name": "Reasoning/Math",
+      "dec_tokens": 193,
+      "dec_sec": 7.048,
+      "speed_tps": 27.382,
+      "stats": {
+        "n_draft": 193,
+        "gen_drafts": 0,
+        "acc_drafts": 0,
+        "gen_tokens": 0,
+        "acc_tokens": 0,
+        "mean_acc_len": 1.0,
+        "acc_rates": [
+          0.0,
+          0.0
+        ],
+        "dur_g": 316.324
+      },
+      "hash": "9853e53e89cc658edcada4fa3dbc0766308216282d7d7e288ec4cbb59e2f8952",
+      "text_snippet": "\n\nLet's break this down step by step.\n\n## 1. Data Volume for All-Reduce\n\nFor a 70B parameter model i"
+    },
+    {
+      "prompt_name": "Chat/Dialogue",
+      "dec_tokens": 193,
+      "dec_sec": 7.045,
+      "speed_tps": 27.396,
+      "stats": {
+        "n_draft": 193,
+        "gen_drafts": 0,
+        "acc_drafts": 0,
+        "gen_tokens": 0,
+        "acc_tokens": 0,
+        "mean_acc_len": 1.0,
+        "acc_rates": [
+          0.0,
+          0.0
+        ],
+        "dur_g": 315.661
+      },
+      "hash": "31c302be442bedaa3be898a00a4b08228778381b58ac2e554d8fdf8a59467462",
+      "text_snippet": "\n\n<think>\nThe user wants a creative dialogue between Ada Lovelace and Alan Turing on three specific "
+    },
+    {
+      "prompt_name": "LongContext/Continuation",
+      "dec_tokens": 193,
+      "dec_sec": 6.979,
+      "speed_tps": 27.654,
+      "stats": {
+        "n_draft": 193,
+        "gen_drafts": 0,
+        "acc_drafts": 0,
+        "gen_tokens": 0,
+        "acc_tokens": 0,
+        "mean_acc_len": 1.0,
+        "acc_rates": [
+          0.0,
+          0.0
+        ],
+        "dur_g": 265.609
+      },
+      "hash": "a2a684c830e5ce461485a27024c59758b1c9a84b8d2a2f89c3891cf9966151b7",
+      "text_snippet": "\n\nIn modern GPU architectures, the memory hierarchy is designed to maximize throughput by managing t"
+    }
+  ]
+}

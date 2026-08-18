@@ -1,0 +1,31 @@
+{
+  "run_order": 2,
+  "name": "MiniMax H3 Text-to-Video — Machine Cathedral",
+  "workflow": "h3_t2v",
+  "workflow_file": "production/workflows/h3_t2v.json",
+  "previous_workflow": "ltx25",
+  "prompt_id": "c4b638c1-62ba-4545-b038-3ca5205e3dae",
+  "wall_seconds": 131.94,
+  "peak_vram_gib": 27.58,
+  "artifact": "/ai/artifacts/runs/minimax-h3/r9700-final-showcase/02-h3-t2v-boxwrench-cathedral_00001_.mp4",
+  "parameters": {
+    "width": 608,
+    "height": 352,
+    "frames": 39,
+    "fps": 24.0,
+    "steps": 20,
+    "sampler": "res_multistep",
+    "scheduler": "simple",
+    "seed": 8112026
+  },
+  "models": [
+    "minimax_h3_fl2va_pruned_fp8_scaled.safetensors",
+    "qwen3vl_32b_minimax_h3_fp8.safetensors",
+    "minimax_h3_video_vae_fp16.safetensors",
+    "minimax_h3_audio_vae_fp32.safetensors"
+  ],
+  "generated_at": "2026-08-18T14:51:38-0700",
+  "gpu": "AMD Radeon AI PRO R9700 (gfx1201)",
+  "preflight_state": "PASS",
+  "notes": "Ran cleanly on the first submission via the unmodified production/workflows/h3_t2v.json driven by scripts/execute-showcase-session.py. Measurement captured live by that script before it halted on the run-5 (R2V) schema mismatch; verified consistent with ComfyUI-server-restart timeline (this run completed under the pre-restart process, so it is not recoverable from the live /history API, but the sidecar was written in real time by the driver script and the artifact file on disk matches this prompt_id's filename_prefix exactly)."
+}

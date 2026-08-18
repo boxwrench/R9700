@@ -1,0 +1,47 @@
+{
+  "BASELINE": {
+    "tps": 5.295,
+    "sec": 48.536,
+    "stats": {
+      "n_draft": 257,
+      "gen_drafts": 0,
+      "acc_drafts": 0,
+      "gen_tokens": 0,
+      "acc_tokens": 0,
+      "mean_acc_len": 1.0,
+      "p0": 0.0,
+      "p1": 0.0,
+      "dur_g": 1783.485
+    }
+  },
+  "64K": {
+    "tps": 27.398,
+    "sec": 9.38,
+    "stats": {
+      "n_draft": 257,
+      "gen_drafts": 0,
+      "acc_drafts": 0,
+      "gen_tokens": 0,
+      "acc_tokens": 0,
+      "mean_acc_len": 1.0,
+      "p0": 0.0,
+      "p1": 0.0,
+      "dur_g": 479.559
+    }
+  },
+  "32K": {
+    "tps": 27.701,
+    "sec": 9.278,
+    "stats": {
+      "n_draft": 257,
+      "gen_drafts": 0,
+      "acc_drafts": 0,
+      "gen_tokens": 0,
+      "acc_tokens": 0,
+      "mean_acc_len": 1.0,
+      "p0": 0.0,
+      "p1": 0.0,
+      "dur_g": 356.124
+    }
+  }
+}

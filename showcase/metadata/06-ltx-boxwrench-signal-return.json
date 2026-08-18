@@ -1,0 +1,31 @@
+{
+  "run_order": 6,
+  "name": "LTX 2.5 Video — Return Run (Signal Vault)",
+  "workflow": "ltx25",
+  "workflow_file": "production/workflows/ltx25.json (audio branch dropped at queue time, see notes)",
+  "previous_workflow": "h3_r2v",
+  "prompt_id": "ce215c01-bb7f-437a-a2fa-d85c6d1e9809",
+  "wall_seconds": 23.62,
+  "peak_vram_gib": "NA",
+  "artifact": "/ai/artifacts/runs/minimax-h3/r9700-final-showcase/06-ltx-boxwrench-signal-return_00001_.mp4",
+  "parameters": {
+    "width": 768,
+    "height": 448,
+    "frames": 41,
+    "fps": 24.0,
+    "steps": 8,
+    "sampler": "res_multistep",
+    "scheduler": "simple",
+    "seed": 8112099,
+    "audio_branch": "dropped (VAEDecodeAudio omitted; see LTX run 1 for the deterministic tensor-mismatch this avoids)"
+  },
+  "models": [
+    "ltx-2.5-22b-distilled-transformer-comfy-int8-convrot.safetensors",
+    "gemma4-12b-with-proj-ltx-2.5-comfy-int8-convrot.safetensors",
+    "ltx-2.5-video-vae-bf16.safetensors"
+  ],
+  "generated_at": "2026-08-18T15:21:58-0700",
+  "gpu": "AMD Radeon AI PRO R9700 (gfx1201)",
+  "preflight_state": "PASS",
+  "notes": "Queued by the previous agent while still debugging H3 R2V, confirming this exact 23.62 s wall time from the handoff. Verified independently from ComfyUI /history (execution_start 15:21:35 -> execution_success 15:21:58). Model/VAE loaders were already warm from run 1's LTX session. Known creative-fidelity limitation: LTX 2.5 here is pure text conditioning with no image-reference mechanism, so it does not reliably reproduce the bx77 anchor's exact color palette/helmet geometry the way the image- and reference-conditioned H3 I2V/R2V runs do — recorded honestly rather than re-rolled, since the run is a technically valid, on-theme (armored figure, cosmic backdrop, chest-core glow) completion and the task directive is not to keep experimenting after a valid completion."
+}

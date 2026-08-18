@@ -24,6 +24,44 @@ The numbers here are engineering reference points from this specific Radeon AI P
 | `torch.compile` on Music Qwen appears to compile but becomes unusable | **Dynamic Python KV-cache index guards** | The index changes every token and caused continual TorchInductor recompilation |
 | Enabling a newer Triton backend looks tempting for INT8 | **Check stack compatibility first** | The stable production stack intentionally does not force the newer Triton path; do not replace Triton alone in the working environment |
 | A model/router is inexplicably spilling to host RAM and decode collapses | **How many large models are being retained** | In the llama.cpp router study, model-count eviction allowed multiple large models to coexist and performance collapsed |
+| H3 I2V/R2V node raises `execute() got an unexpected keyword argument 'image'` / `'ref_image'` / `'ref_image_0'` | **Node schema drift vs. saved workflow JSON** | `MiniMaxH3ImageToVideo` wants `first_frame`, not `image`. `MiniMaxH3ReferenceToVideo.ref_images` is a V3 `io.Autogrow` field — the prompt JSON key must be the dotted path `ref_images.ref_image_0`, not `ref_image` or a bare `ref_image_0`. See §7. |
+| LTX or H3 R2V raises `RuntimeError: The size of tensor a (3072) must match the size of tensor b (128)` in `VAEDecodeAudio` | **Known-bad audio-VAE decode path for these shapes** | Deterministic, not transient. Workaround: drop the audio branch (remove `VAEDecodeAudio`, omit `audio` from `CreateVideo`) and ship video-only. See §7. |
+
+## 7. V3 node schema drift (MiniMax H3 I2V / R2V) — 2026-08-18
+
+### Symptom
+
+A saved production workflow JSON that used to validate now fails at **execution** (not validation) with `TypeError: <Node>.execute() got an unexpected keyword argument '<name>'`.
+
+### Root cause
+
+Two independent, unrelated schema changes landed in the pinned ComfyUI node definitions (`comfy_extras/nodes_minimax_h3.py`) after the workflow JSON files in `production/workflows/` were last captured:
+
+1. `MiniMaxH3ImageToVideo` takes `first_frame` (and optional `last_frame`), not `image`.
+2. `MiniMaxH3ReferenceToVideo.ref_images` is declared as `io.Autogrow.Input(..., prefix="ref_image_", min=0, max=9)`. ComfyUI's V3 dynamic-input machinery (`comfy_api/latest/_io.py`: `parse_class_inputs` → `Autogrow._expand_schema_for_dynamic` → `build_nested_inputs`) only recognizes a filled autogrow slot when the **prompt JSON's flat input key is the dotted path** `<field_id>.<slot_name>` — e.g. `ref_images.ref_image_0` — wired directly as a node input (a link `["<image_node_id>", 0]`). A bare `ref_image_0` or the legacy singular `ref_image` is accepted by `/prompt` **validation** (no `node_errors`) but rejected at **execution**, because validation only checks the class's static `INPUT_TYPES()`, while the dynamic-path expansion that lets `execute()` actually receive `ref_images={"ref_image_0": <tensor>}` only fires for the dotted key. The node's own frontend widget already does this correctly (`custom_nodes/ComfyUI-ALLinONE-MinimaxH3/web/one_node_minimax_h3.js`: `wf["6"].inputs[\`ref_images.ref_image_${idx}\`]=[id,0]`); the drift was only in hand-built/legacy prompt JSON. `audio_vae` (a second `VAELoader`) and `ref_image_size` (`"match"` or `"max"`) are also now required/optional inputs that older saved graphs may be missing entirely.
+
+### Fix
+
+Do not edit the pinned ComfyUI node source. Fix the **workflow JSON**:
+
+- I2V: rename the image input key from `image` to `first_frame`.
+- R2V: replace `"ref_image": [<id>, 0]` with `"ref_images.ref_image_0": [<id>, 0]`, and add `"audio_vae": [<audio_vae_loader_id>, 0]` and `"ref_image_size": "match"` (or `"max"`).
+
+### Known dead ends
+
+- `ref_image_0` or `ref_image_1` (flat, undotted) — validates, fails at execution.
+- Legacy singular `ref_image` — validates, fails at execution (the key does not exist in the live schema at all once `ref_images` autogrow is present).
+- Nesting the value under an actual JSON object `"ref_images": {"ref_image_0": [...]}` — the prompt-graph link format does not support nested dict values; the flat dotted-string key is what `build_nested_inputs` expects to find in the flat prompt input dict.
+
+## 8. LTX / H3 `VAEDecodeAudio` deterministic tensor-shape mismatch — 2026-08-18
+
+### Symptom
+
+`RuntimeError: The size of tensor a (3072) must match the size of tensor b (128) at non-singleton dimension 2` inside `comfy_extras/nodes_audio.py: vae_decode_audio`, for specific LTX and H3 latent shapes. Reproduces identically on retry with unchanged inputs — this is deterministic, not a transient/flaky GPU fault.
+
+### Workaround used in this campaign
+
+Drop the audio branch: remove the `VAEDecodeAudio` node and the `audio` input on `CreateVideo`, and save video-only. This is the same pattern already present in the known-good LTX return production run. Do not attempt to patch the audio VAE decode kernel itself — that is out of scope for showcase/acceptance work and was not investigated further this pass.
 
 ## 1. Catastrophically slow model loading
 

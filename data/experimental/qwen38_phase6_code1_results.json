@@ -1,0 +1,32 @@
+{
+  "FULL": {
+    "wall_time_s": 5.191529796997202,
+    "tok_s": 28.36,
+    "n_predict": 65,
+    "n_drafted": 85,
+    "n_accept": 14,
+    "accept_pct": 16.471,
+    "decode_time_s": 2.292,
+    "output_hash": "e09494c09edbff3e"
+  },
+  "64K": {
+    "wall_time_s": 7.811676615005126,
+    "tok_s": 24.999,
+    "n_predict": 65,
+    "n_drafted": 65,
+    "n_accept": 0,
+    "accept_pct": 0.0,
+    "decode_time_s": 2.6,
+    "output_hash": "dfa4939f41d5e2e4"
+  },
+  "32K": {
+    "wall_time_s": 6.557066041001235,
+    "tok_s": 25.38,
+    "n_predict": 65,
+    "n_drafted": 65,
+    "n_accept": 0,
+    "accept_pct": 0.0,
+    "decode_time_s": 2.561,
+    "output_hash": "f91fdce4bdd9f6d5"
+  }
+}
