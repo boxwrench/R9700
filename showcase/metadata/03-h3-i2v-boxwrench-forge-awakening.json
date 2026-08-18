@@ -1,0 +1,39 @@
+{
+  "run_order": 3,
+  "name": "MiniMax H3 Image-to-Video — Forge Awakening",
+  "workflow": "h3_i2v",
+  "workflow_file": "production/workflows/h3_i2v.json (image input key patched at queue time, see notes)",
+  "previous_workflow": "h3_t2v",
+  "prompt_id": "c204b5d0-a328-4366-9147-083f63a72dce",
+  "wall_seconds": 49.16,
+  "peak_vram_gib": "NA",
+  "artifact": "/ai/artifacts/runs/minimax-h3/r9700-final-showcase/03-h3-i2v-boxwrench-forge-awakening_00001_.mp4",
+  "parameters": {
+    "input_image": "bx77-anchor.png",
+    "width": 608,
+    "height": 352,
+    "frames": 39,
+    "fps": 24.0,
+    "steps": 20,
+    "sampler": "res_multistep",
+    "scheduler": "simple",
+    "seed": 8112026
+  },
+  "models": [
+    "minimax_h3_fl2va_pruned_fp8_scaled.safetensors",
+    "qwen3vl_32b_minimax_h3_fp8.safetensors",
+    "minimax_h3_video_vae_fp16.safetensors",
+    "minimax_h3_audio_vae_fp32.safetensors"
+  ],
+  "generated_at": "2026-08-18T15:05:37-0700",
+  "gpu": "AMD Radeon AI PRO R9700 (gfx1201)",
+  "preflight_state": "PASS",
+  "failed_attempts": [
+    {
+      "prompt_id": "d39d8320-8055-46cc-9164-0351a938b892",
+      "issue": "execution_error: MiniMaxH3ImageToVideo.execute() got an unexpected keyword argument 'image'. production/workflows/h3_i2v.json wires the reference image to input key 'image', but the live-pinned node schema (comfy_extras/nodes_minimax_h3.py) expects 'first_frame' (optional 'last_frame' also supported). Same class of drift later found in H3 R2V (run 5)."
+    }
+  ],
+  "resolution": "Queued with the input key corrected to 'first_frame' instead of 'image'. production/workflows/h3_i2v.json was NOT modified on disk — the fix was applied to the in-memory prompt JSON at queue time only.",
+  "notes": "wall_seconds measured directly from ComfyUI /history (execution_start to execution_success); this run completed after the mid-session ComfyUI process restart (~14:58), so it is still present in the live history API. peak_vram was not polled during this manually-queued run (the automated VRAM-polling driver script had already halted at the run-5 schema mismatch), so it is recorded as NA rather than estimated."
+}

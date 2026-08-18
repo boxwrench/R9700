@@ -1,0 +1,4 @@
+run_id	stage	state	prompt	seed	steps	encoder_load_s	cond_s	dit_load_s	sampling_s	sec_per_step	vae_decode_s	save_s	wall_s	peak_vram_gib	power_avg_w	power_peak_w
+run_a	cold_start	cold	prompt_a	8112026	20	2.44	2.79	3.14	25.57	1.279	5.51	1.09	42.88	26.21	255.6	346.0
+run_b	changed_prompt	warm	prompt_b	8112026	20	0.00	2.57	0.00	25.30	1.265	5.50	1.09	34.46	26.32	255.6	346.0
+run_c	seed_only	cached	prompt_b	8112027	20	0.00	0.00	0.00	22.41	1.120	5.38	1.04	28.84	26.32	255.6	346.0

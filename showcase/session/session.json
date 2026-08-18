@@ -1,0 +1,262 @@
+[
+  {
+    "run_order": 1,
+    "name": "LTX 2.5 Video \u2014 The Artifact Forge",
+    "workflow": "ltx25",
+    "workflow_file": "showcase/workflows/ltx25-run1-showcase.json",
+    "previous_workflow": "cold_init",
+    "prompt_id": "5016503f-1502-4cf0-b803-b3a82cb19e78",
+    "wall_seconds": 11.48,
+    "wall_seconds_note": "Warm-cache measurement: UNETLoader/CLIPLoader/CLIPTextEncode were cache-hit from the immediately preceding same-session attempt on this workflow (same prompt text); only RandomNoise/sampling/VAEDecode/CreateVideo/SaveVideo executed fresh. Not a cold prompt-to-artifact time.",
+    "peak_vram_gib": "NA",
+    "artifact": "/ai/artifacts/runs/minimax-h3/r9700-final-showcase/01-ltx-boxwrench-artifact-forge_00001_.mp4",
+    "parameters": {
+      "width": 768,
+      "height": 448,
+      "frames": 41,
+      "fps": 24.0,
+      "steps": 8,
+      "sampler": "res_multistep",
+      "scheduler": "simple",
+      "seed": 8112031,
+      "audio_branch": "dropped (see notes)"
+    },
+    "models": [
+      "ltx-2.5-22b-distilled-transformer-comfy-int8-convrot.safetensors",
+      "gemma4-12b-with-proj-ltx-2.5-comfy-int8-convrot.safetensors",
+      "ltx-2.5-video-vae-bf16.safetensors"
+    ],
+    "generated_at": "2026-08-18T15:43:00-0700",
+    "gpu": "AMD Radeon AI PRO R9700 (gfx1201)",
+    "preflight_state": "PASS",
+    "failed_attempts": [
+      {
+        "prompt_id": "5a59144d-b8c4-4019-a78a-9b3c0e870e96",
+        "issue": "INVALID CONTENT, not a technical failure. Completed (wall 33.47s per original sidecar) but rendered the production workflow's unmodified placeholder text ('A close-up of an Arctic hunter crouching on an ice floe...') instead of the Boxwrench showcase prompt \u2014 the prompt override did not reach this queued job. Output preserved for the record at /ai/artifacts/runs/r9700-final-showcase-invalid/01-ltx-boxwrench-artifact-forge_00001_WRONG-PROMPT-arctic-hunter-default-text.mp4"
+      },
+      {
+        "prompt_id": "77921571-ab50-4202-8e62-586c8cd5576e",
+        "issue": "execution_error at VAEDecodeAudio (node 14): \"The size of tensor a (3072) must match the size of tensor b (128) at non-singleton dimension 2\". Deterministic for this latent shape, same failure class hit repeatedly during H3 R2V debugging (see run 5)."
+      },
+      {
+        "prompt_id": "bdac84cf-c207-4a4a-94a8-84524523f5f9",
+        "issue": "Identical retry of the same graph, identical VAEDecodeAudio error (deterministic, not transient)."
+      }
+    ],
+    "resolution": "Removed VAEDecodeAudio (node 14) and the audio input from CreateVideo, matching the working pattern already used by the successful run 6 (LTX return, prompt ce215c01). LTX audio-VAE decode for this build/shape combination is a known-bad path; video-only output is the accepted workaround for LTX in this showcase. Root text-override bug fixed by explicitly setting node 5 text via a showcase-only workflow copy (production/workflows/ltx25.json left untouched).",
+    "notes": "production/workflows/ltx25.json was NOT modified. All fixes live in showcase/workflows/ltx25-run1-showcase.json."
+  },
+  {
+    "run_order": 2,
+    "name": "MiniMax H3 Text-to-Video \u2014 Machine Cathedral",
+    "workflow": "h3_t2v",
+    "workflow_file": "production/workflows/h3_t2v.json",
+    "previous_workflow": "ltx25",
+    "prompt_id": "c4b638c1-62ba-4545-b038-3ca5205e3dae",
+    "wall_seconds": 131.94,
+    "peak_vram_gib": 27.58,
+    "artifact": "/ai/artifacts/runs/minimax-h3/r9700-final-showcase/02-h3-t2v-boxwrench-cathedral_00001_.mp4",
+    "parameters": {
+      "width": 608,
+      "height": 352,
+      "frames": 39,
+      "fps": 24.0,
+      "steps": 20,
+      "sampler": "res_multistep",
+      "scheduler": "simple",
+      "seed": 8112026
+    },
+    "models": [
+      "minimax_h3_fl2va_pruned_fp8_scaled.safetensors",
+      "qwen3vl_32b_minimax_h3_fp8.safetensors",
+      "minimax_h3_video_vae_fp16.safetensors",
+      "minimax_h3_audio_vae_fp32.safetensors"
+    ],
+    "generated_at": "2026-08-18T14:51:38-0700",
+    "gpu": "AMD Radeon AI PRO R9700 (gfx1201)",
+    "preflight_state": "PASS",
+    "notes": "Ran cleanly on the first submission via the unmodified production/workflows/h3_t2v.json driven by scripts/execute-showcase-session.py. Measurement captured live by that script before it halted on the run-5 (R2V) schema mismatch; verified consistent with ComfyUI-server-restart timeline (this run completed under the pre-restart process, so it is not recoverable from the live /history API, but the sidecar was written in real time by the driver script and the artifact file on disk matches this prompt_id's filename_prefix exactly)."
+  },
+  {
+    "run_order": 3,
+    "name": "MiniMax H3 Image-to-Video \u2014 Forge Awakening",
+    "workflow": "h3_i2v",
+    "workflow_file": "production/workflows/h3_i2v.json (image input key patched at queue time, see notes)",
+    "previous_workflow": "h3_t2v",
+    "prompt_id": "c204b5d0-a328-4366-9147-083f63a72dce",
+    "wall_seconds": 49.16,
+    "peak_vram_gib": "NA",
+    "artifact": "/ai/artifacts/runs/minimax-h3/r9700-final-showcase/03-h3-i2v-boxwrench-forge-awakening_00001_.mp4",
+    "parameters": {
+      "input_image": "bx77-anchor.png",
+      "width": 608,
+      "height": 352,
+      "frames": 39,
+      "fps": 24.0,
+      "steps": 20,
+      "sampler": "res_multistep",
+      "scheduler": "simple",
+      "seed": 8112026
+    },
+    "models": [
+      "minimax_h3_fl2va_pruned_fp8_scaled.safetensors",
+      "qwen3vl_32b_minimax_h3_fp8.safetensors",
+      "minimax_h3_video_vae_fp16.safetensors",
+      "minimax_h3_audio_vae_fp32.safetensors"
+    ],
+    "generated_at": "2026-08-18T15:05:37-0700",
+    "gpu": "AMD Radeon AI PRO R9700 (gfx1201)",
+    "preflight_state": "PASS",
+    "failed_attempts": [
+      {
+        "prompt_id": "d39d8320-8055-46cc-9164-0351a938b892",
+        "issue": "execution_error: MiniMaxH3ImageToVideo.execute() got an unexpected keyword argument 'image'. production/workflows/h3_i2v.json wires the reference image to input key 'image', but the live-pinned node schema (comfy_extras/nodes_minimax_h3.py) expects 'first_frame' (optional 'last_frame' also supported). Same class of drift later found in H3 R2V (run 5)."
+      }
+    ],
+    "resolution": "Queued with the input key corrected to 'first_frame' instead of 'image'. production/workflows/h3_i2v.json was NOT modified on disk \u2014 the fix was applied to the in-memory prompt JSON at queue time only.",
+    "notes": "wall_seconds measured directly from ComfyUI /history (execution_start to execution_success); this run completed after the mid-session ComfyUI process restart (~14:58), so it is still present in the live history API. peak_vram was not polled during this manually-queued run (the automated VRAM-polling driver script had already halted at the run-5 schema mismatch), so it is recorded as NA rather than estimated."
+  },
+  {
+    "run_order": 4,
+    "run_id": "04-music3-signal-against-the-end",
+    "name": "MiniMax Music 3 \u2014 Signal Against the End",
+    "workflow": "music3",
+    "workflow_file": "production/workflows/music3.json",
+    "previous_workflow": "h3_i2v",
+    "workload": "MiniMax Music 3",
+    "prompt_id": "51fad938-36bc-4d14-9ccf-851b8d8a6767",
+    "timestamp_utc": "2026-08-18T21:53:32Z",
+    "generated_at": "2026-08-18T14:53:32-0700",
+    "wall_time_s": 28.48,
+    "wall_seconds": 28.48,
+    "peak_vram_gib": "NA",
+    "artifact": "/ai/artifacts/runs/minimax-h3/r9700-final-showcase/04-music3-signal-against-the-end_00001.flac",
+    "output_file": "04-music3-signal-against-the-end_00001.flac",
+    "output_format": "FLAC",
+    "duration_s": 14.99,
+    "preflight_state": "PASS",
+    "models": {
+      "dit": "minimax_music3_dit_int8_convrot.safetensors",
+      "text_encoder": "minimax_music3_text_encoder_pruned_int8_convrot.safetensors",
+      "dav": "minimax_music3_dav.safetensors"
+    },
+    "parameters": {
+      "seed": 8112080,
+      "steps": 20,
+      "sampler": "res_multistep",
+      "scheduler": "simple",
+      "cfg_scale": 1.5,
+      "top_k": 50,
+      "max_duration": 15.0
+    },
+    "caption": "A defiant, high-energy classic galloping heavy metal song with a dark science-fiction atmosphere and a strong melodic sense.",
+    "gpu": "AMD Radeon AI PRO R9700",
+    "comfyui_version": "0.33.2",
+    "pytorch_version": "2.9.1+rocm7.2.1",
+    "launch_flags": [
+      "--disable-mmap",
+      "--disable-dynamic-vram",
+      "--disable-smart-memory",
+      "--bf16-vae",
+      "--reserve-vram",
+      "2"
+    ]
+  },
+  {
+    "run_order": 5,
+    "name": "MiniMax H3 Reference-to-Video \u2014 Observatory",
+    "workflow": "h3_r2v",
+    "workflow_file": "showcase/workflows/h3_r2v-showcase.json",
+    "previous_workflow": "music3",
+    "prompt_id": "6dd30fec-7d0c-47c6-a742-9e6408668975",
+    "wall_seconds": 81.47,
+    "peak_vram_gib": "NA",
+    "artifact": "/ai/artifacts/runs/minimax-h3/r9700-final-showcase/05-h3-r2v-boxwrench-observatory_00001_.mp4",
+    "parameters": {
+      "ref_image": "bx77-anchor.png",
+      "ref_image_size": "match",
+      "width": 608,
+      "height": 352,
+      "frames": 39,
+      "fps": 24.0,
+      "steps": 20,
+      "sampler": "res_multistep",
+      "scheduler": "simple",
+      "seed": 8112026
+    },
+    "models": [
+      "minimax_h3_ref2va_pruned_fp8_scaled.safetensors",
+      "qwen3vl_32b_minimax_h3_fp8.safetensors",
+      "minimax_h3_video_vae_fp16.safetensors",
+      "minimax_h3_audio_vae_fp32.safetensors"
+    ],
+    "generated_at": "2026-08-18T15:38:01-0700",
+    "gpu": "AMD Radeon AI PRO R9700 (gfx1201)",
+    "preflight_state": "PASS",
+    "failed_attempts": [
+      {
+        "prompt_id": "8c766146-e35c-4802-9fab-2efe34356f12",
+        "issue": "execute() got an unexpected keyword argument 'ref_image_1' (flat autogrow slot name attempted directly, without the 'ref_images.' dotted path prefix required by build_nested_inputs)"
+      },
+      {
+        "prompt_id": "1d6d7924-38f3-4a08-93e0-f0ef98b4db54",
+        "issue": "RuntimeError: tensor a (3072) must match tensor b (128) at dim 2 \u2014 same deterministic VAEDecodeAudio shape-mismatch bug seen in LTX run 1"
+      },
+      {
+        "prompt_id": "8a80c8a8-6ef2-4a95-addf-0429b386f29b",
+        "issue": "execute() got an unexpected keyword argument 'ref_image' (legacy singular key, not present in the live V3 Autogrow-based schema at all)"
+      },
+      {
+        "prompt_id": "e1270b7f-6cb5-4027-ab96-c7bed074b965",
+        "issue": "same VAEDecodeAudio tensor-mismatch as above"
+      },
+      {
+        "prompt_id": "de0af02f-070a-45f2-8877-287a3bf79d0d",
+        "issue": "execute() got an unexpected keyword argument 'ref_image_0' (flat key, still missing the required 'ref_images.' dotted prefix)"
+      },
+      {
+        "prompt_id": "7a71502d-1722-46e8-a6f3-46b217b2d416",
+        "issue": "execute() got an unexpected keyword argument 'ref_image' (previous agent's carried-over handoff state; legacy key + audio_vae + ref_image_size, still missing the dotted autogrow path)"
+      }
+    ],
+    "root_cause": "MiniMaxH3ReferenceToVideo.ref_images is an io.Autogrow.Input (prefix='ref_image_', min=0, max=9). ComfyUI's V3 dynamic-input machinery (comfy_api/latest/_io.py: parse_class_inputs / Autogrow._expand_schema_for_dynamic / build_nested_inputs) only recognizes an autogrow slot when the prompt JSON's flat input-dict key is the DOTTED path '<autogrow_field_id>.<slot_name>' (e.g. 'ref_images.ref_image_0') \u2014 not the bare slot name and not the legacy singular 'ref_image'. This exact convention is what the node's own frontend (custom_nodes/ComfyUI-ALLinONE-MinimaxH3/web/one_node_minimax_h3.js, wf['6'].inputs[`ref_images.ref_image_${idx}`]=[id,0]) already does; it was just never applied to the hand-built showcase R2V prompt JSON. audio_vae and ref_image_size are separate required/optional non-dynamic inputs that also had to be added \u2014 the production workflow predates both of these schema additions.",
+    "resolution": "Built showcase/workflows/h3_r2v-showcase.json as a copy of production/workflows/h3_r2v.json with: (1) 'ref_image' replaced by 'ref_images.ref_image_0', (2) 'audio_vae': ['4', 0] added, (3) 'ref_image_size': 'match' added, (4) LoadImage pointed at bx77-anchor.png, (5) showcase prompt/filename_prefix substituted. production/workflows/h3_r2v.json was left completely unmodified \u2014 git diff confirms no changes to any file under production/.",
+    "correctness_gate": {
+      "valid_video": true,
+      "has_audio_track": true,
+      "duration_matches_frame_count": "1.625s at 39 frames / 24fps, confirmed by ffprobe",
+      "identity_preserved": "yes \u2014 subject is a visibly gunmetal/brass armored robot knight matching the bx77 anchor's general silhouette and material language; single accepted take, no further iteration performed after success"
+    }
+  },
+  {
+    "run_order": 6,
+    "name": "LTX 2.5 Video \u2014 Return Run (Signal Vault)",
+    "workflow": "ltx25",
+    "workflow_file": "production/workflows/ltx25.json (audio branch dropped at queue time, see notes)",
+    "previous_workflow": "h3_r2v",
+    "prompt_id": "ce215c01-bb7f-437a-a2fa-d85c6d1e9809",
+    "wall_seconds": 23.62,
+    "peak_vram_gib": "NA",
+    "artifact": "/ai/artifacts/runs/minimax-h3/r9700-final-showcase/06-ltx-boxwrench-signal-return_00001_.mp4",
+    "parameters": {
+      "width": 768,
+      "height": 448,
+      "frames": 41,
+      "fps": 24.0,
+      "steps": 8,
+      "sampler": "res_multistep",
+      "scheduler": "simple",
+      "seed": 8112099,
+      "audio_branch": "dropped (VAEDecodeAudio omitted; see LTX run 1 for the deterministic tensor-mismatch this avoids)"
+    },
+    "models": [
+      "ltx-2.5-22b-distilled-transformer-comfy-int8-convrot.safetensors",
+      "gemma4-12b-with-proj-ltx-2.5-comfy-int8-convrot.safetensors",
+      "ltx-2.5-video-vae-bf16.safetensors"
+    ],
+    "generated_at": "2026-08-18T15:21:58-0700",
+    "gpu": "AMD Radeon AI PRO R9700 (gfx1201)",
+    "preflight_state": "PASS",
+    "notes": "Queued by the previous agent while still debugging H3 R2V, confirming this exact 23.62 s wall time from the handoff. Verified independently from ComfyUI /history (execution_start 15:21:35 -> execution_success 15:21:58). Model/VAE loaders were already warm from run 1's LTX session. Known creative-fidelity limitation: LTX 2.5 here is pure text conditioning with no image-reference mechanism, so it does not reliably reproduce the bx77 anchor's exact color palette/helmet geometry the way the image- and reference-conditioned H3 I2V/R2V runs do \u2014 recorded honestly rather than re-rolled, since the run is a technically valid, on-theme (armored figure, cosmic backdrop, chest-core glow) completion and the task directive is not to keep experimenting after a valid completion."
+  }
+]

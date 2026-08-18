@@ -1,0 +1,156 @@
+{
+  "1": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "ltx-2.5-22b-distilled-transformer-comfy-int8-convrot.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "2": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "gemma4-12b-with-proj-ltx-2.5-comfy-int8-convrot.safetensors",
+      "type": "ltxv",
+      "device": "default"
+    }
+  },
+  "3": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "ltx-2.5-video-vae-bf16.safetensors"
+    }
+  },
+  "4": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "ltx-2.5-audio-vae-bf16.safetensors"
+    }
+  },
+  "5": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": [
+        "2",
+        0
+      ],
+      "text": "Boxwrench walks slowly through a vast machine archive while articulated mechanical arms raise glowing recovered artifacts from dark steel vaults around him. The robot knight moves with deliberate weight, worn metallic armor catching narrow reflections from cyan diagnostic panels and warm furnace light. Fine scratches, machined joints, engraved surfaces, cables, bolts, dust, and heat discoloration remain sharply visible as small mechanisms move independently in the background. The camera begins at a low medium-wide angle in front of Boxwrench, tracks backward smoothly as he advances, then drifts slightly sideways to reveal the immense workshop behind him. Holographic measurement traces wake up sequentially along the walls as he passes. Subtle sparks fall from an overhead fabrication arm and steam escapes from a distant valve. Lighting combines cold technical cyan with restrained amber forge highlights, deep shadows, volumetric haze, realistic reflections, and rich surface texture. Motion remains controlled, physical, and cinematic, with no abrupt cuts. Burnished gunmetal steel plate armor with brushed brass trim, a rounded burgonet helm, and a recessed visor with a faint cold amber optic glow."
+    }
+  },
+  "6": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": [
+        "2",
+        0
+      ],
+      "text": "worst quality, low quality, blurry, distorted, jitter, stutter, cartoon, anime, 3d render plastic, morphing, extra limbs, animal, wildlife"
+    }
+  },
+  "7": {
+    "class_type": "EmptyLTXVLatentVideo",
+    "inputs": {
+      "width": 768,
+      "height": 448,
+      "length": 41,
+      "batch_size": 1
+    }
+  },
+  "8": {
+    "class_type": "RandomNoise",
+    "inputs": {
+      "noise_seed": 8112031
+    }
+  },
+  "9": {
+    "class_type": "KSamplerSelect",
+    "inputs": {
+      "sampler_name": "res_multistep"
+    }
+  },
+  "10": {
+    "class_type": "BasicScheduler",
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "scheduler": "simple",
+      "steps": 8,
+      "denoise": 1.0
+    }
+  },
+  "11": {
+    "class_type": "BasicGuider",
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "conditioning": [
+        "5",
+        0
+      ]
+    }
+  },
+  "12": {
+    "class_type": "SamplerCustomAdvanced",
+    "inputs": {
+      "noise": [
+        "8",
+        0
+      ],
+      "guider": [
+        "11",
+        0
+      ],
+      "sampler": [
+        "9",
+        0
+      ],
+      "sigmas": [
+        "10",
+        0
+      ],
+      "latent_image": [
+        "7",
+        0
+      ]
+    }
+  },
+  "13": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "12",
+        0
+      ],
+      "vae": [
+        "3",
+        0
+      ]
+    }
+  },
+  "15": {
+    "class_type": "CreateVideo",
+    "inputs": {
+      "images": [
+        "13",
+        0
+      ],
+      "fps": 24.0,
+      "bit_depth": 8
+    }
+  },
+  "16": {
+    "class_type": "SaveVideo",
+    "inputs": {
+      "video": [
+        "15",
+        0
+      ],
+      "filename_prefix": "r9700-final-showcase/01-ltx-boxwrench-artifact-forge-v2",
+      "format": "mp4",
+      "codec": "h264"
+    }
+  }
+}

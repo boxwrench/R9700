@@ -3,56 +3,440 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>R9700 Video Examples</title>
-  <link rel="stylesheet" href="gallery.css">
+  <title>R9700 Generation Lab — Boxwrench / Radeon AI PRO R9700</title>
+  <meta name="description" content="Measured, tuned, and preserved: LTX 2.5, MiniMax H3, and MiniMax Music 3 on an AMD Radeon AI PRO R9700, with a real six-run workflow-switching acceptance session.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --void: #05070a;
+      --charcoal: #0a0f15;
+      --blue-black: #0d151d;
+      --panel: #10161d;
+      --ink: #e7e2d8;
+      --muted: #999a96;
+      --dim: #8f969a;
+      --chrome: #a8afb4;
+      --brass: #b18a48;
+      --brass-bright: #d2af6c;
+      --crimson: #e45a50;
+      --rule: rgb(190 183 168 / 24%);
+      --font-interface: "Share Tech Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+      --font-prose: "Newsreader Variable", "Newsreader", Georgia, serif;
+      --font-code: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    * { box-sizing: border-box; }
+    html { background: var(--void); }
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 52% 4%, rgb(45 57 67 / 25%), transparent 34rem),
+        var(--void);
+      color: var(--ink);
+      font: 16px/1.6 var(--font-prose);
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--brass-bright); }
+    a:hover { color: var(--crimson); }
+    main {
+      width: min(1180px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 56px 0 96px;
+    }
+    .kicker {
+      font: 13px/1 var(--font-interface);
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--brass);
+    }
+    h1 {
+      font: 600 clamp(2.1rem, 5.5vw, 4.2rem)/1.08 var(--font-prose);
+      margin: 0.4rem 0 0.6rem;
+      color: var(--ink);
+    }
+    h1 em { color: var(--brass-bright); font-style: normal; }
+    .lede {
+      font: 400 20px/1.6 var(--font-prose);
+      color: var(--muted);
+      max-width: 46rem;
+    }
+    .backlink {
+      font: 13px/1 var(--font-interface);
+      letter-spacing: 0.08em;
+      color: var(--dim);
+      text-decoration: none;
+    }
+    .backlink:hover { color: var(--brass-bright); }
+    section { margin-top: 76px; }
+    section > h2 {
+      font: 12px/1 var(--font-interface);
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--brass);
+      border-bottom: 1px solid var(--rule);
+      padding-bottom: 14px;
+      margin: 0 0 28px;
+    }
+    .hero-media {
+      margin-top: 40px;
+      border: 1px solid var(--rule);
+      border-radius: 4px;
+      overflow: hidden;
+      background: var(--charcoal);
+    }
+    .hero-media img { display: block; width: 100%; height: auto; }
+    .hero-caption {
+      font: 13px/1.5 var(--font-interface);
+      color: var(--dim);
+      padding: 14px 18px;
+      border-top: 1px solid var(--rule);
+    }
+
+    /* controlled wins */
+    .wins-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    .win-card {
+      background: var(--panel);
+      border: 1px solid var(--rule);
+      border-radius: 4px;
+      padding: 26px 24px;
+    }
+    .win-number {
+      font: 600 clamp(2.4rem, 5vw, 3.4rem)/1 var(--font-interface);
+      color: var(--brass-bright);
+    }
+    .win-label {
+      margin-top: 10px;
+      font: 15px/1.5 var(--font-prose);
+      color: var(--ink);
+    }
+    .win-scope {
+      margin-top: 10px;
+      font: 12px/1.6 var(--font-interface);
+      color: var(--dim);
+      letter-spacing: 0.02em;
+    }
+    .disclaimer {
+      margin-top: 22px;
+      padding: 14px 18px;
+      border-left: 3px solid var(--crimson);
+      background: rgb(228 90 80 / 6%);
+      font: 14px/1.6 var(--font-prose);
+      color: var(--muted);
+    }
+    .disclaimer strong { color: var(--ink); }
+
+    /* session timeline */
+    .timeline {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      font: 13px/1 var(--font-interface);
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      margin-bottom: 36px;
+    }
+    .timeline .step {
+      background: var(--panel);
+      border: 1px solid var(--rule);
+      border-radius: 3px;
+      padding: 8px 12px;
+      color: var(--brass-bright);
+    }
+    .timeline .arrow { color: var(--dim); }
+
+    .run-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 22px;
+    }
+    .run-card {
+      background: var(--panel);
+      border: 1px solid var(--rule);
+      border-radius: 4px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .run-card .thumb { position: relative; background: #000; }
+    .run-card img, .run-card video { display: block; width: 100%; height: auto; aspect-ratio: 16/9; object-fit: cover; }
+    .run-order-badge {
+      position: absolute; top: 10px; left: 10px;
+      font: 12px/1 var(--font-interface);
+      letter-spacing: 0.08em;
+      background: rgb(5 7 10 / 82%);
+      color: var(--brass-bright);
+      border: 1px solid var(--rule);
+      border-radius: 3px;
+      padding: 5px 9px;
+    }
+    .run-body { padding: 18px 20px 20px; flex: 1; display: flex; flex-direction: column; }
+    .run-title { font: 600 17px/1.35 var(--font-prose); color: var(--ink); margin: 0 0 10px; }
+    .run-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 14px;
+      font: 12px/1.5 var(--font-interface);
+      color: var(--dim);
+      margin-top: auto;
+      padding-top: 14px;
+      border-top: 1px solid var(--rule);
+    }
+    .run-stats .num { color: var(--brass-bright); font-weight: 600; }
+    .run-note { margin-top: 12px; font: 13px/1.55 var(--font-prose); color: var(--muted); }
+    .run-note.warn { color: var(--crimson); }
+    audio { width: 100%; margin-top: 4px; }
+    .music-viz { width: 100%; display: block; border-radius: 3px; margin-bottom: 10px; border: 1px solid var(--rule); }
+
+    /* symptom table */
+    table.symptoms { width: 100%; border-collapse: collapse; font: 14px/1.5 var(--font-prose); }
+    table.symptoms th, table.symptoms td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+    table.symptoms th { font: 12px/1 var(--font-interface); letter-spacing: 0.1em; text-transform: uppercase; color: var(--brass); }
+    table.symptoms code { font: 13px var(--font-code); color: var(--brass-bright); }
+
+    .stack-links, .method-list, .repro-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+    .stack-links a, .repro-list a { font: 15px var(--font-prose); }
+    .method-list li { font: 16px/1.6 var(--font-prose); color: var(--muted); padding-left: 1.6em; position: relative; }
+    .method-list li::before { content: "→"; position: absolute; left: 0; color: var(--brass); }
+
+    footer {
+      margin-top: 90px;
+      padding-top: 24px;
+      border-top: 1px solid var(--rule);
+      font: 13px/1.6 var(--font-interface);
+      color: var(--dim);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 22px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { scroll-behavior: auto !important; }
+    }
+  </style>
 </head>
 <body>
 <main>
-  <a href="https://github.com/boxwrench/R9700">← back to R9700 repository</a>
-  <p class="kicker">Boxwrench / Radeon AI PRO R9700</p>
-  <h1>Video examples</h1>
-  <p class="lede">Three process-cold/model-cold ComfyUI renders from the same brass-robot prompt. The headline is prompt-to-saved-artifact wall time → delivered video duration.</p>
+  <a class="backlink" href="https://github.com/boxwrench/R9700">&larr; back to R9700 repository</a>
+  <p class="kicker" style="margin-top:22px;">Boxwrench &middot; AMD Radeon AI PRO R9700</p>
+  <h1>R9700 Generation Lab<br><em>Measured. Tuned. Preserved.</em></h1>
+  <p class="lede">LTX 2.5, MiniMax H3, and MiniMax Music 3 on an AMD Radeon AI PRO R9700 &mdash; a real six-run workflow-switching acceptance session, with the actual wall times, artifacts, and failure record behind them.</p>
 
-  <section class="grid" aria-label="Benchmark videos">
-    <article class="card">
-      <video controls preload="metadata" poster="assets/h3-standard-fp8.jpg">
-        <source src="https://github.com/boxwrench/R9700/releases/download/video-v1/h3-standard-fp8.mp4" type="video/mp4">
-        Your browser cannot play this video. <a href="https://github.com/boxwrench/R9700/releases/download/video-v1/h3-standard-fp8.mp4">Download it from the release.</a>
-      </video>
-      <div class="card-body">
-        <h2>MiniMax H3 Standard FP8</h2>
-        <div class="meta">261.038 s → 5.167 s · 864×480 · 124 frames · 20 steps</div>
-        <p class="hash">SHA-256: 780f9b78401fc093269bf27e5364c259ba4ffe06ca70730c8070d5f5b58f95f3</p>
-      </div>
-    </article>
+  <div class="hero-media">
+    <img src="assets/showcase/05-h3-r2v-boxwrench-observatory.jpg" alt="Boxwrench, a gunmetal-and-brass robot knight, reaching toward a small point of light inside a dark computational observatory, generated by MiniMax H3 Reference-to-Video on the R9700.">
+    <p class="hero-caption">MiniMax H3 Reference-to-Video &middot; run 5 of 6 &middot; 81.47&thinsp;s wall &middot; identity-anchored on the Boxwrench reference image</p>
+  </div>
 
-    <article class="card">
-      <video controls preload="metadata" poster="assets/h3-turbo-v4-fp8.jpg">
-        <source src="https://github.com/boxwrench/R9700/releases/download/video-v1/h3-turbo-v4-fp8.mp4" type="video/mp4">
-        Your browser cannot play this video. <a href="https://github.com/boxwrench/R9700/releases/download/video-v1/h3-turbo-v4-fp8.mp4">Download it from the release.</a>
-      </video>
-      <div class="card-body">
-        <h2>MiniMax H3 Turbo v4 FP8</h2>
-        <div class="meta">80.927 s → 5.167 s · 864×480 · 124 frames · 4 Turbo steps</div>
-        <p class="hash">SHA-256: abc3e2680b3ca2b188ae9f60300017faa40e0cc349f4f11c60056671a276556e</p>
+  <section aria-labelledby="wins-h">
+    <h2 id="wins-h">Headline controlled wins</h2>
+    <div class="wins-grid">
+      <div class="win-card">
+        <div class="win-number">~776&times;</div>
+        <div class="win-label">H3 Qwen3-VL load pathology eliminated with <code>--disable-mmap</code></div>
+        <div class="win-scope">931&thinsp;s &rarr; 1.2&thinsp;s, model-load only</div>
       </div>
-    </article>
-
-    <article class="card">
-      <video controls preload="metadata" poster="assets/ltx-2.5-distilled-int8.jpg">
-        <source src="https://github.com/boxwrench/R9700/releases/download/video-v1/ltx-2.5-distilled-int8.mp4" type="video/mp4">
-        Your browser cannot play this video. <a href="https://github.com/boxwrench/R9700/releases/download/video-v1/ltx-2.5-distilled-int8.mp4">Download it from the release.</a>
-      </video>
-      <div class="card-body">
-        <h2>LTX-2.5 distilled INT8</h2>
-        <div class="meta">67.035 s → 5.042 s · 896×512 · 121 frames · 8+3 steps</div>
-        <p class="hash">SHA-256: 2adeee6d0e47242b9a391e71c8e4012c6dfc1df4f1436f35c12a051e5dd10ec9</p>
+      <div class="win-card">
+        <div class="win-number">~41%</div>
+        <div class="win-label">Lower LTX wall time on the documented short workload</div>
+        <div class="win-scope">43.78&thinsp;s &rarr; 25.69&thinsp;s, 768&times;448 / 41-frame / 8-step</div>
       </div>
-    </article>
+      <div class="win-card">
+        <div class="win-number">~24.9%</div>
+        <div class="win-label">Faster H3 sampler in the controlled Qwen-residency A/B</div>
+        <div class="win-scope">29.51&thinsp;s &rarr; 22.15&thinsp;s, paired changed-prompt sampling only</div>
+      </div>
+    </div>
+    <p class="disclaimer"><strong>These are prior controlled results from separate isolated experiments</strong>, not from the session below. The workloads and timing boundaries differ &mdash; do not multiply them together or treat them as one universal speedup. Full method and evidence: <a href="comfyui-walltime-campaign-20260818.md">walltime campaign index</a>.</p>
   </section>
 
-  <p class="note">The page expects the three MP4s as assets on the <code>video-v1</code> GitHub Release. The poster frames and measurement records are in the repository; the videos stay out of ordinary Git history.</p>
-  <footer><a href="https://github.com/boxwrench/R9700/blob/main/docs/methodology.md">Methodology</a> · <a href="https://github.com/boxwrench/R9700/blob/main/data/results.tsv">Normalized results</a> · <a href="https://github.com/boxwrench/R9700/releases/tag/video-v1">Release assets</a></footer>
+  <section aria-labelledby="session-h">
+    <h2 id="session-h">The real final session</h2>
+    <div class="timeline" aria-hidden="true">
+      <span class="step">1&nbsp;LTX</span><span class="arrow">&rarr;</span>
+      <span class="step">2&nbsp;H3 T2V</span><span class="arrow">&rarr;</span>
+      <span class="step">3&nbsp;H3 I2V</span><span class="arrow">&rarr;</span>
+      <span class="step">4&nbsp;Music 3</span><span class="arrow">&rarr;</span>
+      <span class="step">5&nbsp;H3 R2V</span><span class="arrow">&rarr;</span>
+      <span class="step">6&nbsp;LTX return</span>
+    </div>
+    <p class="lede" style="font-size:16px;">One long-lived ComfyUI process (one mid-session restart), switching between four different production workflows in sequence, generating a real artifact every time. These are the actual wall times from that session &mdash; including the runs that failed first. Full provenance: <a href="../showcase/session/session.json">session.json</a> &middot; <a href="../data/final-showcase-session-20260818.tsv">session.tsv</a> &middot; <a href="final-generation-acceptance-20260818.md">final acceptance report</a>.</p>
+
+    <div class="run-grid" style="margin-top:28px;">
+      <article class="run-card">
+        <div class="thumb">
+          <span class="run-order-badge">RUN 1 &middot; COLD INIT &rarr; LTX</span>
+          <video controls preload="none" poster="assets/showcase/01-ltx-boxwrench-artifact-forge.jpg">
+            <source src="https://github.com/boxwrench/R9700/releases/download/showcase-final-20260818/01-ltx-boxwrench-artifact-forge_00001_.mp4" type="video/mp4">
+          </video>
+        </div>
+        <div class="run-body">
+          <h3 class="run-title">LTX 2.5 &mdash; The Artifact Forge</h3>
+          <div class="run-stats">
+            <div>WALL <span class="num">11.48s*</span></div>
+            <div>768&times;448 &middot; 41f @24fps</div>
+            <div>8 steps &middot; res_multistep</div>
+            <div>video-only (audio branch dropped)</div>
+          </div>
+          <p class="run-note warn">*Warm-cache measurement; see acceptance report. First attempt rendered the workflow's unmodified placeholder text instead of this prompt (archived, not published) &mdash; corrected and re-run.</p>
+        </div>
+      </article>
+
+      <article class="run-card">
+        <div class="thumb">
+          <span class="run-order-badge">RUN 2 &middot; LTX &rarr; H3 T2V</span>
+          <video controls preload="none" poster="assets/showcase/02-h3-t2v-boxwrench-cathedral.jpg">
+            <source src="https://github.com/boxwrench/R9700/releases/download/showcase-final-20260818/02-h3-t2v-boxwrench-cathedral_00001_.mp4" type="video/mp4">
+          </video>
+        </div>
+        <div class="run-body">
+          <h3 class="run-title">MiniMax H3 T2V &mdash; Machine Cathedral</h3>
+          <div class="run-stats">
+            <div>WALL <span class="num">131.94s</span></div>
+            <div>608&times;352 &middot; 39f @24fps</div>
+            <div>20 steps &middot; res_multistep</div>
+            <div>peak VRAM 27.58&thinsp;GiB</div>
+          </div>
+          <p class="run-note">Clean first-submission run on the unmodified production workflow.</p>
+        </div>
+      </article>
+
+      <article class="run-card">
+        <div class="thumb">
+          <span class="run-order-badge">RUN 3 &middot; H3 T2V &rarr; H3 I2V</span>
+          <video controls preload="none" poster="assets/showcase/03-h3-i2v-boxwrench-forge-awakening.jpg">
+            <source src="https://github.com/boxwrench/R9700/releases/download/showcase-final-20260818/03-h3-i2v-boxwrench-forge-awakening_00001_.mp4" type="video/mp4">
+          </video>
+        </div>
+        <div class="run-body">
+          <h3 class="run-title">MiniMax H3 I2V &mdash; Forge Awakening</h3>
+          <div class="run-stats">
+            <div>WALL <span class="num">49.16s</span></div>
+            <div>608&times;352 &middot; 39f @24fps</div>
+            <div>20 steps &middot; anchor-seeded</div>
+            <div>peak VRAM NA</div>
+          </div>
+          <p class="run-note warn">First submission failed: node schema wants <code>first_frame</code>, saved workflow said <code>image</code>. See <a href="../TROUBLESHOOTING.md#7-v3-node-schema-drift-minimax-h3-i2v--r2v--2026-08-18">Troubleshooting &sect;7</a>.</p>
+        </div>
+      </article>
+
+      <article class="run-card">
+        <div class="thumb" style="aspect-ratio:16/9; display:flex; align-items:center; justify-content:center; background:linear-gradient(180deg, var(--blue-black), var(--void));">
+          <span class="run-order-badge">RUN 4 &middot; H3 I2V &rarr; MUSIC 3</span>
+        </div>
+        <div class="run-body">
+          <h3 class="run-title">MiniMax Music 3 &mdash; Signal Against the End</h3>
+          <img class="music-viz" src="assets/showcase/04-music3-signal-against-the-end-spectrum.png" alt="Log-scale spectrogram of the generated track">
+          <img class="music-viz" src="assets/showcase/04-music3-signal-against-the-end-waveform.png" alt="Waveform of the generated track">
+          <audio controls preload="none" src="https://github.com/boxwrench/R9700/releases/download/showcase-final-20260818/04-music3-signal-against-the-end_00001.flac"></audio>
+          <div class="run-stats">
+            <div>WALL <span class="num">28.48s</span></div>
+            <div>15.0s output</div>
+            <div>galloping heavy-metal, res_multistep</div>
+            <div>FLAC</div>
+          </div>
+          <p class="run-note">A synthetic intelligence transmitting backward through time &mdash; cold logic preserving memory against entropy.</p>
+        </div>
+      </article>
+
+      <article class="run-card">
+        <div class="thumb">
+          <span class="run-order-badge">RUN 5 &middot; MUSIC 3 &rarr; H3 R2V</span>
+          <video controls preload="none" poster="assets/showcase/05-h3-r2v-boxwrench-observatory.jpg">
+            <source src="https://github.com/boxwrench/R9700/releases/download/showcase-final-20260818/05-h3-r2v-boxwrench-observatory_00001_.mp4" type="video/mp4">
+          </video>
+        </div>
+        <div class="run-body">
+          <h3 class="run-title">MiniMax H3 R2V &mdash; Observatory</h3>
+          <div class="run-stats">
+            <div>WALL <span class="num">81.47s</span></div>
+            <div>608&times;352 &middot; 39f @24fps</div>
+            <div>20 steps &middot; ref-anchored + audio</div>
+            <div>6 failed attempts first</div>
+          </div>
+          <p class="run-note warn">Six prior submissions failed on the V3 autogrow input schema before the correct dotted-path key (<code>ref_images.ref_image_0</code>) was found. Full root cause: <a href="../TROUBLESHOOTING.md#7-v3-node-schema-drift-minimax-h3-i2v--r2v--2026-08-18">Troubleshooting &sect;7</a>.</p>
+        </div>
+      </article>
+
+      <article class="run-card">
+        <div class="thumb">
+          <span class="run-order-badge">RUN 6 &middot; H3 R2V &rarr; LTX RETURN</span>
+          <video controls preload="none" poster="assets/showcase/06-ltx-boxwrench-signal-return.jpg">
+            <source src="https://github.com/boxwrench/R9700/releases/download/showcase-final-20260818/06-ltx-boxwrench-signal-return_00001_.mp4" type="video/mp4">
+          </video>
+        </div>
+        <div class="run-body">
+          <h3 class="run-title">LTX 2.5 Return &mdash; Signal Vault</h3>
+          <div class="run-stats">
+            <div>WALL <span class="num">23.62s</span></div>
+            <div>768&times;448 &middot; 41f @24fps</div>
+            <div>8 steps &middot; res_multistep</div>
+            <div>video-only (audio branch dropped)</div>
+          </div>
+          <p class="run-note">Confirms clean switch-back to LTX after four intervening workflow changes. Text-only conditioning here does not guarantee exact identity match to the reference &mdash; see acceptance report.</p>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section aria-labelledby="symptom-h">
+    <h2 id="symptom-h">If you see this, check this</h2>
+    <table class="symptoms">
+      <thead><tr><th>Symptom</th><th>First check</th></tr></thead>
+      <tbody>
+        <tr><td>Model loading takes minutes; one CPU core busy; GPU mostly idle</td><td>Check <code>--disable-mmap</code></td></tr>
+        <tr><td>H3 changed-prompt sampler runs ~25&ndash;30s instead of ~22s</td><td>Check Qwen3-VL residency before the sampler</td></tr>
+        <tr><td>LTX short prompt spends ~22s in conditioning</td><td>Check the Gemma minimum sequence floor (<code>LTX_GEMMA_MIN_LENGTH=256</code>)</td></tr>
+        <tr><td>Music spends ~20s in conditioning before a ~3.6s DiT step</td><td>Inspect the AR conditioner, not the DiT</td></tr>
+        <tr><td><code>execute() got an unexpected keyword argument 'ref_image'</code> / <code>'image'</code></td><td>Node schema drift &mdash; see Troubleshooting &sect;7</td></tr>
+        <tr><td><code>VAEDecodeAudio</code> tensor-shape RuntimeError</td><td>Known-bad shape combo &mdash; drop the audio branch, see Troubleshooting &sect;8</td></tr>
+      </tbody>
+    </table>
+    <p style="margin-top:18px;"><a href="../TROUBLESHOOTING.md">Full symptom map, measurements, and dead ends &rarr;</a></p>
+  </section>
+
+  <section aria-labelledby="stack-h">
+    <h2 id="stack-h">Known-good stack</h2>
+    <ul class="stack-links">
+      <li><a href="selected-production-configs.md">docs/selected-production-configs.md</a> &mdash; exact flags, env vars, and per-workload selections</li>
+      <li><a href="../production/manifest.json">production/manifest.json</a> &mdash; pinned model SHA-256 hashes and workflow fingerprints</li>
+      <li><a href="update-gate.md">docs/update-gate.md</a> &mdash; how a new ComfyUI/model version earns production status</li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="method-h">
+    <h2 id="method-h">Method</h2>
+    <ul class="method-list">
+      <li>Measure the components.</li>
+      <li>Find the big cost.</li>
+      <li>Run a discriminator.</li>
+      <li>Keep meaningful wins.</li>
+      <li>Record dead ends.</li>
+      <li>Stop chasing tiny percentages.</li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="repro-h">
+    <h2 id="repro-h">Reproduce / agents</h2>
+    <ul class="repro-list">
+      <li><a href="../README.md">README</a></li>
+      <li><a href="../AGENTS.md">AGENTS.md</a> &mdash; read first if you are an AI agent working in this repo</li>
+      <li><a href="../TROUBLESHOOTING.md">TROUBLESHOOTING.md</a></li>
+      <li><a href="../scripts/production-preflight.py">scripts/production-preflight.py</a> &mdash; preflight check</li>
+      <li><a href="update-gate.md">docs/update-gate.md</a></li>
+    </ul>
+  </section>
+
+  <footer>
+    <span>&copy; Boxwrench</span>
+    <a href="https://github.com/boxwrench/R9700">R9700 repository</a>
+    <a href="https://github.com/boxwrench/R9700/releases/tag/showcase-final-20260818">Release assets</a>
+    <a href="final-generation-acceptance-20260818.md">Final acceptance report</a>
+  </footer>
 </main>
 </body>
 </html>

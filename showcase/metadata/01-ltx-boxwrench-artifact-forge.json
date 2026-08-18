@@ -1,0 +1,47 @@
+{
+  "run_order": 1,
+  "name": "LTX 2.5 Video — The Artifact Forge",
+  "workflow": "ltx25",
+  "workflow_file": "showcase/workflows/ltx25-run1-showcase.json",
+  "previous_workflow": "cold_init",
+  "prompt_id": "5016503f-1502-4cf0-b803-b3a82cb19e78",
+  "wall_seconds": 11.48,
+  "wall_seconds_note": "Warm-cache measurement: UNETLoader/CLIPLoader/CLIPTextEncode were cache-hit from the immediately preceding same-session attempt on this workflow (same prompt text); only RandomNoise/sampling/VAEDecode/CreateVideo/SaveVideo executed fresh. Not a cold prompt-to-artifact time.",
+  "peak_vram_gib": "NA",
+  "artifact": "/ai/artifacts/runs/minimax-h3/r9700-final-showcase/01-ltx-boxwrench-artifact-forge_00001_.mp4",
+  "parameters": {
+    "width": 768,
+    "height": 448,
+    "frames": 41,
+    "fps": 24.0,
+    "steps": 8,
+    "sampler": "res_multistep",
+    "scheduler": "simple",
+    "seed": 8112031,
+    "audio_branch": "dropped (see notes)"
+  },
+  "models": [
+    "ltx-2.5-22b-distilled-transformer-comfy-int8-convrot.safetensors",
+    "gemma4-12b-with-proj-ltx-2.5-comfy-int8-convrot.safetensors",
+    "ltx-2.5-video-vae-bf16.safetensors"
+  ],
+  "generated_at": "2026-08-18T15:43:00-0700",
+  "gpu": "AMD Radeon AI PRO R9700 (gfx1201)",
+  "preflight_state": "PASS",
+  "failed_attempts": [
+    {
+      "prompt_id": "5a59144d-b8c4-4019-a78a-9b3c0e870e96",
+      "issue": "INVALID CONTENT, not a technical failure. Completed (wall 33.47s per original sidecar) but rendered the production workflow's unmodified placeholder text ('A close-up of an Arctic hunter crouching on an ice floe...') instead of the Boxwrench showcase prompt — the prompt override did not reach this queued job. Output preserved for the record at /ai/artifacts/runs/r9700-final-showcase-invalid/01-ltx-boxwrench-artifact-forge_00001_WRONG-PROMPT-arctic-hunter-default-text.mp4"
+    },
+    {
+      "prompt_id": "77921571-ab50-4202-8e62-586c8cd5576e",
+      "issue": "execution_error at VAEDecodeAudio (node 14): \"The size of tensor a (3072) must match the size of tensor b (128) at non-singleton dimension 2\". Deterministic for this latent shape, same failure class hit repeatedly during H3 R2V debugging (see run 5)."
+    },
+    {
+      "prompt_id": "bdac84cf-c207-4a4a-94a8-84524523f5f9",
+      "issue": "Identical retry of the same graph, identical VAEDecodeAudio error (deterministic, not transient)."
+    }
+  ],
+  "resolution": "Removed VAEDecodeAudio (node 14) and the audio input from CreateVideo, matching the working pattern already used by the successful run 6 (LTX return, prompt ce215c01). LTX audio-VAE decode for this build/shape combination is a known-bad path; video-only output is the accepted workaround for LTX in this showcase. Root text-override bug fixed by explicitly setting node 5 text via a showcase-only workflow copy (production/workflows/ltx25.json left untouched).",
+  "notes": "production/workflows/ltx25.json was NOT modified. All fixes live in showcase/workflows/ltx25-run1-showcase.json."
+}
