@@ -1,4 +1,4 @@
-run_id	state	mode	checkpoint	text_encoder	width	height	frames	fps	steps	samplER	scheduler	conditioning_s	offload_s	load_stage_s	vram_before_sampler_gib	sampling_s	seconds_per_step	decode_s	wall_s	peak_vram_gib	notes
+run_id	state	mode	checkpoint	text_encoder	width	height	frames	fps	steps	sampler	scheduler	conditioning_s	offload_s	load_stage_s	vram_before_sampler_gib	sampling_s	seconds_per_step	decode_s	wall_s	peak_vram_gib	notes
 h3-a	cold_prompt_a	T2V	minimax_h3_fl2va_pruned_fp8_scaled.safetensors	qwen3vl_32b_minimax_h3_fp8.safetensors	608	352	39	24	20	res_multistep	simple	2.79	0	5.58		25.57	1.279	5.51	42.88	26.21	cold encoder+DiT loader spans total 5.58 s
 h3-b	warm_changed_prompt_b	T2V	minimax_h3_fl2va_pruned_fp8_scaled.safetensors	qwen3vl_32b_minimax_h3_fp8.safetensors	608	352	39	24	20	res_multistep	simple	2.57	0	0		25.30	1.265	5.50	34.46	26.32	Qwen resident before sampler
 h3-c	warm_cached_prompt_new_seed	T2V	minimax_h3_fl2va_pruned_fp8_scaled.safetensors	qwen3vl_32b_minimax_h3_fp8.safetensors	608	352	39	24	20	res_multistep	simple	0	0	0	1.70	22.41	1.120	5.38	28.84		conditioning skipped; Qwen not staged
