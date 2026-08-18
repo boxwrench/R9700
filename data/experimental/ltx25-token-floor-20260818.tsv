@@ -1,0 +1,6 @@
+floor	raw_prompt_tokens	effective_tokens	encode_s	max_abs_error_vs_1024	mean_abs_error_vs_1024	cosine_vs_1024	output_shape	nan_inf	notes
+1024	24	1024	10.934	0	0	0.9999936	24x6144	false	baseline self-comparison cosine reflects numeric accumulation floor
+768	24	768	8.256	0.125	1.005e-4	0.9999937	24x6144	false	pad_left true; output cropped to real tokens
+512	24	512	3.616	0.125	1.725e-4	0.9999936	24x6144	false	
+256	24	256	1.958	0.125	1.346e-4	0.9999936	24x6144	false	selected production floor
+128	24	128	1.615	0.125	1.434e-4	0.9999935	24x6144	false	minimal additional wall gain vs 256
