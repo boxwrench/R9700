@@ -2,6 +2,44 @@
 
 Reproducible workflows, measurements, and engineering records for AI workloads on an AMD Radeon AI PRO R9700. The repository is deliberately numbers-first: it records absolute wall time, exact workload shape, software/model provenance, failed hypotheses, and the evidence behind production selections.
 
+> **Something is slow or weird?** Start with [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md). It maps observed symptoms to the first discriminator to run before you reinstall, requantize, or start tuning kernels.
+>
+> **Setting up the known-good configuration?** Use [`docs/selected-production-configs.md`](docs/selected-production-configs.md).
+>
+> **AI agent?** Read [`AGENTS.md`](AGENTS.md) first. Do not silently replace selected configurations with newer upstream defaults.
+
+## What this repo has already found
+
+These are measured improvements on this R9700 system, not generic AMD marketing claims. The workloads and timing boundaries differ, so the rows should not be multiplied together or treated as one universal speedup.
+
+| Problem / workload | Unoptimized or pathological path measured here | Selected / corrected path | Result |
+|---|---:|---:|---:|
+| H3 Qwen3-VL model load, mmap-backed | 931 s | 1.2 s with `--disable-mmap` | **~776x faster load** |
+| H3 full warm-up path | 1,362 s | 51.07 s with mmap disabled | **~27x faster warm-up** |
+| LTX short 768x448 / 41-frame / 8-step workload | 43.78 s wall | 25.69 s wall | **41% less wall time / ~1.70x throughput** |
+| H3 paired changed-prompt T2V | 44.95 s wall | 41.30 s with Qwen pre-sampler offload | **8.1% less wall time** |
+| H3 sampler inside that paired A/B | 29.51 s | 22.15 s | **24.9% faster sampling** |
+| MiniMax Music 3 | ~24.42 s warm wall | optimization still open | **AR bottleneck identified; no production speedup claimed yet** |
+
+The spectacular mmap numbers are **model-loading fixes**, not generation speedups. Once models are warm, they do not compound with the recurring LTX/H3 improvements.
+
+The other value of this repository is avoiding dead ends. This campaign has already ruled out or scoped several tempting paths: storage/PCIe tuning for the mmap pathology, BF16 LTX encoder as a speed fix, generic H3 dual-GPU residency as the default, unreliable `rocm-smi` utilization conclusions on gfx1201, H3 kernel tuning before encoder residency, Music DiT tuning while conditioning dominates, ComfyUI's NVIDIA-only FixedKV Music graph path, and naive `torch.compile` on Music's dynamic Qwen KV-cache loop.
+
+## If you see this, check this first
+
+| Symptom | First check |
+|---|---|
+| Model load takes many minutes; one CPU core busy; GPU mostly idle | Run with `--disable-mmap`; see [catastrophically slow model loading](TROUBLESHOOTING.md#1-catastrophically-slow-model-loading) |
+| H3 changed-prompt sampling is ~25-30 s instead of ~22 s | Check whether Qwen3-VL is still resident before the sampler |
+| H3 sampler starts around 26 GiB allocated | Check pre-sampler encoder offload; selected path drops to roughly 7 GiB before DiT staging |
+| LTX short prompt spends ~22 s conditioning | Check Gemma minimum sequence floor; selected value is `256` |
+| `rocm-smi` says ~0-1% GPU while board power is near 300 W | Do not diagnose CPU fallback from that counter alone |
+| MiniMax Music spends ~20 s conditioning before a ~3.6 s DiT | Inspect `MiniMaxMusic3AR.generate`; the AR loop is the bottleneck |
+| Music FixedKV/graph path crashes on AMD | Do not force it; installed flash decode path is NVIDIA-only |
+| Music `torch.compile` continually recompiles | Check the changing Python KV-cache index guards |
+
+The full symptom map, measurements, dead ends, and quick discriminators are in [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md).
+
 ## Automation and support
 
 Almost all of this repository is generated and assembled automatically. If you find an error, need information or clarification, or have a testing request, please submit it as a [GitHub Issue](https://github.com/boxwrench/R9700/issues). I’ll try to address issues and requests promptly.
@@ -18,7 +56,89 @@ Start with the [current campaign index](docs/comfyui-walltime-campaign-20260818.
 |---|---|---|
 | LTX 2.5 | `--disable-mmap`, INT8-ConvRot encoder+DiT, `LTX_GEMMA_MIN_LENGTH=256`, reuse unchanged negative conditioning | **selected** |
 | MiniMax H3 | `--disable-mmap`, single R9700, explicitly offload Qwen3-VL after conditioning and before sampling | **selected** |
-| MiniMax Music 3 | text/lyrics conditioning is ~19.9 s / 81.4% of warm wall time | **next optimization target** |
+| MiniMax Music 3 | text/lyrics conditioning is ~19.9 s / 81.4% of warm wall time | **optimization active** |
+
+### Exact files used in the current ComfyUI campaign
+
+**LTX 2.5**
+
+```text
+Transformer: ltx-2.5-22b-distilled-transformer-comfy-int8-convrot.safetensors
+Text encoder: gemma4-12b-with-proj-ltx-2.5-comfy-int8-convrot.safetensors
+E2B: gemma4_e2b_it_bf16.safetensors
+```
+
+Selected LTX behavior:
+
+```text
+--disable-mmap
+LTX_GEMMA_MIN_LENGTH=256
+tile_size=1280
+INT8-ConvRot text encoder + DiT
+reuse unchanged negative conditioning when cached
+```
+
+**MiniMax H3**
+
+```text
+FL2VA: minimax_h3_fl2va_pruned_fp8_scaled.safetensors
+Ref2VA: minimax_h3_ref2va_pruned_fp8_scaled.safetensors
+Text/vision encoder: qwen3vl_32b_minimax_h3_fp8.safetensors
+```
+
+Selected H3 behavior:
+
+```text
+--disable-mmap
+single R9700
+explicitly unload Qwen3-VL after conditioning and before sampling
+comfy.model_management.unload_model_and_clones(clip.patcher)
+```
+
+Reference T2V config:
+
+```text
+608x352
+39 frames
+24 fps
+20 steps
+res_multistep / simple
+```
+
+**MiniMax Music 3**
+
+```text
+DiT: minimax_music3_dit_int8_convrot.safetensors
+Text/lyrics encoder: minimax_music3_text_encoder_pruned_int8_convrot.safetensors
+DAV: minimax_music3_dav.safetensors
+```
+
+Current benchmark config:
+
+```text
+--disable-mmap
+15.0 s output
+20 steps
+res_multistep / simple
+CFG 1.5
+top_k 50
+```
+
+The complete runtime versions, launcher, environment, caveats, and reference results are in [`docs/selected-production-configs.md`](docs/selected-production-configs.md).
+
+### For an AI agent
+
+If the user asks to **set up H3**, **restore the optimized workflow**, **use the fastest current config**, or otherwise reproduce the known-good R9700 state:
+
+1. Treat the selected configurations in this README and [`docs/selected-production-configs.md`](docs/selected-production-configs.md) as authoritative.
+2. Do not substitute a newer model, quant, workflow, ComfyUI commit, Torch/ROCm stack, or default merely because it is newer.
+3. Verify the exact model filenames before changing anything.
+4. Preserve the selected local behavior: LTX Gemma floor `256` and H3 Qwen pre-sampler offload.
+5. Consult [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md) before diagnosing a performance problem from scratch.
+6. Treat updates as **candidates** until they reproduce the relevant canary.
+7. If an update would overwrite a selected local modification, report exactly what would be lost before proceeding.
+
+More detailed agent rules live in [`AGENTS.md`](AGENTS.md).
 
 Key current records:
 
@@ -176,11 +296,12 @@ The gallery source is [`docs/index.html`](docs/index.html). Its MP4 sources are 
 
 ## Start here
 
-1. Read the [current ComfyUI wall-time campaign](docs/comfyui-walltime-campaign-20260818.md) for active video/audio recommendations.
-2. Read [`docs/methodology.md`](docs/methodology.md) for the original timing boundary and cold-state definition.
-3. Inspect normalized measurements under [`data/experimental/`](data/experimental/) and the original canonical table in [`data/results.tsv`](data/results.tsv).
-4. Load exact JSON workflows under [`workflows/`](workflows/). Their SHA-256 values are checked by [`scripts/verify.py`](scripts/verify.py).
-5. Use the neutral prompt in [`prompts/neutral-brass-robot.txt`](prompts/neutral-brass-robot.txt), or choose a separate I2V/T2V card from the [`Boxwrench v1 prompt suite`](prompts/boxwrench-v1/README.md).
+1. If something is wrong, use [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md) first.
+2. For the known-good ComfyUI files/settings, use [`docs/selected-production-configs.md`](docs/selected-production-configs.md).
+3. Read the [current ComfyUI wall-time campaign](docs/comfyui-walltime-campaign-20260818.md) for active video/audio recommendations.
+4. Read [`docs/methodology.md`](docs/methodology.md) for the original timing boundary and cold-state definition.
+5. Inspect normalized measurements under [`data/experimental/`](data/experimental/) and the original canonical table in [`data/results.tsv`](data/results.tsv).
+6. Load exact JSON workflows under [`workflows/`](workflows/). Their SHA-256 values are checked by [`scripts/verify.py`](scripts/verify.py).
 
 Run the local checks with:
 
