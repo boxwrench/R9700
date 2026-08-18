@@ -166,6 +166,8 @@ conditioning ~= 0.25 s + 0.0516 s * frames
 
 **Naive `torch.compile` on the Qwen one-token backbone:** tracing succeeded, but the Python integer KV-cache index changed each token and triggered continual recompilation.
 
+**`torch.compile` on the RVQ depth decoder:** compiled cleanly with 0 graph breaks, but micro-sequence lengths ($S \in [2..8]$) across sequential discrete passes are host-dispatch bound (~1.03x speedup, ~0.94% wall-time win; rejected).
+
 Do not rediscover these before checking the current Music optimization record.
 
 ## 6. Before changing anything major

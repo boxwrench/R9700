@@ -41,6 +41,8 @@ TRITON_CACHE_DIR=/ai/cache/triton
 
 Important scope note: the single-R9700 golden launcher intentionally retains `--disable-smart-memory`. The historical dual-GPU H3 lane required different memory-policy behavior and should not be used to generalize this flag.
 
+---
+
 ## LTX 2.5 — selected
 
 ### Files
@@ -54,6 +56,12 @@ gemma4-12b-with-proj-ltx-2.5-comfy-int8-convrot.safetensors
 
 E2B:
 gemma4_e2b_it_bf16.safetensors
+
+Video VAE:
+ltx-2.5-video-vae-bf16.safetensors
+
+Audio VAE:
+ltx-2.5-audio-vae-bf16.safetensors
 ```
 
 ### Selected behavior
@@ -67,7 +75,7 @@ tile_size=1280
 reuse unchanged negative conditioning when ComfyUI cache permits
 ```
 
-The minimum-length change is a local ComfyUI modification/override and must survive updates. The 256 value is a minimum sequence floor, not a 256-token truncation.
+The minimum-length change is a local ComfyUI modification/override preserved in [`production/patches/ltx-gemma-floor-256.patch`](../production/patches/ltx-gemma-floor-256.patch). The 256 value is a minimum sequence floor, not a 256-token truncation.
 
 Reference optimization workload:
 
@@ -84,7 +92,7 @@ Reference result:
 256 floor:  conditioning 5.35 s, wall 25.69 s
 ```
 
-Do not compare these numbers directly with the older 896x512 / 121-frame public baseline.
+---
 
 ## MiniMax H3 — selected for this pass
 
@@ -99,6 +107,12 @@ minimax_h3_ref2va_pruned_fp8_scaled.safetensors
 
 Text / vision encoder:
 qwen3vl_32b_minimax_h3_fp8.safetensors
+
+Video VAE:
+minimax_h3_video_vae_fp16.safetensors
+
+Audio VAE:
+minimax_h3_audio_vae_fp32.safetensors
 ```
 
 ### Selected behavior
@@ -111,7 +125,7 @@ BF16 VAE execution
 explicitly unload Qwen3-VL after conditioning and before sampler
 ```
 
-The selected pre-sampler action uses the existing ComfyUI model-management path:
+The selected pre-sampler action uses the local production patch in [`production/patches/h3-qwen-presampler-offload.patch`](../production/patches/h3-qwen-presampler-offload.patch):
 
 ```python
 comfy.model_management.unload_model_and_clones(clip.patcher)
@@ -142,17 +156,9 @@ sampling 22.15 s / 1.108 s per step
 
 Production sanity reproduced 22.42 s sampling.
 
-Current mode reference points:
+---
 
-```text
-T2V sampling ~22.1-22.5 s once Qwen is not resident
-I2V baseline sampling 27.33 s; prep ~12.59 s
-R2V baseline sampling 29.98 s; prep ~9.66 s
-```
-
-The I2V/R2V values above came from the characterization lane and should not be treated as final optimized mode numbers unless the exact same residency behavior is used.
-
-## MiniMax Music 3 — current baseline, optimization still open
+## MiniMax Music 3 — complete for this pass
 
 ### Files
 
@@ -167,11 +173,11 @@ DAV:
 minimax_music3_dav.safetensors
 ```
 
-### Current benchmark config
+### Benchmark configuration
 
 ```text
 --disable-mmap
-15.0 s output
+15.0 s output (375 frames)
 res_multistep / simple
 20 steps
 CFG scale 1.5
@@ -188,7 +194,7 @@ wall ~24.42 s
 peak VRAM ~10.5 GiB
 ```
 
-Current diagnosis:
+Conditioning decomposition:
 
 ```text
 MiniMaxMusic3AR.generate ~19.80 s / 375 frames
@@ -196,21 +202,19 @@ Qwen3-8B one-token backbone ~12.04 s
 RVQ depth decoder ~6.82 s
 ```
 
-Known closed paths:
+Closed paths summary:
+- **ComfyUI FixedKV / graph path:** Blocked on ROCm because fixed-KV decode calls NVIDIA-only `comfy_kitchen.flash_attention_decode`.
+- **Qwen backbone `torch.compile`:** Blocked due to changing Python KV-cache index causing continuous Dynamo guard failures.
+- **RVQDepthDecoder `torch.compile`:** Evaluated and rejected (~1.03x speedup, ~0.94% wall improvement) due to sequential dependency and host-launch bounds.
 
-- Existing ComfyUI FixedKV/graph decode is blocked on ROCm by the installed NVIDIA-only `comfy_kitchen.flash_attention_decode` dependency.
-- Naive `torch.compile` of the Qwen one-token backbone continually recompiles because the dynamic Python KV-cache index changes every token.
+---
 
-Do not replace the production Music path until a candidate clears the campaign's double-digit wall-time threshold and passes a sanity run.
+## Production verification & update gate
 
-## Update rule
+To verify that the local system matches these known-good configurations:
 
-Before changing any selected configuration:
+```bash
+python3 /ai/github/R9700/scripts/production-preflight.py
+```
 
-1. Record the current selected state.
-2. Test the new state as a candidate.
-3. Run the smallest canary for each affected workload.
-4. Reject changes that break required behavior or create a meaningful regression.
-5. Promote only after the candidate demonstrates a real reason to replace production.
-
-The repository is moving toward a machine-readable production manifest and automated preflight/update gate. Until that exists, this page is the human-readable source of truth.
+To safely evaluate candidate software/model updates without breaking production, follow [`docs/update-gate.md`](update-gate.md).

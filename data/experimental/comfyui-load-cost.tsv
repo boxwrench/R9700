@@ -1,0 +1,15 @@
+date	comfyui	model	role	format	gib	flags	seconds	note
+2026-08-12	c2bcbecd	ltx-2.5-22b-distilled-transformer-comfy-int8-convrot	transformer	int8_convrot	20.03	golden	NA	inside 67.035s model-cold lane
+2026-08-12	c2bcbecd	gemma4-12b-with-proj-ltx-2.5-comfy-int8-convrot	encoder	int8_convrot	14.32	golden	NA	inside 67.035s model-cold lane
+2026-08-15	8f37cf8c	gemma4-12b-with-proj-ltx-2.5-comfy-int8-convrot	encoder	int8_convrot	14.32	golden	671	11m11s
+2026-08-15	8f37cf8c	gemma4_e2b_it_bf16	encoder	bf16	9.57	golden	13	
+2026-08-15	8f37cf8c	ltx-2.5-22b-distilled-transformer-comfy-int8-convrot	transformer	int8_convrot	20.03	golden	26	cold; same process as the 671s encoder
+2026-08-17	7cee3ceb	qwen3vl_32b_minimax_h3_fp8	encoder	fp8	24.71	dynvram-on	938	15m38s
+2026-08-17	7cee3ceb	minimax_h3_fl2va_pruned_fp8_scaled	transformer	fp8_scaled	19.52	dynvram-on	419	6m59s
+2026-08-18	7cee3ceb	gemma4-12b-with-proj-ltx-2.5-comfy-int8-convrot	encoder	int8_convrot	14.32	dynvram-on	685	11m25s
+2026-08-18	7cee3ceb	ltx-2.5-22b-distilled-transformer-comfy-int8-convrot	transformer	int8_convrot	20.03	dynvram-on	>2100	aborted, never completed
+2026-08-18	7cee3ceb	qwen3vl_32b_minimax_h3_fp8	encoder	fp8	24.71	dynvram-off	931	15m31s; flag had no effect
+2026-08-18	7cee3ceb	gemma4-12b-with-proj-ltx-2.5-bf16	encoder	bf16	24.46	golden+mmap	>486	MEASUREMENT A: aborted at 8m06s, still loading
+2026-08-18	7cee3ceb	qwen3vl_32b_minimax_h3_fp8	encoder	fp8	24.71	golden+disable-mmap	1.2	RESOLVED: 776x faster than 931s
+2026-08-18	7cee3ceb	minimax_h3_fl2va_pruned_fp8_scaled	transformer	fp8_scaled	19.52	golden+disable-mmap	20	was 419s
+2026-08-18	7cee3ceb	FULL-WARMUP	all	mixed	NA	golden+disable-mmap	51	was 1362s (22m42s)

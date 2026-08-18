@@ -1,0 +1,37 @@
+{
+  "workload": "music3",
+  "workflow_file": "production/workflows/music3.json",
+  "canary_name": "MiniMax Music 3 Song Generation Canary",
+  "parameters": {
+    "prompt": "An energetic synthwave track with retro 80s analog synthesizers and punchy drum machine beat.",
+    "lyrics": "[verse]\nNeon lights in the night\nDriving fast under city lights\n[chorus]\nElectric horizon, take me away\n",
+    "seed": 8112080,
+    "seconds": 15.0,
+    "steps": 20,
+    "cfg_scale": 1.5,
+    "top_k": 50,
+    "sampler": "res_multistep",
+    "scheduler": "simple"
+  },
+  "required_models": [
+    "minimax_music3_dit_int8_convrot.safetensors",
+    "minimax_music3_text_encoder_pruned_int8_convrot.safetensors",
+    "minimax_music3_dav.safetensors"
+  ],
+  "reference_metrics": {
+    "conditioning_s": 19.87,
+    "sampling_s": 3.64,
+    "decode_s": 0.40,
+    "warm_wall_s": 24.42,
+    "peak_vram_gib": 10.52
+  },
+  "validation_criteria": {
+    "strict_structural": [
+      "output audio exists with valid non-silent waveforms",
+      "audio duration is exactly 15.0 seconds (375 frames)",
+      "no NaN/Inf tensors during autoregressive or diffusion sampling",
+      "no ROCm/HIP memory access faults"
+    ],
+    "performance_regression_warning_threshold_s": 28.1
+  }
+}

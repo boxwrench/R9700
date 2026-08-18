@@ -19,7 +19,7 @@ These are measured improvements on this R9700 system, not generic AMD marketing 
 | LTX short 768x448 / 41-frame / 8-step workload | 43.78 s wall | 25.69 s wall | **41% less wall time / ~1.70x throughput** |
 | H3 paired changed-prompt T2V | 44.95 s wall | 41.30 s with Qwen pre-sampler offload | **8.1% less wall time** |
 | H3 sampler inside that paired A/B | 29.51 s | 22.15 s | **24.9% faster sampling** |
-| MiniMax Music 3 | ~24.42 s warm wall | optimization still open | **AR bottleneck identified; no production speedup claimed yet** |
+| MiniMax Music 3 | ~24.42 s warm wall | complete for this pass | **AR bottleneck characterized; FixedKV/compile closed** |
 
 The spectacular mmap numbers are **model-loading fixes**, not generation speedups. Once models are warm, they do not compound with the recurring LTX/H3 improvements.
 
@@ -56,7 +56,7 @@ Start with the [current campaign index](docs/comfyui-walltime-campaign-20260818.
 |---|---|---|
 | LTX 2.5 | `--disable-mmap`, INT8-ConvRot encoder+DiT, `LTX_GEMMA_MIN_LENGTH=256`, reuse unchanged negative conditioning | **selected** |
 | MiniMax H3 | `--disable-mmap`, single R9700, explicitly offload Qwen3-VL after conditioning and before sampling | **selected** |
-| MiniMax Music 3 | text/lyrics conditioning is ~19.9 s / 81.4% of warm wall time | **optimization active** |
+| MiniMax Music 3 | baseline characterized (~19.8 s AR / ~3.6 s DiT); FixedKV/compile evaluated and closed | **complete for this pass** |
 
 ### Exact files used in the current ComfyUI campaign
 
@@ -296,18 +296,19 @@ The gallery source is [`docs/index.html`](docs/index.html). Its MP4 sources are 
 
 ## Start here
 
-1. If something is wrong, use [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md) first.
-2. For the known-good ComfyUI files/settings, use [`docs/selected-production-configs.md`](docs/selected-production-configs.md).
-3. Read the [current ComfyUI wall-time campaign](docs/comfyui-walltime-campaign-20260818.md) for active video/audio recommendations.
-4. Read [`docs/methodology.md`](docs/methodology.md) for the original timing boundary and cold-state definition.
-5. Inspect normalized measurements under [`data/experimental/`](data/experimental/) and the original canonical table in [`data/results.tsv`](data/results.tsv).
-6. Load exact JSON workflows under [`workflows/`](workflows/). Their SHA-256 values are checked by [`scripts/verify.py`](scripts/verify.py).
-
-Run the local checks with:
-
-```bash
-python3 scripts/verify.py
-```
+1. To verify the live system against the machine-checkable production manifest:
+   ```bash
+   python3 scripts/production-preflight.py
+   ```
+2. If something is wrong or slow, use [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md) first.
+3. For the known-good ComfyUI files/settings, inspect [`docs/selected-production-configs.md`](docs/selected-production-configs.md) and [`production/manifest.json`](production/manifest.json).
+4. For candidate software/model update procedures, follow [`docs/update-gate.md`](docs/update-gate.md).
+5. Read the [current ComfyUI wall-time campaign](docs/comfyui-walltime-campaign-20260818.md) for active video/audio recommendations.
+6. Golden workflows are in [`production/workflows/`](production/workflows/), with canaries in [`production/canaries/`](production/canaries/).
+7. Run the historical baseline repository verification with:
+   ```bash
+   python3 scripts/verify.py
+   ```
 
 ## Scope and safety
 

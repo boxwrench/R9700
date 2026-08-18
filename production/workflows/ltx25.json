@@ -1,0 +1,122 @@
+{
+  "1": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "ltx-2.5-22b-distilled-transformer-comfy-int8-convrot.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "2": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "gemma4-12b-with-proj-ltx-2.5-comfy-int8-convrot.safetensors",
+      "type": "ltxv",
+      "device": "default"
+    }
+  },
+  "3": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "ltx-2.5-video-vae-bf16.safetensors"
+    }
+  },
+  "4": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "ltx-2.5-audio-vae-bf16.safetensors"
+    }
+  },
+  "5": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": ["2", 0],
+      "text": "A close-up of an Arctic hunter crouching on an ice floe, breath visible in crisp air, camera slowly pulls back."
+    }
+  },
+  "6": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": ["2", 0],
+      "text": "worst quality, low quality, blurry, distorted, jitter, stutter"
+    }
+  },
+  "7": {
+    "class_type": "EmptyLTXVLatentVideo",
+    "inputs": {
+      "width": 768,
+      "height": 448,
+      "length": 41,
+      "batch_size": 1
+    }
+  },
+  "8": {
+    "class_type": "RandomNoise",
+    "inputs": {
+      "noise_seed": 8112026
+    }
+  },
+  "9": {
+    "class_type": "KSamplerSelect",
+    "inputs": {
+      "sampler_name": "res_multistep"
+    }
+  },
+  "10": {
+    "class_type": "BasicScheduler",
+    "inputs": {
+      "model": ["1", 0],
+      "scheduler": "simple",
+      "steps": 8,
+      "denoise": 1.0
+    }
+  },
+  "11": {
+    "class_type": "BasicGuider",
+    "inputs": {
+      "model": ["1", 0],
+      "conditioning": ["5", 0]
+    }
+  },
+  "12": {
+    "class_type": "SamplerCustomAdvanced",
+    "inputs": {
+      "noise": ["8", 0],
+      "guider": ["11", 0],
+      "sampler": ["9", 0],
+      "sigmas": ["10", 0],
+      "latent_image": ["7", 0]
+    }
+  },
+  "13": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": ["12", 0],
+      "vae": ["3", 0]
+    }
+  },
+  "14": {
+    "class_type": "VAEDecodeAudio",
+    "inputs": {
+      "samples": ["12", 0],
+      "vae": ["4", 0]
+    }
+  },
+  "15": {
+    "class_type": "CreateVideo",
+    "inputs": {
+      "images": ["13", 0],
+      "audio": ["14", 0],
+      "fps": 24.0,
+      "bit_depth": 8
+    }
+  },
+  "16": {
+    "class_type": "SaveVideo",
+    "inputs": {
+      "video": ["15", 0],
+      "filename_prefix": "ltx25/t2v-production",
+      "format": "mp4",
+      "codec": "h264"
+    }
+  }
+}

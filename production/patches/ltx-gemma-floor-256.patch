@@ -1,0 +1,32 @@
+diff --git a/comfy/text_encoders/lt.py b/comfy/text_encoders/lt.py
+index c512a7d4..df832212 100644
+--- a/comfy/text_encoders/lt.py
++++ b/comfy/text_encoders/lt.py
+@@ -4,6 +4,9 @@ from transformers import T5TokenizerFast
+ from .spiece_tokenizer import SPieceTokenizer
+ import comfy.text_encoders.genmo
+ import torch
++# LOCAL EXPERIMENT 2026-08-18: LTX_GEMMA_MIN_LENGTH env override on the Gemma
++# tokenizer pad floor (upstream default 1024). Revert with
++# /ai/archive/comfyui-cleanup-20260817/lt.py.orig-before-tokenfloor
+ import comfy.utils
+ import math
+ import itertools
+@@ -73,7 +76,7 @@ class Gemma3_12BTokenizer(Gemma3_Tokenizer, sd1_clip.SDTokenizer):
+     def __init__(self, embedding_directory=None, tokenizer_data={}):
+         tokenizer = tokenizer_data.get("spiece_model", None)
+         special_tokens = {"<image_soft_token>": 262144, "<end_of_turn>": 106}
+-        super().__init__(tokenizer, pad_with_end=False, embedding_size=3840, embedding_key='gemma3_12b', tokenizer_class=SPieceTokenizer, has_end_token=False, pad_to_max_length=False, max_length=99999999, min_length=1024, pad_left=True, disable_weights=True, tokenizer_args={"add_bos": True, "add_eos": False, "special_tokens": special_tokens}, tokenizer_data=tokenizer_data)
++        super().__init__(tokenizer, pad_with_end=False, embedding_size=3840, embedding_key='gemma3_12b', tokenizer_class=SPieceTokenizer, has_end_token=False, pad_to_max_length=False, max_length=99999999, min_length=int(__import__('os').environ.get('LTX_GEMMA_MIN_LENGTH', 1024)), pad_left=True, disable_weights=True, tokenizer_args={"add_bos": True, "add_eos": False, "special_tokens": special_tokens}, tokenizer_data=tokenizer_data)
+ 
+ 
+ class LTXAVGemmaTokenizer(sd1_clip.SD1Tokenizer):
+@@ -87,7 +90,7 @@ def ltxav_gemma4_tokenizer(tokenizer):
+             super().__init__(embedding_directory=embedding_directory, tokenizer_data=tokenizer_data)
+             gemma_tokenizer = getattr(self, self.clip)
+             if gemma_tokenizer.min_length == 1:
+-                gemma_tokenizer.min_length = 1024
++                gemma_tokenizer.min_length = int(__import__('os').environ.get('LTX_GEMMA_MIN_LENGTH', 1024))
+ 
+     return LTXAVGemma4Tokenizer
+ 

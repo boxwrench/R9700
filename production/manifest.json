@@ -1,0 +1,234 @@
+{
+  "schema_version": 1,
+  "generated_from": {
+    "r9700_repo_commit": "a98fb068351a20b98e0974230239105758443990",
+    "date": "2026-08-18"
+  },
+  "hardware": {
+    "gpu_name": "AMD Radeon AI PRO R9700",
+    "gcn_arch": "gfx1201",
+    "vram_bytes": 34208743424,
+    "vram_gib": 31.86,
+    "cpu": "AMD Ryzen 7 9800X3D",
+    "ram_gib": 186.34,
+    "os": "Ubuntu 24.04.4 LTS",
+    "kernel": "7.0.0-28-generic"
+  },
+  "runtime": {
+    "python": "3.12.3",
+    "torch": "2.9.1+rocm7.2.1.gitff65f5bc",
+    "hip": "7.2.53211-e1a6bc5663",
+    "triton": "3.5.1+rocm7.2.1.gita272dfa8",
+    "safetensors": "0.8.0",
+    "comfy_kitchen": "0.2.31",
+    "comfy_aimdo": "0.4.13",
+    "transformers": "5.15.0",
+    "numpy": "2.5.2"
+  },
+  "comfyui": {
+    "repo_path": "/ai/comfyui",
+    "expected_commit": "7cee3ceb1a35503172e0dfb8dbdbdedee2aba8aa",
+    "version_tag": "v0.33.2",
+    "required_launch_flags": [
+      "--output-directory",
+      "/ai/artifacts/runs/minimax-h3",
+      "--disable-dynamic-vram",
+      "--disable-smart-memory",
+      "--disable-mmap",
+      "--bf16-vae",
+      "--reserve-vram",
+      "2",
+      "--listen",
+      "127.0.0.1",
+      "--port",
+      "8190",
+      "--disable-auto-launch"
+    ],
+    "required_environment": {
+      "HIP_VISIBLE_DEVICES": "1",
+      "MIOPEN_FIND_MODE": "FAST",
+      "MIOPEN_USER_DB_PATH": "/ai/cache/miopen",
+      "TORCH_HOME": "/ai/cache/torch",
+      "TORCHINDUCTOR_CACHE_DIR": "/ai/cache/torchinductor",
+      "TORCH_ROCM_AOTRITON_ENABLE_EXPERIMENTAL": "1",
+      "TRITON_CACHE_DIR": "/ai/cache/triton",
+      "LTX_GEMMA_MIN_LENGTH": "256"
+    }
+  },
+  "production_modifications": {
+    "ltx_gemma_floor_256": {
+      "target_file": "comfy/text_encoders/lt.py",
+      "patch_file": "production/patches/ltx-gemma-floor-256.patch",
+      "marker": "LTX_GEMMA_MIN_LENGTH",
+      "status": "SELECTED",
+      "description": "Allows runtime override of LTX Gemma token padding floor from upstream default 1024 to 256"
+    },
+    "h3_qwen_presampler_offload": {
+      "target_file": "comfy_extras/nodes_minimax_h3.py",
+      "patch_file": "production/patches/h3-qwen-presampler-offload.patch",
+      "marker": "unload_model_and_clones(clip.patcher)",
+      "status": "SELECTED",
+      "description": "Explicitly unloads Qwen3-VL from VRAM after conditioning and before sampling in H3 nodes"
+    }
+  },
+  "models": {
+    "ltx-2.5-22b-distilled-transformer-comfy-int8-convrot.safetensors": {
+      "relative_path": "diffusion_models/ltx-2.5-22b-distilled-transformer-comfy-int8-convrot.safetensors",
+      "role": "LTX 2.5 DiT transformer (INT8-ConvRot)",
+      "size_bytes": 21504034224,
+      "sha256": "c4279eeff115cbeaca494bd2183e7d768c38fe85a184dc6afbb7159157c44334",
+      "workloads": ["ltx25"]
+    },
+    "gemma4-12b-with-proj-ltx-2.5-comfy-int8-convrot.safetensors": {
+      "relative_path": "text_encoders/gemma4-12b-with-proj-ltx-2.5-comfy-int8-convrot.safetensors",
+      "role": "LTX 2.5 Gemma 4 text encoder with projection (INT8-ConvRot)",
+      "size_bytes": 15372971786,
+      "sha256": "09a89e084de1a149c3de60cfe9dfd3e5161967eb09eea39e806fcdeffdd568de",
+      "workloads": ["ltx25"]
+    },
+    "gemma4_e2b_it_bf16.safetensors": {
+      "relative_path": "text_encoders/gemma4_e2b_it_bf16.safetensors",
+      "role": "LTX 2.5 Gemma 4 E2B prompt enhancer (BF16)",
+      "size_bytes": 10278774160,
+      "sha256": "dcc3c8d27be2db2ef38b78d564ebfa1e92eb24665ed2751f2983275f03a067c8",
+      "workloads": ["ltx25"]
+    },
+    "ltx-2.5-video-vae-bf16.safetensors": {
+      "relative_path": "vae/ltx-2.5-video-vae-bf16.safetensors",
+      "role": "LTX 2.5 Video VAE (BF16)",
+      "size_bytes": 1472223346,
+      "sha256": "847e14ca7f3355debca0cea4eaa24ac0fbcdf0061da054ac89ca638a869ddba3",
+      "workloads": ["ltx25"]
+    },
+    "ltx-2.5-audio-vae-bf16.safetensors": {
+      "relative_path": "vae/ltx-2.5-audio-vae-bf16.safetensors",
+      "role": "LTX 2.5 Audio VAE (BF16)",
+      "size_bytes": 364866540,
+      "sha256": "c52733d37f6a7fb7949c3dc0fb468c6cb2169e4d836983a73babb9f0d54837a5",
+      "workloads": ["ltx25"]
+    },
+    "ltx-2.5-latent-spatial-upscaler-x2-bf16-1.0.safetensors": {
+      "relative_path": "latent_upscale_models/ltx-2.5-latent-spatial-upscaler-x2-bf16-1.0.safetensors",
+      "role": "LTX 2.5 Spatial Latent Upscaler (BF16)",
+      "size_bytes": 995778752,
+      "sha256": "eb5a71fe4068ee87ccdb1c3aa635e547ca76bd2d30ae20ae889f2c325c0677e8",
+      "workloads": ["ltx25"]
+    },
+    "minimax_h3_fl2va_pruned_fp8_scaled.safetensors": {
+      "relative_path": "diffusion_models/minimax_h3_fl2va_pruned_fp8_scaled.safetensors",
+      "role": "MiniMax H3 First/Last Frame to Video transformer (FP8 scaled)",
+      "size_bytes": 20958205608,
+      "sha256": "12944c1f7791637e7de12208aef04da82bd26b95271b1b47d817364315ade993",
+      "workloads": ["h3_t2v", "h3_i2v"]
+    },
+    "minimax_h3_ref2va_pruned_fp8_scaled.safetensors": {
+      "relative_path": "diffusion_models/minimax_h3_ref2va_pruned_fp8_scaled.safetensors",
+      "role": "MiniMax H3 Reference to Video transformer (FP8 scaled)",
+      "size_bytes": 20958205608,
+      "sha256": "f86f2f79ebd2d76eb8eeb46091e83982e6ff51d255747e7b16e92834b392b8e9",
+      "workloads": ["h3_r2v"]
+    },
+    "qwen3vl_32b_minimax_h3_fp8.safetensors": {
+      "relative_path": "text_encoders/qwen3vl_32b_minimax_h3_fp8.safetensors",
+      "role": "MiniMax H3 Qwen3-VL text/multimodal encoder (FP8)",
+      "size_bytes": 26533986093,
+      "sha256": "5e1127e510a300990c4f0486395b41e1f0a344b4a8495adb0498a5843c0af15f",
+      "workloads": ["h3_t2v", "h3_i2v", "h3_r2v"]
+    },
+    "minimax_h3_video_vae_fp16.safetensors": {
+      "relative_path": "vae/minimax_h3_video_vae_fp16.safetensors",
+      "role": "MiniMax H3 Video VAE (FP16)",
+      "size_bytes": 5207808496,
+      "sha256": "7c1f131492e7eddacaac9069a61b81bdd39de5cc96561e677c5eab1cdce5e522",
+      "workloads": ["h3_t2v", "h3_i2v", "h3_r2v"]
+    },
+    "minimax_h3_audio_vae_fp32.safetensors": {
+      "relative_path": "vae/minimax_h3_audio_vae_fp32.safetensors",
+      "role": "MiniMax H3 Audio VAE (FP32)",
+      "size_bytes": 605254808,
+      "sha256": "8e505d95dd1561d47abd43d4238fd40d9bb1ae9e147ed0a4cba778d76ae4db48",
+      "workloads": ["h3_t2v", "h3_i2v", "h3_r2v"]
+    },
+    "minimax_music3_dit_int8_convrot.safetensors": {
+      "relative_path": "diffusion_models/minimax_music3_dit_int8_convrot.safetensors",
+      "role": "MiniMax Music 3 DiT transformer (INT8-ConvRot)",
+      "size_bytes": 2502161682,
+      "sha256": "d6b959633e69899f99f3a92d6741c0fe79f26958a30811e50e372ef978b24d5f",
+      "workloads": ["music3"]
+    },
+    "minimax_music3_text_encoder_pruned_int8_convrot.safetensors": {
+      "relative_path": "text_encoders/minimax_music3_text_encoder_pruned_int8_convrot.safetensors",
+      "role": "MiniMax Music 3 text/lyrics encoder (INT8-ConvRot)",
+      "size_bytes": 9196611886,
+      "sha256": "010b7416d2336a08c711bc22ee65849c9623069ddb7d89bec011a75699e52014",
+      "workloads": ["music3"]
+    },
+    "minimax_music3_dav.safetensors": {
+      "relative_path": "vae/minimax_music3_dav.safetensors",
+      "role": "MiniMax Music 3 Discrete Audio VAE / Codec",
+      "size_bytes": 216696128,
+      "sha256": "2a32155b769be01445fcc2a8663b910fc9e1751e18dc1c3ec528064512d9ef0c",
+      "workloads": ["music3"]
+    }
+  },
+  "workflows": {
+    "ltx25": {
+      "workflow_file": "production/workflows/ltx25.json",
+      "file_sha256": "314f85f49a75c6493f97dfa4ef3b11db19c909d819c4a5972898c72eacb0112b",
+      "semantic_sha256": "9853597d7796892640cf26a4667d090f18526473c42bb6e644dd5ade81bee9ae"
+    },
+    "h3_t2v": {
+      "workflow_file": "production/workflows/h3_t2v.json",
+      "file_sha256": "922f3b37b22d899068d8912bfd2935fe8293ed0cb8653f0bb01d83197c73e444",
+      "semantic_sha256": "f193c48b0f72c261cb4c18e13b2b0bb8b8773c98669e03db8dcb044438474bc2"
+    },
+    "h3_i2v": {
+      "workflow_file": "production/workflows/h3_i2v.json",
+      "file_sha256": "7dea540dad15cbdcafa90809496aa77fb5cdf8edc9182278842833435b47c0b0",
+      "semantic_sha256": "0f56cbf63fc6f6b05ed93df10fc25b7beb670c7105b4377727fa3df0a0ed2120"
+    },
+    "h3_r2v": {
+      "workflow_file": "production/workflows/h3_r2v.json",
+      "file_sha256": "02671d715a3eea4e94c8407abd5039c8e2030219d44bbf6b69f29e85536043b2",
+      "semantic_sha256": "9acec847a6ca62152aa6d54bee2ad89e3d8b0e089d36c4f7735798402aaf3a72"
+    },
+    "music3": {
+      "workflow_file": "production/workflows/music3.json",
+      "file_sha256": "961b2cc938d903740f63ed5fdaedf0e21cf3216df594e9371f5ed99045dfb0b4",
+      "semantic_sha256": "f1c52db9d4b1f07ebf2d6b1e8302eb42a83100931c06bc91e6de87275ac917b0"
+    }
+  },
+  "reference_behavior": {
+    "ltx25": {
+      "workload_geometry": "768x448, 41 frames, 8 steps",
+      "conditioning_s": 5.35,
+      "sampling_s": 10.61,
+      "warm_wall_s": 25.69
+    },
+    "h3_t2v": {
+      "workload_geometry": "608x352, 39 frames, 20 steps",
+      "conditioning_and_offload_s": 13.18,
+      "sampling_s": 22.42,
+      "warm_wall_s": 44.91
+    },
+    "h3_i2v": {
+      "workload_geometry": "608x352, 39 frames, 20 steps",
+      "prep_s": 12.59,
+      "sampling_s": 27.33,
+      "warm_wall_s": 46.30
+    },
+    "h3_r2v": {
+      "workload_geometry": "608x352, 39 frames, 20 steps",
+      "prep_s": 9.66,
+      "sampling_s": 29.98,
+      "warm_wall_s": 46.10
+    },
+    "music3": {
+      "workload_geometry": "15.0 s duration (375 frames), 20 steps",
+      "conditioning_s": 19.87,
+      "sampling_s": 3.64,
+      "decode_s": 0.40,
+      "warm_wall_s": 24.42
+    }
+  }
+}

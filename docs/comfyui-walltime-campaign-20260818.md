@@ -8,10 +8,7 @@ This campaign is deliberately broad. It uses small, decisive experiments, locks 
 
 ## Current operational recommendations
 
-### LTX 2.5
-
-Selected:
-
+### LTX 2.5 — SELECTED
 - `--disable-mmap`
 - INT8-ConvRot Gemma4-12B + projection text encoder
 - INT8-ConvRot LTX 2.5 DiT
@@ -20,17 +17,13 @@ Selected:
 - tested `tile_size=1280` VAE workaround
 
 Key result on the short 768×448, 41-frame, 8-step benchmark:
-
 - floor 1024: 22.51 s conditioning, 43.78 s wall
 - floor 256: 5.35 s conditioning, 25.69 s wall
 - about 41% wall reduction
 
 See [`ltx25-r9700-optimization-20260818.md`](ltx25-r9700-optimization-20260818.md).
 
-### MiniMax H3
-
-Selected:
-
+### MiniMax H3 — SELECTED
 - `--disable-mmap`
 - single R9700 as the default execution lane
 - explicit Qwen3-VL-32B offload after conditioning and before sampling
@@ -38,12 +31,12 @@ Selected:
 
 Direct pre-sampler offload A/B:
 
-| metric | Qwen resident | Qwen offloaded |
+| Metric | Qwen resident | Qwen offloaded |
 |---|---:|---:|
 | VRAM before sampler | 26.18 GiB | 7.19 GiB |
-| sampling | 29.51 s | 22.15 s |
+| Sampling | 29.51 s | 22.15 s |
 | s/step | 1.476 | 1.108 |
-| wall | 44.95 s | 41.30 s |
+| Wall | 44.95 s | 41.30 s |
 
 Offload cost was 4.03 s; net wall improvement was 8.1%. A production sanity run reproduced a 22.42 s sampler.
 
@@ -51,27 +44,30 @@ See [`minimax-h3-r9700-optimization-20260818.md`](minimax-h3-r9700-optimization-
 
 The older RX 7900 XT dual-GPU residency experiment remains useful historical evidence but is no longer the main operational recommendation. See [`archive/dual-gpu-residency-20260812.md`](archive/dual-gpu-residency-20260812.md).
 
-### MiniMax Music 3
-
-Baseline only; optimization has not started.
+### MiniMax Music 3 — COMPLETE FOR THIS PASS
+Characterization and optimization exploration complete.
 
 Warm changed-input 15 s output:
+- Conditioning: 19.87–20.03 s
+- 20-step DiT generation: 3.64 s
+- Audio decode: 0.40 s
+- Wall: 24.42 s
+- Peak VRAM: 10.52 GiB
 
-- conditioning: 19.87 s
-- 20-step generation: 3.64 s
-- audio decode: 0.40 s
-- wall: 24.42 s
-- peak VRAM: 10.52 GiB
-
-Text/lyrics conditioning is 81.4% of warm wall time and is the next justified optimization target.
+Evaluated optimization paths:
+1. **ComfyUI FixedKV / graph path:** Blocked on ROCm because fixed-KV decode calls NVIDIA-only `comfy_kitchen.flash_attention_decode`.
+2. **Qwen one-token backbone `torch.compile`:** Rejected due to changing Python KV-cache index causing continuous Dynamo guard failures.
+3. **RVQDepthDecoder `torch.compile`:** Rejected; strictly sequentially dependent micro-iterations are host-dispatch bound (~1.03x speedup, ~0.94% wall improvement).
 
 See [`minimax-music3-r9700-baseline-20260818.md`](minimax-music3-r9700-baseline-20260818.md).
+
+---
 
 ## Cross-workflow switching
 
 One representative transition per lane found staging to be modest relative to generation:
 
-| from -> to | load/stage | condition/prep | sample/gen | decode | wall |
+| From -> To | Load / stage | Condition / prep | Sample / gen | Decode | Wall |
 |---|---:|---:|---:|---:|---:|
 | LTX -> LTX | 0.00 s | 11.55 s | 13.92 s | 3.95 s | 30.22 s |
 | H3 -> H3 | 0.00 s | 4.97 s | 22.37 s | 5.03 s | 33.25 s |
@@ -82,26 +78,27 @@ One representative transition per lane found staging to be modest relative to ge
 
 Current decision: no urgent multi-GPU/residency redesign for switching alone.
 
+---
+
 ## Important corrected interpretations
 
 The campaign preserves reversals because they are useful engineering evidence:
-
 - multi-minute model loading was traced to an mmap-backed tensor-transfer pathology, not Dynamic VRAM or SSD throughput
 - LTX BF16 text encoding did not outperform INT8-ConvRot
 - an apparent ~11 s LTX warm conditioning state was one cached CLIP node, not hidden staging
 - `rocm-smi --showuse` can report near-zero utilization on a high-power gfx1201 workload
 - H3's faster cached state was traced to text-encoder residency, then reproduced with explicit pre-sampler offload
 - full GPU power does not imply kernel optimality
+- MiniMax Music 3's ~20 s conditioning is fundamentally bounded by sequential autoregressive token generation across Python dispatch and missing ROCm flash-decode kernels.
 
-## Measurement standard
+---
 
-- report absolute wall time
-- distinguish process/model cold, warm changed-input, and cached-input states
-- do not add nested profiler percentages as independent costs
-- label mechanism explanations as hypotheses unless directly measured
-- one or two engineering runs are sufficient for a decision unless variance itself is the question
-- do not compare headline times from different geometry/frame/step workloads as if they were the same benchmark
+## Hardening & production verification
 
-## Next target
-
-MiniMax Music 3 text/lyrics conditioning. The baseline indicates about 20 s of recurring conditioning versus about 3.6 s of DiT generation, so the next task is to decompose/profile `MiniMaxMusic3TextEncode` before changing kernels, cache behavior, or quantization.
+With the optimization campaign pass complete, the stack has been hardened into machine-checkable assets:
+- Master golden manifest: [`production/manifest.json`](../production/manifest.json)
+- Verified patches: [`production/patches/`](../production/patches/)
+- Golden workflows: [`production/workflows/`](../production/workflows/)
+- Canary benchmarks: [`production/canaries/`](../production/canaries/)
+- Automated preflight tool: [`scripts/production-preflight.py`](../scripts/production-preflight.py)
+- Safe update procedure: [`docs/update-gate.md`](update-gate.md)
