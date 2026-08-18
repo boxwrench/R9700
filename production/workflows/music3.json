@@ -1,0 +1,93 @@
+{
+  "1": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "minimax_music3_dit_int8_convrot.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "2": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "minimax_music3_text_encoder_pruned_int8_convrot.safetensors",
+      "type": "minimax",
+      "device": "default"
+    }
+  },
+  "3": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "minimax_music3_dav.safetensors"
+    }
+  },
+  "4": {
+    "class_type": "MiniMaxMusic3TextEncode",
+    "inputs": {
+      "clip": ["2", 0],
+      "prompt": "An energetic synthwave track with retro 80s analog synthesizers and punchy drum machine beat.",
+      "lyrics": "[verse]\nNeon lights in the night\nDriving fast under city lights\n[chorus]\nElectric horizon, take me away\n",
+      "cfg_scale": 1.5,
+      "top_k": 50,
+      "seed": 8112080,
+      "max_audio_frames": 375
+    }
+  },
+  "5": {
+    "class_type": "EmptyMiniMaxMusic3LatentAudio",
+    "inputs": {
+      "seconds": 15.0
+    }
+  },
+  "6": {
+    "class_type": "RandomNoise",
+    "inputs": {
+      "noise_seed": 8112080
+    }
+  },
+  "7": {
+    "class_type": "KSamplerSelect",
+    "inputs": {
+      "sampler_name": "res_multistep"
+    }
+  },
+  "8": {
+    "class_type": "BasicScheduler",
+    "inputs": {
+      "model": ["1", 0],
+      "scheduler": "simple",
+      "steps": 20,
+      "denoise": 1.0
+    }
+  },
+  "9": {
+    "class_type": "BasicGuider",
+    "inputs": {
+      "model": ["1", 0],
+      "conditioning": ["4", 0]
+    }
+  },
+  "10": {
+    "class_type": "SamplerCustomAdvanced",
+    "inputs": {
+      "noise": ["6", 0],
+      "guider": ["9", 0],
+      "sampler": ["7", 0],
+      "sigmas": ["8", 0],
+      "latent_image": ["5", 0]
+    }
+  },
+  "11": {
+    "class_type": "VAEDecodeAudio",
+    "inputs": {
+      "samples": ["10", 0],
+      "vae": ["3", 0]
+    }
+  },
+  "12": {
+    "class_type": "SaveAudio",
+    "inputs": {
+      "audio": ["11", 0],
+      "filename_prefix": "minimax-music3/music3-production"
+    }
+  }
+}

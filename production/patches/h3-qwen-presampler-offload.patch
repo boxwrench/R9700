@@ -1,0 +1,26 @@
+diff --git a/comfy_extras/nodes_minimax_h3.py b/comfy_extras/nodes_minimax_h3.py
+index 0b1840e8..53c9fec8 100644
+--- a/comfy_extras/nodes_minimax_h3.py
++++ b/comfy_extras/nodes_minimax_h3.py
+@@ -148,6 +148,10 @@ class MiniMaxH3ImageToVideo(io.ComfyNode):
+                 "minimax_keyframes": keyframes,
+                 "minimax_frame_count": frame_count,
+             })
++
++        if hasattr(clip, "patcher") and clip.patcher is not None:
++            comfy.model_management.unload_model_and_clones(clip.patcher)
++
+         return io.NodeOutput(cond, latent)
+ 
+ 
+@@ -277,6 +281,10 @@ class MiniMaxH3ReferenceToVideo(io.ComfyNode):
+         cond = clip.encode_from_tokens_scheduled(tokens)
+         if ref_blocks:
+             cond = node_helpers.conditioning_set_values(cond, {"minimax_refs": ref_blocks})
++
++        if hasattr(clip, "patcher") and clip.patcher is not None:
++            comfy.model_management.unload_model_and_clones(clip.patcher)
++
+         return io.NodeOutput(cond, latent)
+ 
+ 

@@ -1,0 +1,42 @@
+{
+  "workload": "ltx25",
+  "workflow_file": "production/workflows/ltx25.json",
+  "canary_name": "LTX 2.5 Short T2V Canary",
+  "parameters": {
+    "prompt": "A close-up of an Arctic hunter crouching on an ice floe, breath visible in crisp air, camera slowly pulls back.",
+    "negative_prompt": "worst quality, low quality, blurry, distorted, jitter, stutter",
+    "seed": 8112026,
+    "width": 768,
+    "height": 448,
+    "length": 41,
+    "fps": 24.0,
+    "steps": 8,
+    "sampler": "res_multistep",
+    "scheduler": "simple"
+  },
+  "required_models": [
+    "ltx-2.5-22b-distilled-transformer-comfy-int8-convrot.safetensors",
+    "gemma4-12b-with-proj-ltx-2.5-comfy-int8-convrot.safetensors",
+    "gemma4_e2b_it_bf16.safetensors",
+    "ltx-2.5-video-vae-bf16.safetensors",
+    "ltx-2.5-audio-vae-bf16.safetensors"
+  ],
+  "required_environment": {
+    "LTX_GEMMA_MIN_LENGTH": "256"
+  },
+  "reference_metrics": {
+    "conditioning_s": 5.35,
+    "sampling_s": 10.61,
+    "decode_s": 3.95,
+    "warm_wall_s": 25.69
+  },
+  "validation_criteria": {
+    "strict_structural": [
+      "output video exists and is non-empty",
+      "video duration is exactly 41 frames / ~1.71s at 24fps",
+      "no NaN/Inf tensors during sampling or decode",
+      "no ROCm/HIP memory access faults"
+    ],
+    "performance_regression_warning_threshold_s": 29.5
+  }
+}
