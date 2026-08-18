@@ -1,0 +1,8 @@
+run_id	encoder_format	dit_format	token_floor	condition_state	encoder_load_s	conditioning_s	dit_load_s	sampling_s	seconds_per_step	decode_s	wall_s	peak_vram_gib	notes
+ltx-int8-cold	INT8-ConvRot	INT8-ConvRot	1024	cold_pair	1.97	22.56	1.55	10.63	1.33	3.99	43.36	21.42	controlled INT8 encoder arm
+ltx-bf16-cold	BF16	INT8-ConvRot	1024	cold_pair	4.47	22.80	1.76	11.75	1.47		47.51	28.58	encoder-format control; sampling difference not attributed to encoder
+ltx-cache-positive	INT8-ConvRot	INT8-ConvRot	1024	positive_changed_negative_cached		11.46	0	10.06	1.26		26.34		negative encode skipped
+ltx-cache-both	INT8-ConvRot	INT8-ConvRot	1024	positive_and_negative_changed		22.14	0	10.14	1.27		37.08		positive 10.59 s + negative 11.55 s
+ltx-floor1024-video	INT8-ConvRot	INT8-ConvRot	1024	both_changed		22.51		10.65	1.33		43.78		768x448 41 frames 8 steps
+ltx-floor256-video	INT8-ConvRot	INT8-ConvRot	256	both_changed		5.35		10.61	1.33		25.69		selected; same prompt/seed as floor1024 test, trajectory differs numerically
+ltx-floor128-video	INT8-ConvRot	INT8-ConvRot	128	both_changed		4.60		10.70	1.34		25.04		diminishing return vs 256
