@@ -1,442 +1,931 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>R9700 Generation Lab — Boxwrench / Radeon AI PRO R9700</title>
-  <meta name="description" content="Measured, tuned, and preserved: LTX 2.5, MiniMax H3, and MiniMax Music 3 on an AMD Radeon AI PRO R9700, with a real six-run workflow-switching acceptance session.">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --void: #05070a;
-      --charcoal: #0a0f15;
-      --blue-black: #0d151d;
-      --panel: #10161d;
-      --ink: #e7e2d8;
-      --muted: #999a96;
-      --dim: #8f969a;
-      --chrome: #a8afb4;
-      --brass: #b18a48;
-      --brass-bright: #d2af6c;
-      --crimson: #e45a50;
-      --rule: rgb(190 183 168 / 24%);
-      --font-interface: "Share Tech Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-      --font-prose: "Newsreader Variable", "Newsreader", Georgia, serif;
-      --font-code: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-    }
-    * { box-sizing: border-box; }
-    html { background: var(--void); }
-    body {
-      margin: 0;
-      background:
-        radial-gradient(circle at 52% 4%, rgb(45 57 67 / 25%), transparent 34rem),
-        var(--void);
-      color: var(--ink);
-      font: 16px/1.6 var(--font-prose);
-      -webkit-font-smoothing: antialiased;
-    }
-    a { color: var(--brass-bright); }
-    a:hover { color: var(--crimson); }
-    main {
-      width: min(1180px, calc(100% - 40px));
-      margin: 0 auto;
-      padding: 56px 0 96px;
-    }
-    .kicker {
-      font: 13px/1 var(--font-interface);
-      letter-spacing: 0.22em;
-      text-transform: uppercase;
-      color: var(--brass);
-    }
-    h1 {
-      font: 600 clamp(2.1rem, 5.5vw, 4.2rem)/1.08 var(--font-prose);
-      margin: 0.4rem 0 0.6rem;
-      color: var(--ink);
-    }
-    h1 em { color: var(--brass-bright); font-style: normal; }
-    .lede {
-      font: 400 20px/1.6 var(--font-prose);
-      color: var(--muted);
-      max-width: 46rem;
-    }
-    .backlink {
-      font: 13px/1 var(--font-interface);
-      letter-spacing: 0.08em;
-      color: var(--dim);
-      text-decoration: none;
-    }
-    .backlink:hover { color: var(--brass-bright); }
-    section { margin-top: 76px; }
-    section > h2 {
-      font: 12px/1 var(--font-interface);
-      letter-spacing: 0.22em;
-      text-transform: uppercase;
-      color: var(--brass);
-      border-bottom: 1px solid var(--rule);
-      padding-bottom: 14px;
-      margin: 0 0 28px;
-    }
-    .hero-media {
-      margin-top: 40px;
-      border: 1px solid var(--rule);
-      border-radius: 4px;
-      overflow: hidden;
-      background: var(--charcoal);
-    }
-    .hero-media img { display: block; width: 100%; height: auto; }
-    .hero-caption {
-      font: 13px/1.5 var(--font-interface);
-      color: var(--dim);
-      padding: 14px 18px;
-      border-top: 1px solid var(--rule);
-    }
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>R9700 Generation Lab — BX-77 Hardware Field Report</title>
+<meta name="description" content="A practical field report on making LTX 2.5, MiniMax H3, and MiniMax Music 3 behave on AMD's Radeon AI PRO R9700: measured bottlenecks, selected fixes, documented dead ends, and one real six-run session.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   BOXWRENCH DESIGN TOKENS
+   Mirrored from /ai/github/boxwrench/src/ds/tokens/*.css.
+   Eight core colours, three faces, radius 0, 2px ink edges.
+   ============================================================ */
+:root{
+  --paper:#F4EFE4;
+  --paper-raised:#EAE2D2;
+  --ink:#17161B;
+  --ink-muted:#5E594F;
+  --rule:#CDC3AF;
+  --chrome:#878D94;
+  --brass:#A57C33;
+  --visor:#C33A2B;
+  --brass-text:#7A5A22;
+  --visor-text:#A32B1D;
 
-    /* controlled wins */
-    .wins-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 20px;
-    }
-    .win-card {
-      background: var(--panel);
-      border: 1px solid var(--rule);
-      border-radius: 4px;
-      padding: 26px 24px;
-    }
-    .win-number {
-      font: 600 clamp(2.4rem, 5vw, 3.4rem)/1 var(--font-interface);
-      color: var(--brass-bright);
-    }
-    .win-label {
-      margin-top: 10px;
-      font: 15px/1.5 var(--font-prose);
-      color: var(--ink);
-    }
-    .win-scope {
-      margin-top: 10px;
-      font: 12px/1.6 var(--font-interface);
-      color: var(--dim);
-      letter-spacing: 0.02em;
-    }
-    .disclaimer {
-      margin-top: 22px;
-      padding: 14px 18px;
-      border-left: 3px solid var(--crimson);
-      background: rgb(228 90 80 / 6%);
-      font: 14px/1.6 var(--font-prose);
-      color: var(--muted);
-    }
-    .disclaimer strong { color: var(--ink); }
+  --font-interface:"Share Tech Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-prose:"Newsreader", Georgia, "Times New Roman", serif;
+  --font-code:"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 
-    /* session timeline */
-    .timeline {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 6px;
-      font: 13px/1 var(--font-interface);
-      letter-spacing: 0.04em;
-      color: var(--muted);
-      margin-bottom: 36px;
-    }
-    .timeline .step {
-      background: var(--panel);
-      border: 1px solid var(--rule);
-      border-radius: 3px;
-      padding: 8px 12px;
-      color: var(--brass-bright);
-    }
-    .timeline .arrow { color: var(--dim); }
+  --border-width:2px;
+  --border:2px solid var(--ink);
+  --hairline:1px solid var(--rule);
+  --radius:0;
+  --lift:9px;
+  --shadow-lift:var(--lift) var(--lift) 0 var(--chrome);
 
-    .run-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 22px;
-    }
-    .run-card {
-      background: var(--panel);
-      border: 1px solid var(--rule);
-      border-radius: 4px;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
-    .run-card .thumb { position: relative; background: #000; }
-    .run-card img, .run-card video { display: block; width: 100%; height: auto; aspect-ratio: 16/9; object-fit: cover; }
-    .run-order-badge {
-      position: absolute; top: 10px; left: 10px;
-      font: 12px/1 var(--font-interface);
-      letter-spacing: 0.08em;
-      background: rgb(5 7 10 / 82%);
-      color: var(--brass-bright);
-      border: 1px solid var(--rule);
-      border-radius: 3px;
-      padding: 5px 9px;
-    }
-    .run-body { padding: 18px 20px 20px; flex: 1; display: flex; flex-direction: column; }
-    .run-title { font: 600 17px/1.35 var(--font-prose); color: var(--ink); margin: 0 0 10px; }
-    .run-stats {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px 14px;
-      font: 12px/1.5 var(--font-interface);
-      color: var(--dim);
-      margin-top: auto;
-      padding-top: 14px;
-      border-top: 1px solid var(--rule);
-    }
-    .run-stats .num { color: var(--brass-bright); font-weight: 600; }
-    .run-note { margin-top: 12px; font: 13px/1.55 var(--font-prose); color: var(--muted); }
-    .run-note.warn { color: var(--crimson); }
-    audio { width: 100%; margin-top: 4px; }
-    .music-viz { width: 100%; display: block; border-radius: 3px; margin-bottom: 10px; border: 1px solid var(--rule); }
+  --measure:65ch;
+  --canvas:1180px;
+  --gutter:20px;
 
-    /* symptom table */
-    table.symptoms { width: 100%; border-collapse: collapse; font: 14px/1.5 var(--font-prose); }
-    table.symptoms th, table.symptoms td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--rule); vertical-align: top; }
-    table.symptoms th { font: 12px/1 var(--font-interface); letter-spacing: 0.1em; text-transform: uppercase; color: var(--brass); }
-    table.symptoms code { font: 13px var(--font-code); color: var(--brass-bright); }
+  --space-1:4px;  --space-2:8px;  --space-3:12px; --space-4:16px; --space-5:24px;
+  --space-6:32px; --space-7:48px; --space-8:64px; --space-9:96px;
 
-    .stack-links, .method-list, .repro-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
-    .stack-links a, .repro-list a { font: 15px var(--font-prose); }
-    .method-list li { font: 16px/1.6 var(--font-prose); color: var(--muted); padding-left: 1.6em; position: relative; }
-    .method-list li::before { content: "→"; position: absolute; left: 0; color: var(--brass); }
+  --step:80ms steps(2);
+  --grain-opacity:0.10;
+}
+@media (min-width:900px){ :root{ --gutter:32px; } }
 
-    footer {
-      margin-top: 90px;
-      padding-top: 24px;
-      border-top: 1px solid var(--rule);
-      font: 13px/1.6 var(--font-interface);
-      color: var(--dim);
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px 22px;
-    }
+*,*::before,*::after{box-sizing:border-box}
+html{background:var(--paper)}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--font-prose);
+  font-size:18px;
+  line-height:1.70;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+h1,h2,h3,h4{font-family:var(--font-interface);font-weight:400;margin:0;text-wrap:balance}
+p{margin:0}
+img,video{max-width:100%;display:block}
+code,pre{font-family:var(--font-code)}
+a{color:var(--ink);text-decoration:none;border-bottom:2px solid var(--brass);transition:background var(--step),color var(--step)}
+a:hover{background:var(--ink);color:var(--paper);border-bottom-color:var(--ink)}
+a:focus-visible,summary:focus-visible,video:focus-visible,audio:focus-visible{outline:2px solid var(--visor);outline-offset:2px}
+::selection{background:var(--brass);color:var(--paper)}
 
-    @media (prefers-reduced-motion: reduce) {
-      * { scroll-behavior: auto !important; }
-    }
-  </style>
+/* the single page-level grain overlay */
+.grain{
+  position:fixed;inset:0;pointer-events:none;z-index:9999;
+  opacity:var(--grain-opacity);mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---------- layout rails ---------- */
+.canvas{max-width:var(--canvas);margin-inline:auto;padding-inline:var(--gutter)}
+.measure{max-width:var(--measure)}
+.measure--center{margin-inline:auto}
+code{white-space:nowrap}
+pre code{white-space:pre}
+.prose{font-family:var(--font-prose);text-wrap:pretty}
+.prose>*+*{margin-top:var(--space-5)}
+
+/* ---------- interface type roles ---------- */
+.label{font-family:var(--font-interface);font-size:12px;line-height:1;letter-spacing:0.22em;text-transform:uppercase;color:var(--ink)}
+.label--brass{color:var(--brass-text)}
+.label--muted{color:var(--ink-muted)}
+.meta{font-family:var(--font-interface);font-size:13px;line-height:1.4;letter-spacing:0.08em;color:var(--ink-muted)}
+.caption{font-family:var(--font-interface);font-size:13px;line-height:1.5;letter-spacing:0.06em;color:var(--ink-muted)}
+.mono{font-family:var(--font-code);font-size:14px;letter-spacing:0}
+
+/* ---------- 1. masthead ---------- */
+.masthead{
+  display:flex;align-items:baseline;justify-content:space-between;
+  gap:var(--space-5);flex-wrap:wrap;
+  padding:var(--space-6) 0 var(--space-3);
+  border-bottom:var(--border);
+}
+.wordmark{
+  font-family:var(--font-interface);font-size:22px;line-height:1;letter-spacing:0.02em;
+  text-transform:lowercase;border:0;
+}
+.wordmark:hover{background:none;color:var(--ink)}
+.wordmark .bracket{color:var(--brass)}
+.wordmark .tail{color:var(--brass-text)}
+.masthead nav{display:flex;gap:var(--space-5);flex-wrap:wrap}
+.masthead nav a{
+  font-family:var(--font-interface);font-size:13px;line-height:1;letter-spacing:0.14em;
+  text-transform:uppercase;border-bottom:2px solid transparent;padding-bottom:var(--space-1);
+}
+.masthead nav a:hover{border-bottom-color:var(--ink)}
+.register{
+  display:flex;justify-content:space-between;gap:var(--space-4);flex-wrap:wrap;
+  padding:var(--space-3) 0;border-bottom:var(--hairline);
+}
+
+/* ---------- 2. hero ---------- */
+.hero{padding:var(--space-8) 0 0}
+.hero h1{
+  font-size:clamp(3rem,11vw,7.5rem);
+  line-height:0.94;
+  letter-spacing:-0.01em;
+  text-transform:uppercase;
+}
+.hero h1 .line2{display:block;color:var(--brass-text)}
+.hero__sub{
+  margin-top:var(--space-4);
+  font-family:var(--font-interface);font-size:clamp(14px,2.4vw,18px);
+  letter-spacing:0.22em;text-transform:uppercase;color:var(--ink-muted);
+}
+.hero__deck{
+  margin-top:var(--space-5);max-width:34ch;
+  font-family:var(--font-interface);font-size:15px;line-height:1.55;color:var(--ink);
+}
+.hero__grid{display:grid;gap:var(--space-6);margin-top:var(--space-6)}
+@media (min-width:900px){
+  .hero__grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:end;gap:var(--space-8)}
+  .hero__deck{margin-top:0}
+}
+.hero__lede{font-size:20px;line-height:1.65;max-width:48ch}
+
+/* art slot — the loud moments */
+.artslot{
+  position:relative;margin-top:var(--space-7);
+  background:var(--paper-raised);border:var(--border);
+  box-shadow:var(--shadow-lift);
+  aspect-ratio:3/2;overflow:hidden;
+}
+@media (min-width:760px){ .artslot{aspect-ratio:16/7} }
+.artslot img{width:100%;height:100%;object-fit:cover;object-position:50% 38%}
+.artslot__tag{
+  position:absolute;left:0;bottom:0;
+  font-family:var(--font-interface);font-size:12px;letter-spacing:0.22em;text-transform:uppercase;
+  background:var(--ink);color:var(--paper);padding:var(--space-2) var(--space-3);
+}
+.artslot__cap{margin-top:calc(var(--lift) + var(--space-3))}
+
+/* placeholder art (no image yet) */
+.artslot--wide{aspect-ratio:3/2}
+@media (min-width:760px){ .artslot--wide{aspect-ratio:3/1} }
+.artslot--empty{display:grid;place-items:center;background:
+  repeating-linear-gradient(135deg,var(--paper-raised) 0 14px,var(--paper) 14px 28px)}
+.artslot--empty .artslot__note{
+  font-family:var(--font-interface);font-size:12px;letter-spacing:0.22em;text-transform:uppercase;
+  color:var(--ink-muted);text-align:center;padding:0 var(--space-5)
+}
+
+/* ---------- section chrome ---------- */
+.section{padding-top:var(--space-9)}
+.section__head{
+  display:flex;align-items:baseline;justify-content:space-between;gap:var(--space-4);
+  flex-wrap:wrap;border-bottom:var(--border);padding-bottom:var(--space-3);
+}
+.section__title{font-size:clamp(1.25rem,3.4vw,2rem);line-height:1.2;letter-spacing:0.06em;text-transform:uppercase}
+
+/* ---------- 3. headline number band ---------- */
+.band{display:grid;margin-top:var(--space-7)}
+@media (min-width:860px){ .band{grid-template-columns:repeat(3,minmax(0,1fr))} }
+.band__item{padding:var(--space-6) 0;border-top:var(--hairline)}
+@media (min-width:860px){
+  .band__item{border-top:0;padding:0 var(--space-6);border-left:2px solid var(--brass)}
+  .band__item:first-child{padding-left:0;border-left:0}
+  .band__item:last-child{padding-right:0}
+}
+.band__item:first-child{border-top:0;padding-top:0}
+.band__num{
+  font-family:var(--font-interface);font-size:clamp(3.5rem,9vw,5.5rem);line-height:0.9;
+  letter-spacing:-0.02em;
+}
+.band__what{margin-top:var(--space-3);font-family:var(--font-interface);font-size:13px;letter-spacing:0.22em;text-transform:uppercase}
+.band__delta{margin-top:var(--space-2);font-family:var(--font-code);font-size:15px;color:var(--brass-text)}
+.band__cap{margin-top:var(--space-4);font-size:16px;line-height:1.6;max-width:32ch}
+.band__note{
+  margin-top:var(--space-7);padding-top:var(--space-4);border-top:var(--hairline);
+  font-family:var(--font-interface);font-size:13px;line-height:1.6;letter-spacing:0.04em;color:var(--ink-muted);
+  max-width:60ch;
+}
+
+/* ---------- 4. bridge ---------- */
+.bridge{padding-top:var(--space-9)}
+.bridge h2{
+  font-size:clamp(1.5rem,4.4vw,2.6rem);line-height:1.15;letter-spacing:0.02em;text-transform:uppercase;
+  max-width:22ch;
+}
+.bridge p{margin-top:var(--space-5)}
+.bridge__turn{
+  margin-top:var(--space-6);font-family:var(--font-interface);font-size:clamp(15px,2.6vw,19px);
+  letter-spacing:0.14em;text-transform:uppercase;color:var(--visor-text);
+}
+
+/* ---------- 5. session sequence ---------- */
+.transition{
+  display:flex;align-items:center;gap:var(--space-4);
+  padding:var(--space-8) 0 var(--space-7);
+}
+.transition::before,.transition::after{content:"";flex:1;height:2px;background:var(--brass)}
+.transition__label{
+  font-family:var(--font-interface);font-size:13px;letter-spacing:0.22em;text-transform:uppercase;
+  color:var(--brass-text);white-space:nowrap;
+}
+.run{border-top:var(--border);padding-top:var(--space-5)}
+.run__head{display:grid;gap:var(--space-3);align-items:baseline}
+@media (min-width:760px){
+  .run__head{grid-template-columns:auto minmax(0,1fr) auto;gap:var(--space-6)}
+}
+.run__no{
+  font-family:var(--font-interface);font-size:clamp(3rem,9vw,5rem);line-height:0.85;
+  letter-spacing:-0.02em;color:var(--ink);
+}
+.run__model{font-size:clamp(1.1rem,3vw,1.5rem);line-height:1.2;letter-spacing:0.1em;text-transform:uppercase}
+.run__piece{
+  margin-top:var(--space-2);font-family:var(--font-prose);font-size:19px;line-height:1.3;
+  font-style:italic;color:var(--ink-muted);
+}
+.run__wall{display:flex;align-items:baseline;gap:var(--space-3)}
+@media (min-width:760px){ .run__wall{flex-direction:column;align-items:flex-end;gap:0} }
+.run__wall-num{
+  font-family:var(--font-interface);font-size:clamp(2.2rem,6vw,3.4rem);line-height:1;
+  letter-spacing:-0.01em;white-space:nowrap;
+}
+.run__wall-num .u{font-size:0.42em;letter-spacing:0.1em;color:var(--ink-muted);margin-left:0.25em}
+.run__wall-lab{font-family:var(--font-interface);font-size:12px;letter-spacing:0.22em;text-transform:uppercase;color:var(--ink-muted)}
+
+/* 16:9 media slot */
+.slot{margin:var(--space-5) 0 0}
+.slot__frame{
+  position:relative;background:var(--paper-raised);border:var(--border);
+  aspect-ratio:16/9;overflow:hidden;
+}
+.slot__frame video{width:100%;height:100%;object-fit:cover;background:var(--paper-raised)}
+.slot__tag{
+  position:absolute;left:0;top:0;z-index:2;pointer-events:none;
+  font-family:var(--font-interface);font-size:11px;letter-spacing:0.2em;text-transform:uppercase;
+  background:var(--ink);color:var(--paper);padding:var(--space-1) var(--space-3);
+}
+.slot figcaption{
+  margin-top:var(--space-3);display:flex;justify-content:space-between;gap:var(--space-4);flex-wrap:wrap;
+}
+.run__foot{
+  display:grid;gap:var(--space-4);margin-top:var(--space-5);padding-bottom:var(--space-4);
+}
+@media (min-width:760px){
+  .run__foot{grid-template-columns:minmax(0,20ch) minmax(0,1fr);gap:var(--space-7)}
+}
+.cfg{margin:0;font-family:var(--font-code);font-size:14px;line-height:1.7;color:var(--ink-muted)}
+.cfg span{display:block}
+.run__note{font-size:17px;line-height:1.6;max-width:52ch}
+
+/* ---------- music feature (the one deliberate dark block) ---------- */
+.music{
+  margin-top:var(--space-7);
+  background:var(--ink);color:var(--paper);
+  border:var(--border);
+  padding:var(--space-7) var(--space-5) var(--space-8);
+}
+@media (min-width:760px){ .music{padding:var(--space-8) var(--space-8) var(--space-9)} }
+.music a{color:var(--paper);border-bottom-color:var(--brass)}
+.music a:hover{background:var(--paper);color:var(--ink);border-bottom-color:var(--paper)}
+.music__head{display:grid;gap:var(--space-4)}
+@media (min-width:760px){ .music__head{grid-template-columns:auto minmax(0,1fr) auto;gap:var(--space-6);align-items:baseline} }
+.music__no{font-family:var(--font-interface);font-size:clamp(3rem,9vw,5rem);line-height:0.85;color:var(--paper)}
+.music__model{font-size:clamp(1.1rem,3vw,1.5rem);letter-spacing:0.1em;text-transform:uppercase;color:var(--paper)}
+.music__title{
+  margin-top:var(--space-2);font-family:var(--font-interface);
+  font-size:clamp(1.3rem,4.2vw,2.2rem);line-height:1.1;letter-spacing:0.06em;text-transform:uppercase;
+  color:var(--brass);
+}
+.music__stats{display:flex;gap:var(--space-6);flex-wrap:wrap}
+@media (min-width:760px){ .music__stats{flex-direction:column;gap:var(--space-4);text-align:right} }
+.music__stat-num{font-family:var(--font-interface);font-size:clamp(1.8rem,5vw,2.6rem);line-height:1;color:var(--paper)}
+.music__stat-num .u{font-size:0.42em;letter-spacing:0.1em;color:var(--chrome);margin-left:0.25em}
+.music__stat-lab{display:block;font-family:var(--font-interface);font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--chrome);margin-top:var(--space-1)}
+.music__stat-num{display:block}
+.sleeve{
+  margin-top:var(--space-7);border:2px solid var(--chrome);background:#0f0e12;
+  aspect-ratio:3/2;overflow:hidden;position:relative;display:grid;place-items:center;
+}
+@media (min-width:760px){ .sleeve{aspect-ratio:2.4/1} }
+.sleeve img{width:100%;height:100%;object-fit:cover}
+.sleeve__note{
+  font-family:var(--font-interface);font-size:12px;letter-spacing:0.22em;text-transform:uppercase;
+  color:var(--chrome);text-align:center;padding:0 var(--space-5);
+}
+.sleeve__tag{
+  position:absolute;left:0;bottom:0;
+  font-family:var(--font-interface);font-size:11px;letter-spacing:0.2em;text-transform:uppercase;
+  background:var(--paper);color:var(--ink);padding:var(--space-1) var(--space-3);
+}
+.player{margin-top:var(--space-6)}
+.player audio{width:100%;height:44px}
+.waveform{margin-top:var(--space-5);border-top:1px solid var(--chrome);padding-top:var(--space-5)}
+.waveform img{width:100%;height:auto;filter:invert(1) hue-rotate(180deg);opacity:0.85}
+.lyric{
+  margin-top:var(--space-7);border-left:8px solid var(--brass);padding-left:var(--space-5);
+  font-family:var(--font-prose);font-size:clamp(1.1rem,3.2vw,1.5rem);line-height:1.5;font-style:italic;
+  color:var(--paper);max-width:34ch;
+}
+.lyric cite{display:block;margin-top:var(--space-3);font-family:var(--font-interface);font-size:12px;
+  letter-spacing:0.2em;text-transform:uppercase;font-style:normal;color:var(--chrome)}
+.music .disclosure{border-color:var(--chrome);background:transparent;margin-top:var(--space-7)}
+.music .disclosure>summary{color:var(--brass)}
+.music .disclosure[open]>summary{border-bottom-color:var(--chrome)}
+.music .disclosure__body{border-top-color:var(--chrome)}
+.music .caption,.music .meta{color:var(--chrome)}
+
+/* ---------- disclosures ---------- */
+.disclosure{margin-top:var(--space-6);border:var(--border);background:var(--paper)}
+.disclosure>summary{
+  cursor:pointer;list-style:none;padding:var(--space-3) var(--space-4);
+  font-family:var(--font-interface);font-size:13px;letter-spacing:0.14em;text-transform:uppercase;
+  display:flex;justify-content:space-between;align-items:center;gap:var(--space-4);
+}
+.disclosure>summary::-webkit-details-marker{display:none}
+.disclosure>summary::after{content:"+";color:var(--brass-text);font-size:16px}
+.disclosure[open]>summary::after{content:"\2212"}
+.disclosure[open]>summary{color:var(--brass-text);border-bottom:var(--border)}
+.disclosure__body{padding:var(--space-5) var(--space-4)}
+.disclosure__body>*+*{margin-top:var(--space-4)}
+.disclosure__body h3{
+  font-size:14px;letter-spacing:0.14em;text-transform:uppercase;margin-top:var(--space-5)
+}
+.disclosure__body p{font-size:16px;line-height:1.6}
+.disclosure__body ul{margin:0;padding-left:var(--space-5);list-style:none}
+.disclosure__body li{position:relative;font-size:16px;line-height:1.6}
+.disclosure__body li+li{margin-top:var(--space-2)}
+.disclosure__body li::before{content:"";position:absolute;left:calc(-1 * var(--space-4));top:0.62em;width:8px;height:8px;background:var(--brass)}
+.hashes{width:100%;border-collapse:collapse;font-family:var(--font-code);font-size:12.5px}
+.hashes th,.hashes td{text-align:left;padding:var(--space-2) var(--space-3) var(--space-2) 0;border-bottom:var(--hairline);vertical-align:top}
+.hashes th{font-family:var(--font-interface);font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--ink-muted)}
+.hashes td:last-child{color:var(--ink-muted);word-break:break-all}
+.scroll-x{overflow-x:auto;-webkit-overflow-scrolling:touch}
+/* narrow: the hash table stops being a table and becomes stacked records */
+@media (max-width:700px){
+  .hashes,.hashes tbody,.hashes tr,.hashes td{display:block;width:100%}
+  .hashes thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .hashes tr{border-bottom:var(--hairline);padding:var(--space-3) 0}
+  .hashes td{border:0;padding:0;word-break:break-all}
+  .hashes td:nth-child(2){
+    font-family:var(--font-interface);font-size:11px;letter-spacing:0.16em;text-transform:uppercase;
+    color:var(--ink-muted);margin-top:var(--space-1);
+  }
+  .hashes td:last-child{margin-top:var(--space-1)}
+}
+
+/* ---------- 6. findings callouts ---------- */
+.findings{display:grid;gap:0;margin-top:var(--space-7)}
+.finding{border-top:var(--hairline);padding:var(--space-7) 0}
+.finding:first-child{border-top:0;padding-top:0}
+.finding__q{
+  font-size:clamp(1.35rem,4.2vw,2.1rem);line-height:1.15;letter-spacing:0.02em;text-transform:uppercase;
+  max-width:20ch;
+}
+.finding__body{display:grid;gap:var(--space-4);margin-top:var(--space-4)}
+@media (min-width:860px){
+  .finding{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--space-8);align-items:start}
+  .finding__body{margin-top:0}
+}
+.finding__a{font-size:18px;line-height:1.6;max-width:44ch}
+.finding__ev{
+  font-family:var(--font-code);font-size:14px;line-height:1.6;color:var(--ink-muted);
+  border-left:2px solid var(--brass);padding-left:var(--space-4);
+}
+.finding__ev b{font-weight:400;color:var(--ink)}
+.more{margin-top:var(--space-7);font-family:var(--font-interface);font-size:14px;letter-spacing:0.14em;text-transform:uppercase}
+
+/* ---------- 7. known-good ---------- */
+.stack{margin-top:var(--space-7);display:grid;gap:var(--space-6)}
+@media (min-width:860px){ .stack{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--space-8)} }
+.stack dl{margin:0}
+.stack dt{
+  font-family:var(--font-interface);font-size:12px;letter-spacing:0.22em;text-transform:uppercase;
+  color:var(--ink-muted);padding-top:var(--space-4);border-top:var(--hairline);
+}
+.stack dl>dt:first-child{padding-top:0;border-top:0}
+.stack dd{margin:var(--space-1) 0 var(--space-4);font-family:var(--font-code);font-size:15px;line-height:1.5;word-break:break-word}
+.stack dd em{font-style:normal;color:var(--ink-muted);font-size:13px;display:block;margin-top:2px}
+
+/* ---------- 8. method ---------- */
+.method{margin-top:var(--space-7);counter-reset:m}
+.method__item{
+  display:grid;gap:var(--space-3);align-items:baseline;
+  border-top:var(--hairline);padding:var(--space-6) 0;
+}
+@media (min-width:640px){ .method__item{grid-template-columns:auto minmax(0,1fr);gap:var(--space-6)} }
+.method__item:first-child{border-top:0}
+.method__n{font-family:var(--font-interface);font-size:clamp(2rem,6vw,3rem);line-height:0.85;color:var(--brass-text)}
+.method__s{font-family:var(--font-interface);font-size:clamp(1.15rem,3.6vw,1.75rem);line-height:1.2;letter-spacing:0.04em;text-transform:uppercase}
+
+/* ---------- 9. reproduce ---------- */
+.repro{margin-top:var(--space-7)}
+.repro__cmd{
+  background:var(--paper-raised);border:var(--border);padding:var(--space-4) var(--space-5);
+  font-family:var(--font-code);font-size:15px;overflow-x:auto;white-space:pre;
+}
+.repro__links{margin-top:var(--space-6);display:grid;gap:0}
+@media (min-width:760px){ .repro__links{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:var(--space-8)} }
+.repro__link{border-top:var(--hairline);padding:var(--space-4) 0;display:flex;justify-content:space-between;gap:var(--space-4);align-items:baseline}
+.repro__link a{font-family:var(--font-interface);font-size:14px;letter-spacing:0.1em;text-transform:uppercase}
+.repro__link span{font-family:var(--font-interface);font-size:12px;letter-spacing:0.06em;color:var(--ink-muted);text-align:right}
+@media (max-width:560px){
+  .repro__link{flex-direction:column;gap:var(--space-2)}
+  .repro__link span{text-align:left}
+}
+
+/* ---------- 10. closing ---------- */
+.closing{padding-top:var(--space-9)}
+.closing__copy{margin-top:calc(var(--lift) + var(--space-6));display:flex;justify-content:space-between;gap:var(--space-5);flex-wrap:wrap;align-items:baseline}
+.closing__mark{font-family:var(--font-interface);font-size:clamp(1rem,3vw,1.5rem);letter-spacing:0.22em;text-transform:uppercase}
+
+/* ---------- footer ---------- */
+.pagefoot{
+  margin-top:var(--space-9);border-top:var(--hairline);
+  padding:var(--space-5) 0 var(--space-8);
+  display:flex;justify-content:space-between;gap:var(--space-5);flex-wrap:wrap;
+}
+.pagefoot a{color:var(--ink-muted);border-bottom-color:var(--rule)}
+.pagefoot__links{display:flex;gap:var(--space-5);flex-wrap:wrap}
+
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important;animation:none!important;scroll-behavior:auto!important}
+  .grain{display:none}
+}
+</style>
 </head>
 <body>
-<main>
-  <a class="backlink" href="https://github.com/boxwrench/R9700">&larr; back to R9700 repository</a>
-  <p class="kicker" style="margin-top:22px;">Boxwrench &middot; AMD Radeon AI PRO R9700</p>
-  <h1>R9700 Generation Lab<br><em>Measured. Tuned. Preserved.</em></h1>
-  <p class="lede">LTX 2.5, MiniMax H3, and MiniMax Music 3 on an AMD Radeon AI PRO R9700 &mdash; a real six-run workflow-switching acceptance session, with the actual wall times, artifacts, and failure record behind them.</p>
+<div class="grain" aria-hidden="true"></div>
 
-  <div class="hero-media">
-    <img src="assets/showcase/05-h3-r2v-boxwrench-observatory.jpg" alt="Boxwrench, a gunmetal-and-brass robot knight, reaching toward a small point of light inside a dark computational observatory, generated by MiniMax H3 Reference-to-Video on the R9700.">
-    <p class="hero-caption">MiniMax H3 Reference-to-Video &middot; run 5 of 6 &middot; 81.47&thinsp;s wall &middot; identity-anchored on the Boxwrench reference image</p>
+<div class="canvas">
+
+  <!-- ============ 1. MASTHEAD ============ -->
+  <header class="masthead">
+    <a class="wordmark" href="https://boxwrench.dev/"><span class="bracket">[</span>box<span class="tail">wrench</span><span class="bracket">]</span></a>
+    <nav aria-label="Boxwrench">
+      <a href="https://boxwrench.dev/archive">field notes</a>
+      <a href="https://boxwrench.dev/artifacts">artifacts</a>
+      <a href="https://boxwrench.dev/lore">lore</a>
+      <a href="https://boxwrench.dev/about">about</a>
+    </nav>
+  </header>
+  <div class="register">
+    <span class="label label--brass">BX-77 // Hardware Field Report</span>
+    <span class="label label--muted">Filed 2026.08.18</span>
   </div>
 
-  <section aria-labelledby="wins-h">
-    <h2 id="wins-h">Headline controlled wins</h2>
-    <div class="wins-grid">
-      <div class="win-card">
-        <div class="win-number">~776&times;</div>
-        <div class="win-label">H3 Qwen3-VL load pathology eliminated with <code>--disable-mmap</code></div>
-        <div class="win-scope">931&thinsp;s &rarr; 1.2&thinsp;s, model-load only</div>
+  <main>
+
+    <!-- ============ 2. HERO ============ -->
+    <section class="hero" aria-labelledby="page-title">
+      <h1 id="page-title">R9700<span class="line2">Generation Lab</span></h1>
+      <div class="hero__grid">
+        <div>
+          <p class="hero__sub">Measured. Tuned. Preserved.</p>
+          <p class="hero__deck">A practical field report on making LTX&nbsp;2.5, MiniMax&nbsp;H3, and MiniMax&nbsp;Music&nbsp;3 behave on AMD's Radeon AI PRO R9700.</p>
+        </div>
+        <p class="prose hero__lede">This project began as a performance investigation and ended as a known-good production stack: measured bottlenecks, selected fixes, documented dead ends, reproducible workflows, and a final session switching between generation models without rebuilding the machine between jobs.</p>
       </div>
-      <div class="win-card">
-        <div class="win-number">~41%</div>
-        <div class="win-label">Lower LTX wall time on the documented short workload</div>
-        <div class="win-scope">43.78&thinsp;s &rarr; 25.69&thinsp;s, 768&times;448 / 41-frame / 8-step</div>
+
+      <figure class="artslot">
+        <img src="assets/showcase/hero-bx77-anchor-placeholder.webp" alt="BX-77 Boxwrench: a heavy robot knight in burnished gunmetal plate with brass-trimmed pauldrons, a recessed visor slit, and a hexagonal chest core.">
+        <figcaption class="artslot__tag">Plate 01 — placeholder</figcaption>
+      </figure>
+      <p class="caption artslot__cap">Standing in for the final hero plate. Target slot 16:7 on desktop, 3:2 on mobile — see <a href="https://github.com/boxwrench/R9700/blob/main/showcase/media-spec.md">showcase/media-spec.md</a>.</p>
+    </section>
+
+    <!-- ============ 3. HEADLINE FINDINGS ============ -->
+    <section class="section" aria-labelledby="findings-title">
+      <div class="section__head">
+        <h2 class="section__title" id="findings-title">What we found</h2>
+        <span class="label label--muted">Controlled experiments</span>
       </div>
-      <div class="win-card">
-        <div class="win-number">~24.9%</div>
-        <div class="win-label">Faster H3 sampler in the controlled Qwen-residency A/B</div>
-        <div class="win-scope">29.51&thinsp;s &rarr; 22.15&thinsp;s, paired changed-prompt sampling only</div>
+
+      <div class="band">
+        <div class="band__item">
+          <p class="band__num">776&times;</p>
+          <p class="band__what">Model load</p>
+          <p class="band__delta">931 s &rarr; 1.2 s</p>
+          <p class="band__cap prose">H3 Qwen3-VL model-load pathology removed with <code>--disable-mmap</code>.</p>
+        </div>
+        <div class="band__item">
+          <p class="band__num">41%</p>
+          <p class="band__what">Less wall time</p>
+          <p class="band__delta">43.78 s &rarr; 25.69 s</p>
+          <p class="band__cap prose">LTX short-workload result after selecting the 256-token Gemma floor.</p>
+        </div>
+        <div class="band__item">
+          <p class="band__num">24.9%</p>
+          <p class="band__what">Faster sampler</p>
+          <p class="band__delta">29.51 s &rarr; 22.15 s</p>
+          <p class="band__cap prose">H3 paired Qwen-residency A/B.</p>
+        </div>
       </div>
-    </div>
-    <p class="disclaimer"><strong>These are prior controlled results from separate isolated experiments</strong>, not from the session below. The workloads and timing boundaries differ &mdash; do not multiply them together or treat them as one universal speedup. Full method and evidence: <a href="comfyui-walltime-campaign-20260818.md">walltime campaign index</a>.</p>
-  </section>
 
-  <section aria-labelledby="session-h">
-    <h2 id="session-h">The real final session</h2>
-    <div class="timeline" aria-hidden="true">
-      <span class="step">1&nbsp;LTX</span><span class="arrow">&rarr;</span>
-      <span class="step">2&nbsp;H3 T2V</span><span class="arrow">&rarr;</span>
-      <span class="step">3&nbsp;H3 I2V</span><span class="arrow">&rarr;</span>
-      <span class="step">4&nbsp;Music 3</span><span class="arrow">&rarr;</span>
-      <span class="step">5&nbsp;H3 R2V</span><span class="arrow">&rarr;</span>
-      <span class="step">6&nbsp;LTX return</span>
-    </div>
-    <p class="lede" style="font-size:16px;">One long-lived ComfyUI process (one mid-session restart), switching between four different production workflows in sequence, generating a real artifact every time. These are the actual wall times from that session &mdash; including the runs that failed first. Full provenance: <a href="../showcase/session/session.json">session.json</a> &middot; <a href="../data/final-showcase-session-20260818.tsv">session.tsv</a> &middot; <a href="final-generation-acceptance-20260818.md">final acceptance report</a>.</p>
+      <p class="band__note">These are separate controlled experiments with different boundaries. They are not additive.</p>
+    </section>
 
-    <div class="run-grid" style="margin-top:28px;">
-      <article class="run-card">
-        <div class="thumb">
-          <span class="run-order-badge">RUN 1 &middot; COLD INIT &rarr; LTX</span>
-          <video controls preload="none" poster="assets/showcase/01-ltx-boxwrench-artifact-forge.jpg">
-            <source src="https://github.com/boxwrench/R9700/releases/download/showcase-final-20260818/01-ltx-boxwrench-artifact-forge_00001_.mp4" type="video/mp4">
-          </video>
-        </div>
-        <div class="run-body">
-          <h3 class="run-title">LTX 2.5 &mdash; The Artifact Forge</h3>
-          <div class="run-stats">
-            <div>WALL <span class="num">11.48s*</span></div>
-            <div>768&times;448 &middot; 41f @24fps</div>
-            <div>8 steps &middot; res_multistep</div>
-            <div>video-only (audio branch dropped)</div>
+    <!-- ============ 4. EDITORIAL BRIDGE ============ -->
+    <section class="bridge" aria-labelledby="bridge-title">
+      <h2 id="bridge-title">The point was not to win a benchmark.</h2>
+      <p class="prose measure">The useful question was whether the machine could move between real workloads without turning every model change into another debugging session.</p>
+      <p class="bridge__turn">So we ran one final creative session.</p>
+    </section>
+
+    <!-- ============ 5. REAL SESSION ============ -->
+    <section class="section" aria-labelledby="session-title">
+      <div class="section__head">
+        <h2 class="section__title" id="session-title">One session, six runs</h2>
+        <span class="label label--muted">2026.08.18 &middot; gfx1201</span>
+      </div>
+      <p class="prose measure" style="margin-top:var(--space-6)">Four production workflows, executed back to back in one long-lived ComfyUI process. Every wall time below is the measured time for that run in this sequence — not a best-of, not a cold-start figure carried over from the optimization campaign.</p>
+
+      <!-- RUN 01 -->
+      <div class="transition"><span class="transition__label">&darr; Cold init &rarr; LTX</span></div>
+      <article class="run" aria-labelledby="run-01">
+        <div class="run__head">
+          <p class="run__no">01</p>
+          <div>
+            <h3 class="run__model" id="run-01">LTX 2.5</h3>
+            <p class="run__piece">The Artifact Forge</p>
           </div>
-          <p class="run-note warn">*Warm-cache measurement; see acceptance report. First attempt rendered the workflow's unmodified placeholder text instead of this prompt (archived, not published) &mdash; corrected and re-run.</p>
+          <p class="run__wall"><span class="run__wall-num">11.48<span class="u">s</span></span><span class="run__wall-lab">Wall</span></p>
+        </div>
+        <figure class="slot">
+          <div class="slot__frame">
+            <span class="slot__tag">Media slot &mdash; source run</span>
+            <video controls preload="none" playsinline
+                   poster="assets/showcase/01-ltx-boxwrench-artifact-forge.jpg"
+                   aria-label="LTX 2.5 run 01, The Artifact Forge">
+              <source src="https://github.com/boxwrench/R9700/releases/download/showcase-final-20260818/01-ltx-boxwrench-artifact-forge_00001_.mp4" type="video/mp4">
+            </video>
+          </div>
+          <figcaption>
+            <span class="caption">Poster frame extracted from the run output. Captions land here.</span>
+            <span class="caption"><a href="https://github.com/boxwrench/R9700/releases/download/showcase-final-20260818/01-ltx-boxwrench-artifact-forge_00001_.mp4">open source file &rarr;</a></span>
+          </figcaption>
+        </figure>
+        <div class="run__foot">
+          <p class="cfg"><span>768&times;448</span><span>41 frames</span><span>8 steps</span></p>
+          <p class="run__note prose">Warm-cache final showcase run. The audio branch is dropped here on purpose — see the field notes below.</p>
         </div>
       </article>
 
-      <article class="run-card">
-        <div class="thumb">
-          <span class="run-order-badge">RUN 2 &middot; LTX &rarr; H3 T2V</span>
-          <video controls preload="none" poster="assets/showcase/02-h3-t2v-boxwrench-cathedral.jpg">
-            <source src="https://github.com/boxwrench/R9700/releases/download/showcase-final-20260818/02-h3-t2v-boxwrench-cathedral_00001_.mp4" type="video/mp4">
-          </video>
-        </div>
-        <div class="run-body">
-          <h3 class="run-title">MiniMax H3 T2V &mdash; Machine Cathedral</h3>
-          <div class="run-stats">
-            <div>WALL <span class="num">131.94s</span></div>
-            <div>608&times;352 &middot; 39f @24fps</div>
-            <div>20 steps &middot; res_multistep</div>
-            <div>peak VRAM 27.58&thinsp;GiB</div>
+      <!-- RUN 02 -->
+      <div class="transition"><span class="transition__label">&darr; LTX &rarr; H3</span></div>
+      <article class="run" aria-labelledby="run-02">
+        <div class="run__head">
+          <p class="run__no">02</p>
+          <div>
+            <h3 class="run__model" id="run-02">MiniMax H3 &mdash; Text to Video</h3>
+            <p class="run__piece">Machine Cathedral</p>
           </div>
-          <p class="run-note">Clean first-submission run on the unmodified production workflow.</p>
+          <p class="run__wall"><span class="run__wall-num">131.94<span class="u">s</span></span><span class="run__wall-lab">Wall</span></p>
+        </div>
+        <figure class="slot">
+          <div class="slot__frame">
+            <span class="slot__tag">Media slot &mdash; source run</span>
+            <video controls preload="none" playsinline
+                   poster="assets/showcase/02-h3-t2v-boxwrench-cathedral.jpg"
+                   aria-label="MiniMax H3 text-to-video run 02, Machine Cathedral">
+              <source src="https://github.com/boxwrench/R9700/releases/download/showcase-final-20260818/02-h3-t2v-boxwrench-cathedral_00001_.mp4" type="video/mp4">
+            </video>
+          </div>
+          <figcaption>
+            <span class="caption">Poster frame extracted from the run output.</span>
+            <span class="caption"><a href="https://github.com/boxwrench/R9700/releases/download/showcase-final-20260818/02-h3-t2v-boxwrench-cathedral_00001_.mp4">open source file &rarr;</a></span>
+          </figcaption>
+        </figure>
+        <div class="run__foot">
+          <p class="cfg"><span>608&times;352</span><span>39 frames</span><span>20 steps</span></p>
+          <p class="run__note prose">The first model change of the session: LTX's Gemma stack out, H3's Qwen3-VL stack in. The longest run on the board, and the only one that had to pay for a full encoder swap.</p>
         </div>
       </article>
 
-      <article class="run-card">
-        <div class="thumb">
-          <span class="run-order-badge">RUN 3 &middot; H3 T2V &rarr; H3 I2V</span>
-          <video controls preload="none" poster="assets/showcase/03-h3-i2v-boxwrench-forge-awakening.jpg">
-            <source src="https://github.com/boxwrench/R9700/releases/download/showcase-final-20260818/03-h3-i2v-boxwrench-forge-awakening_00001_.mp4" type="video/mp4">
-          </video>
-        </div>
-        <div class="run-body">
-          <h3 class="run-title">MiniMax H3 I2V &mdash; Forge Awakening</h3>
-          <div class="run-stats">
-            <div>WALL <span class="num">49.16s</span></div>
-            <div>608&times;352 &middot; 39f @24fps</div>
-            <div>20 steps &middot; anchor-seeded</div>
-            <div>peak VRAM NA</div>
+      <!-- RUN 03 -->
+      <div class="transition"><span class="transition__label">&darr; H3 T2V &rarr; H3 I2V</span></div>
+      <article class="run" aria-labelledby="run-03">
+        <div class="run__head">
+          <p class="run__no">03</p>
+          <div>
+            <h3 class="run__model" id="run-03">MiniMax H3 &mdash; Image to Video</h3>
+            <p class="run__piece">Forge Awakening</p>
           </div>
-          <p class="run-note warn">First submission failed: node schema wants <code>first_frame</code>, saved workflow said <code>image</code>. See <a href="../TROUBLESHOOTING.md#7-v3-node-schema-drift-minimax-h3-i2v--r2v--2026-08-18">Troubleshooting &sect;7</a>.</p>
+          <p class="run__wall"><span class="run__wall-num">49.16<span class="u">s</span></span><span class="run__wall-lab">Wall</span></p>
+        </div>
+        <figure class="slot">
+          <div class="slot__frame">
+            <span class="slot__tag">Media slot &mdash; source run</span>
+            <video controls preload="none" playsinline
+                   poster="assets/showcase/03-h3-i2v-boxwrench-forge-awakening.jpg"
+                   aria-label="MiniMax H3 image-to-video run 03, Forge Awakening">
+              <source src="https://github.com/boxwrench/R9700/releases/download/showcase-final-20260818/03-h3-i2v-boxwrench-forge-awakening_00001_.mp4" type="video/mp4">
+            </video>
+          </div>
+          <figcaption>
+            <span class="caption">Poster frame extracted from the run output.</span>
+            <span class="caption"><a href="https://github.com/boxwrench/R9700/releases/download/showcase-final-20260818/03-h3-i2v-boxwrench-forge-awakening_00001_.mp4">open source file &rarr;</a></span>
+          </figcaption>
+        </figure>
+        <div class="run__foot">
+          <p class="cfg"><span>608&times;352</span><span>39 frames</span><span>20 steps</span><span>first_frame: anchor</span></p>
+          <p class="run__note prose">The same H3 weights as run 02, now conditioned on the BX-77 anchor frame. Identical resolution, frame count, and step count — and it finished in a little over a third of the time.</p>
         </div>
       </article>
 
-      <article class="run-card">
-        <div class="thumb" style="aspect-ratio:16/9; display:flex; align-items:center; justify-content:center; background:linear-gradient(180deg, var(--blue-black), var(--void));">
-          <span class="run-order-badge">RUN 4 &middot; H3 I2V &rarr; MUSIC 3</span>
-        </div>
-        <div class="run-body">
-          <h3 class="run-title">MiniMax Music 3 &mdash; Signal Against the End</h3>
-          <img class="music-viz" src="assets/showcase/04-music3-signal-against-the-end-spectrum.png" alt="Log-scale spectrogram of the generated track">
-          <img class="music-viz" src="assets/showcase/04-music3-signal-against-the-end-waveform.png" alt="Waveform of the generated track">
-          <audio controls preload="none" src="https://github.com/boxwrench/R9700/releases/download/showcase-final-20260818/04-music3-signal-against-the-end_00001.flac"></audio>
-          <div class="run-stats">
-            <div>WALL <span class="num">28.48s</span></div>
-            <div>15.0s output</div>
-            <div>galloping heavy-metal, res_multistep</div>
-            <div>FLAC</div>
+      <!-- RUN 04 — MUSIC FEATURE -->
+      <div class="transition"><span class="transition__label">&darr; H3 I2V &rarr; Music</span></div>
+      <article class="music" aria-labelledby="run-04">
+        <div class="music__head">
+          <p class="music__no">04</p>
+          <div>
+            <h3 class="music__model" id="run-04">MiniMax Music 3</h3>
+            <p class="music__title">Signal Against the End</p>
           </div>
-          <p class="run-note">A synthetic intelligence transmitting backward through time &mdash; cold logic preserving memory against entropy.</p>
+          <div class="music__stats">
+            <p><span class="music__stat-num">28.48<span class="u">s</span></span><span class="music__stat-lab">Generation wall</span></p>
+            <p><span class="music__stat-num">14.99<span class="u">s</span></span><span class="music__stat-lab">Audio</span></p>
+          </div>
+        </div>
+
+        <div class="sleeve">
+          <p class="sleeve__note">Cover plate pending &mdash; wide slot, 2.4:1 desktop / 3:2 mobile</p>
+          <span class="sleeve__tag">Sleeve &mdash; placeholder</span>
+        </div>
+
+        <div class="player">
+          <audio controls preload="none" aria-label="Signal Against the End — MiniMax Music 3 output">
+            <source src="https://github.com/boxwrench/R9700/releases/download/showcase-final-20260818/04-music3-signal-against-the-end_00001.flac" type="audio/flac">
+          </audio>
+          <p class="caption" style="margin-top:var(--space-3)">FLAC, 14.99 s. <a href="https://github.com/boxwrench/R9700/releases/download/showcase-final-20260818/04-music3-signal-against-the-end_00001.flac">Open source file &rarr;</a></p>
+        </div>
+
+        <div class="waveform">
+          <img src="assets/showcase/04-music3-signal-against-the-end-waveform.png" alt="Waveform of the generated track: a dense, consistently loud block with sharp transient peaks across the full 14.99 seconds." loading="lazy">
+          <p class="caption" style="margin-top:var(--space-3)">Waveform, rendered from the FLAC output.</p>
+        </div>
+
+        <blockquote class="lyric">
+          &ldquo;Carry the signal, deny the end&hellip;&rdquo;
+          <cite>Chorus &mdash; lyric excerpt</cite>
+        </blockquote>
+
+        <details class="disclosure">
+          <summary>Technical detail &mdash; spectrum and parameters</summary>
+          <div class="disclosure__body">
+            <img src="assets/showcase/04-music3-signal-against-the-end-spectrum.png" alt="Spectrogram of the generated track showing energy concentrated below roughly 10 kHz with a broadband percussive layer." loading="lazy">
+            <p class="cfg" style="color:inherit"><span>seed 8112080</span><span>20 steps &middot; res_multistep &middot; simple</span><span>cfg 1.5 &middot; top-k 50</span><span>max duration 15.0 s</span></p>
+            <p class="caption">Roughly 19.8 s of the 28.48 s wall is the autoregressive lyric/text conditioner; the DiT itself is about 3.6 s. See <a href="https://github.com/boxwrench/R9700/blob/main/docs/minimax-music3-r9700-baseline-20260818.md">the Music 3 baseline</a>.</p>
+          </div>
+        </details>
+      </article>
+
+      <!-- RUN 05 -->
+      <div class="transition"><span class="transition__label">&darr; Music &rarr; H3 R2V</span></div>
+      <article class="run" aria-labelledby="run-05">
+        <div class="run__head">
+          <p class="run__no">05</p>
+          <div>
+            <h3 class="run__model" id="run-05">MiniMax H3 &mdash; Reference to Video</h3>
+            <p class="run__piece">Observatory</p>
+          </div>
+          <p class="run__wall"><span class="run__wall-num">81.47<span class="u">s</span></span><span class="run__wall-lab">Wall</span></p>
+        </div>
+        <figure class="slot">
+          <div class="slot__frame">
+            <span class="slot__tag">Media slot &mdash; source run</span>
+            <video controls preload="none" playsinline
+                   poster="assets/showcase/05-h3-r2v-boxwrench-observatory.jpg"
+                   aria-label="MiniMax H3 reference-to-video run 05, Observatory">
+              <source src="https://github.com/boxwrench/R9700/releases/download/showcase-final-20260818/05-h3-r2v-boxwrench-observatory_00001_.mp4" type="video/mp4">
+            </video>
+          </div>
+          <figcaption>
+            <span class="caption">Poster frame extracted from the run output.</span>
+            <span class="caption"><a href="https://github.com/boxwrench/R9700/releases/download/showcase-final-20260818/05-h3-r2v-boxwrench-observatory_00001_.mp4">open source file &rarr;</a></span>
+          </figcaption>
+        </figure>
+        <div class="run__foot">
+          <p class="cfg"><span>608&times;352</span><span>39 frames</span><span>20 steps</span><span>ref: anchor, match</span></p>
+          <p class="run__note prose">A different H3 transformer than runs 02 and 03, swapped in against the same anchor. This is the run that cost the most to get working, and none of that cost was the GPU's fault.</p>
         </div>
       </article>
 
-      <article class="run-card">
-        <div class="thumb">
-          <span class="run-order-badge">RUN 5 &middot; MUSIC 3 &rarr; H3 R2V</span>
-          <video controls preload="none" poster="assets/showcase/05-h3-r2v-boxwrench-observatory.jpg">
-            <source src="https://github.com/boxwrench/R9700/releases/download/showcase-final-20260818/05-h3-r2v-boxwrench-observatory_00001_.mp4" type="video/mp4">
-          </video>
-        </div>
-        <div class="run-body">
-          <h3 class="run-title">MiniMax H3 R2V &mdash; Observatory</h3>
-          <div class="run-stats">
-            <div>WALL <span class="num">81.47s</span></div>
-            <div>608&times;352 &middot; 39f @24fps</div>
-            <div>20 steps &middot; ref-anchored + audio</div>
-            <div>6 failed attempts first</div>
+      <!-- RUN 06 -->
+      <div class="transition"><span class="transition__label">&darr; H3 R2V &rarr; LTX</span></div>
+      <article class="run" aria-labelledby="run-06">
+        <div class="run__head">
+          <p class="run__no">06</p>
+          <div>
+            <h3 class="run__model" id="run-06">LTX 2.5 &mdash; Return Run</h3>
+            <p class="run__piece">Signal Vault</p>
           </div>
-          <p class="run-note warn">Six prior submissions failed on the V3 autogrow input schema before the correct dotted-path key (<code>ref_images.ref_image_0</code>) was found. Full root cause: <a href="../TROUBLESHOOTING.md#7-v3-node-schema-drift-minimax-h3-i2v--r2v--2026-08-18">Troubleshooting &sect;7</a>.</p>
+          <p class="run__wall"><span class="run__wall-num">23.62<span class="u">s</span></span><span class="run__wall-lab">Wall</span></p>
+        </div>
+        <figure class="slot">
+          <div class="slot__frame">
+            <span class="slot__tag">Media slot &mdash; source run</span>
+            <video controls preload="none" playsinline
+                   poster="assets/showcase/06-ltx-boxwrench-signal-return.jpg"
+                   aria-label="LTX 2.5 return run 06, Signal Vault">
+              <source src="https://github.com/boxwrench/R9700/releases/download/showcase-final-20260818/06-ltx-boxwrench-signal-return_00001_.mp4" type="video/mp4">
+            </video>
+          </div>
+          <figcaption>
+            <span class="caption">Poster frame extracted from the run output.</span>
+            <span class="caption"><a href="https://github.com/boxwrench/R9700/releases/download/showcase-final-20260818/06-ltx-boxwrench-signal-return_00001_.mp4">open source file &rarr;</a></span>
+          </figcaption>
+        </figure>
+        <div class="run__foot">
+          <p class="cfg"><span>768&times;448</span><span>41 frames</span><span>8 steps</span></p>
+          <p class="run__note prose">Back to LTX after four intervening model changes. Run 01's 11.48 s came off an already-warm LTX cache; 23.62 s is what the round trip actually cost.</p>
         </div>
       </article>
 
-      <article class="run-card">
-        <div class="thumb">
-          <span class="run-order-badge">RUN 6 &middot; H3 R2V &rarr; LTX RETURN</span>
-          <video controls preload="none" poster="assets/showcase/06-ltx-boxwrench-signal-return.jpg">
-            <source src="https://github.com/boxwrench/R9700/releases/download/showcase-final-20260818/06-ltx-boxwrench-signal-return_00001_.mp4" type="video/mp4">
-          </video>
+      <details class="disclosure">
+        <summary>Field notes &mdash; provenance and compatibility issues</summary>
+        <div class="disclosure__body">
+          <p>Everything above is a run that worked. These are the ones that didn't, kept because a showcase that only records successes is not evidence.</p>
+
+          <h3>Saved workflows drifted from the live node schema</h3>
+          <p>Two of the golden workflow files predate schema changes in the MiniMax H3 nodes. Both passed <code>/prompt</code> validation and then failed at execution, because ComfyUI validates against the static input table and only resolves the real signature later.</p>
+          <ul>
+            <li><b>H3 image-to-video</b> — the saved graph sends <code>image</code>; the live node wants <code>first_frame</code>. One failed job, then a clean run.</li>
+            <li><b>H3 reference-to-video</b> — <code>ref_images</code> is a V3 Autogrow input, so the prompt JSON key has to be the dotted dynamic path <code>ref_images.ref_image_0</code>, not the bare slot name and not the legacy <code>ref_image</code>. Six failed attempts before the key format was traced through <code>comfy_api/latest/_io.py</code>. <code>audio_vae</code> and <code>ref_image_size</code> also had to be supplied.</li>
+          </ul>
+          <p>Both were fixed in showcase copies of the workflows. The files under <code>production/</code> were not modified.</p>
+
+          <h3><code>VAEDecodeAudio</code> tensor-shape mismatch</h3>
+          <p>For certain latent shapes the audio decode raises a size mismatch at dimension 2 and does so deterministically — an identical retry with a fully warm cache fails identically. Runs 01 and 06 ship video-only for this reason. Not a hardware fault, not intermittent.</p>
+
+          <h3>A run that succeeded and was still wrong</h3>
+          <p>The first attempt at run 01 executed cleanly and produced a valid file of entirely the wrong subject: the production workflow's placeholder prompt text was never overridden for that queued job. It was caught by looking at the extracted frames rather than trusting the status code. The bad file is archived rather than deleted, and run 01 was requeued with the correct prompt.</p>
+
+          <h3>Session shape</h3>
+          <p>The six runs executed in one long-lived ComfyUI process across one mid-session restart (around 14:58 local, between run 04 and runs 05/06). That restart is why the in-memory <code>/history</code> API could confirm runs 03, 05, and 06 directly and the earlier runs had to be reconciled against on-disk sidecars and file timestamps.</p>
+          <p>Peak VRAM is recorded as <code>NA</code> for every run except 02. It was not sampled for the manually queued runs, and it is not estimated here.</p>
+
+          <p class="meta">Full record: <a href="https://github.com/boxwrench/R9700/blob/main/docs/final-generation-acceptance-20260818.md">final generation acceptance</a> &middot; <a href="https://github.com/boxwrench/R9700/blob/main/showcase/session/session.json">session.json</a> &middot; <a href="https://github.com/boxwrench/R9700/blob/main/data/final-showcase-session-20260818.tsv">session TSV</a></p>
         </div>
-        <div class="run-body">
-          <h3 class="run-title">LTX 2.5 Return &mdash; Signal Vault</h3>
-          <div class="run-stats">
-            <div>WALL <span class="num">23.62s</span></div>
-            <div>768&times;448 &middot; 41f @24fps</div>
-            <div>8 steps &middot; res_multistep</div>
-            <div>video-only (audio branch dropped)</div>
+      </details>
+    </section>
+
+    <!-- ============ 6. WHAT TO CHECK ============ -->
+    <section class="section" aria-labelledby="weird-title">
+      <div class="section__head">
+        <h2 class="section__title" id="weird-title">We found some weird stuff.</h2>
+        <span class="label label--muted">If yours behaves badly</span>
+      </div>
+
+      <div class="findings">
+        <div class="finding">
+          <h3 class="finding__q">Model load takes fifteen minutes?</h3>
+          <div class="finding__body">
+            <p class="finding__a prose">Check mmap before blaming your SSD. <code>--disable-mmap</code>.</p>
+            <p class="finding__ev">H3 encoder <b>931 s &rarr; 1.2 s</b></p>
           </div>
-          <p class="run-note">Confirms clean switch-back to LTX after four intervening workflow changes. Text-only conditioning here does not guarantee exact identity match to the reference &mdash; see acceptance report.</p>
         </div>
-      </article>
-    </div>
-  </section>
+        <div class="finding">
+          <h3 class="finding__q">H3 gets slow after a new prompt?</h3>
+          <div class="finding__body">
+            <p class="finding__a prose">Check whether Qwen is still resident before touching the sampler.</p>
+            <p class="finding__ev">Paired sampling A/B <b>29.51 s &rarr; 22.15 s</b></p>
+          </div>
+        </div>
+        <div class="finding">
+          <h3 class="finding__q">Short LTX prompt takes twenty seconds?</h3>
+          <div class="finding__body">
+            <p class="finding__a prose">You may be processing a 1,024-token minimum sequence you never asked for.</p>
+            <p class="finding__ev">Selected: <b>LTX_GEMMA_MIN_LENGTH=256</b></p>
+          </div>
+        </div>
+        <div class="finding">
+          <h3 class="finding__q">Music looks GPU-idle for twenty seconds?</h3>
+          <div class="finding__body">
+            <p class="finding__a prose">The work is in the autoregressive conditioner, not the diffusion transformer.</p>
+            <p class="finding__ev">Measured: <b>~19.8 s</b> AR loop vs <b>~3.6 s</b> DiT</p>
+          </div>
+        </div>
+      </div>
 
-  <section aria-labelledby="symptom-h">
-    <h2 id="symptom-h">If you see this, check this</h2>
-    <table class="symptoms">
-      <thead><tr><th>Symptom</th><th>First check</th></tr></thead>
-      <tbody>
-        <tr><td>Model loading takes minutes; one CPU core busy; GPU mostly idle</td><td>Check <code>--disable-mmap</code></td></tr>
-        <tr><td>H3 changed-prompt sampler runs ~25&ndash;30s instead of ~22s</td><td>Check Qwen3-VL residency before the sampler</td></tr>
-        <tr><td>LTX short prompt spends ~22s in conditioning</td><td>Check the Gemma minimum sequence floor (<code>LTX_GEMMA_MIN_LENGTH=256</code>)</td></tr>
-        <tr><td>Music spends ~20s in conditioning before a ~3.6s DiT step</td><td>Inspect the AR conditioner, not the DiT</td></tr>
-        <tr><td><code>execute() got an unexpected keyword argument 'ref_image'</code> / <code>'image'</code></td><td>Node schema drift &mdash; see Troubleshooting &sect;7</td></tr>
-        <tr><td><code>VAEDecodeAudio</code> tensor-shape RuntimeError</td><td>Known-bad shape combo &mdash; drop the audio branch, see Troubleshooting &sect;8</td></tr>
-      </tbody>
-    </table>
-    <p style="margin-top:18px;"><a href="../TROUBLESHOOTING.md">Full symptom map, measurements, and dead ends &rarr;</a></p>
-  </section>
+      <p class="more"><a href="https://github.com/boxwrench/R9700/blob/main/TROUBLESHOOTING.md">Full troubleshooting field guide &rarr;</a></p>
+    </section>
 
-  <section aria-labelledby="stack-h">
-    <h2 id="stack-h">Known-good stack</h2>
-    <ul class="stack-links">
-      <li><a href="selected-production-configs.md">docs/selected-production-configs.md</a> &mdash; exact flags, env vars, and per-workload selections</li>
-      <li><a href="../production/manifest.json">production/manifest.json</a> &mdash; pinned model SHA-256 hashes and workflow fingerprints</li>
-      <li><a href="update-gate.md">docs/update-gate.md</a> &mdash; how a new ComfyUI/model version earns production status</li>
-    </ul>
-  </section>
+    <!-- ============ 7. KNOWN-GOOD STATE ============ -->
+    <section class="section" aria-labelledby="stack-title">
+      <div class="section__head">
+        <h2 class="section__title" id="stack-title">Known-good state</h2>
+        <span class="label label--muted">Preflight verified</span>
+      </div>
 
-  <section aria-labelledby="method-h">
-    <h2 id="method-h">Method</h2>
-    <ul class="method-list">
-      <li>Measure the components.</li>
-      <li>Find the big cost.</li>
-      <li>Run a discriminator.</li>
-      <li>Keep meaningful wins.</li>
-      <li>Record dead ends.</li>
-      <li>Stop chasing tiny percentages.</li>
-    </ul>
-  </section>
+      <div class="stack">
+        <dl>
+          <dt>Workloads</dt>
+          <dd>LTX 2.5<em>text-to-video, 22B distilled DiT, INT8-ConvRot</em></dd>
+          <dd>MiniMax H3<em>T2V / I2V / R2V, FP8-scaled, Qwen3-VL 32B encoder</em></dd>
+          <dd>MiniMax Music 3<em>INT8-ConvRot DiT, discrete audio codec</em></dd>
+        </dl>
+        <dl>
+          <dt>ComfyUI</dt>
+          <dd>v0.33.2<em>7cee3ceb1a35503172e0dfb8dbdbdedee2aba8aa</em></dd>
+          <dt>Torch</dt>
+          <dd>2.9.1+rocm7.2.1</dd>
+          <dt>ROCm / HIP</dt>
+          <dd>7.2.53211-e1a6bc5663</dd>
+          <dt>Triton</dt>
+          <dd>3.5.1+rocm7.2.1</dd>
+          <dt>GPU</dt>
+          <dd>AMD Radeon AI PRO R9700<em>gfx1201 &middot; 31.86 GiB</em></dd>
+        </dl>
+      </div>
 
-  <section aria-labelledby="repro-h">
-    <h2 id="repro-h">Reproduce / agents</h2>
-    <ul class="repro-list">
-      <li><a href="../README.md">README</a></li>
-      <li><a href="../AGENTS.md">AGENTS.md</a> &mdash; read first if you are an AI agent working in this repo</li>
-      <li><a href="../TROUBLESHOOTING.md">TROUBLESHOOTING.md</a></li>
-      <li><a href="../scripts/production-preflight.py">scripts/production-preflight.py</a> &mdash; preflight check</li>
-      <li><a href="update-gate.md">docs/update-gate.md</a></li>
-    </ul>
-  </section>
+      <details class="disclosure">
+        <summary>Model hashes and provenance</summary>
+        <div class="disclosure__body">
+          <p>SHA-256, truncated. Full digests, sizes, and workflow fingerprints live in the manifest and are re-checked by the preflight script on every run.</p>
+          <div class="scroll-x">
+          <table class="hashes">
+            <thead><tr><th scope="col">File</th><th scope="col">Role</th><th scope="col">SHA-256 (16)</th></tr></thead>
+            <tbody>
+              <tr><td>ltx-2.5-22b-distilled-transformer-comfy-int8-convrot</td><td>LTX 2.5 DiT</td><td>c4279eeff115cbea</td></tr>
+              <tr><td>gemma4-12b-with-proj-ltx-2.5-comfy-int8-convrot</td><td>LTX 2.5 text encoder</td><td>09a89e084de1a149</td></tr>
+              <tr><td>ltx-2.5-video-vae-bf16</td><td>LTX 2.5 video VAE</td><td>847e14ca7f3355de</td></tr>
+              <tr><td>minimax_h3_fl2va_pruned_fp8_scaled</td><td>H3 first/last-frame transformer</td><td>12944c1f7791637e</td></tr>
+              <tr><td>minimax_h3_ref2va_pruned_fp8_scaled</td><td>H3 reference transformer</td><td>f86f2f79ebd2d76e</td></tr>
+              <tr><td>qwen3vl_32b_minimax_h3_fp8</td><td>H3 Qwen3-VL encoder</td><td>5e1127e510a30099</td></tr>
+              <tr><td>minimax_h3_video_vae_fp16</td><td>H3 video VAE</td><td>7c1f131492e7edda</td></tr>
+              <tr><td>minimax_h3_audio_vae_fp32</td><td>H3 audio VAE</td><td>8e505d95dd1561d4</td></tr>
+              <tr><td>minimax_music3_dit_int8_convrot</td><td>Music 3 DiT</td><td>d6b959633e69899f</td></tr>
+              <tr><td>minimax_music3_text_encoder_pruned_int8_convrot</td><td>Music 3 lyric encoder</td><td>010b7416d2336a08</td></tr>
+              <tr><td>minimax_music3_dav</td><td>Music 3 audio codec</td><td>2a32155b769be014</td></tr>
+            </tbody>
+          </table>
+          </div>
+          <p class="meta"><a href="https://github.com/boxwrench/R9700/blob/main/production/manifest.json">production/manifest.json</a></p>
+        </div>
+      </details>
 
-  <footer>
-    <span>&copy; Boxwrench</span>
-    <a href="https://github.com/boxwrench/R9700">R9700 repository</a>
-    <a href="https://github.com/boxwrench/R9700/releases/tag/showcase-final-20260818">Release assets</a>
-    <a href="final-generation-acceptance-20260818.md">Final acceptance report</a>
+      <div class="repro__links" style="margin-top:var(--space-6)">
+        <p class="repro__link"><a href="https://github.com/boxwrench/R9700/blob/main/docs/selected-production-configs.md">Selected production configs</a><span>what shipped, and why</span></p>
+        <p class="repro__link"><a href="https://github.com/boxwrench/R9700/blob/main/production/manifest.json">Production manifest</a><span>hashes, flags, fingerprints</span></p>
+        <p class="repro__link"><a href="https://github.com/boxwrench/R9700/blob/main/docs/update-gate.md">Update gate</a><span>what must not move</span></p>
+      </div>
+    </section>
+
+    <!-- ============ 8. METHOD ============ -->
+    <section class="section" aria-labelledby="method-title">
+      <div class="section__head">
+        <h2 class="section__title" id="method-title">How we worked</h2>
+        <span class="label label--muted">Field method</span>
+      </div>
+      <ol class="method" style="list-style:none;margin:0;padding:0">
+        <li class="method__item"><span class="method__n">01</span><span class="method__s">Measure the components.</span></li>
+        <li class="method__item"><span class="method__n">02</span><span class="method__s">Find the big cost.</span></li>
+        <li class="method__item"><span class="method__n">03</span><span class="method__s">Run one discriminator.</span></li>
+        <li class="method__item"><span class="method__n">04</span><span class="method__s">Keep meaningful wins.</span></li>
+        <li class="method__item"><span class="method__n">05</span><span class="method__s">Record the dead ends.</span></li>
+        <li class="method__item"><span class="method__n">06</span><span class="method__s">Stop chasing 3%.</span></li>
+      </ol>
+    </section>
+
+    <!-- ============ 9. REPRODUCE ============ -->
+    <section class="section" aria-labelledby="repro-title">
+      <div class="section__head">
+        <h2 class="section__title" id="repro-title">Make your R9700 do this.</h2>
+        <span class="label label--muted">Start here</span>
+      </div>
+      <div class="repro">
+        <p class="prose measure">Verify the machine matches the recorded state before anything else. The preflight checks hardware, runtime versions, applied patches, model hashes, and workflow fingerprints in one pass.</p>
+        <pre class="repro__cmd" style="margin-top:var(--space-5)"><code>python3 scripts/production-preflight.py</code></pre>
+        <div class="repro__links">
+          <p class="repro__link"><a href="https://github.com/boxwrench/R9700/blob/main/README.md">README</a><span>the repository</span></p>
+          <p class="repro__link"><a href="https://github.com/boxwrench/R9700/blob/main/AGENTS.md">AGENTS.md</a><span>rules for automated work</span></p>
+          <p class="repro__link"><a href="https://github.com/boxwrench/R9700/blob/main/TROUBLESHOOTING.md">TROUBLESHOOTING.md</a><span>symptom-first guide</span></p>
+          <p class="repro__link"><a href="https://github.com/boxwrench/R9700/blob/main/scripts/production-preflight.py">production-preflight.py</a><span>the verifier</span></p>
+          <p class="repro__link"><a href="https://github.com/boxwrench/R9700/blob/main/production/manifest.json">production/manifest.json</a><span>the recorded state</span></p>
+          <p class="repro__link"><a href="https://github.com/boxwrench/R9700/blob/main/docs/update-gate.md">update-gate.md</a><span>before you upgrade anything</span></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 10. CLOSING ART ============ -->
+    <section class="closing" aria-labelledby="closing-title">
+      <h2 class="label label--brass" id="closing-title">End of field report</h2>
+      <div class="artslot artslot--wide artslot--empty" style="margin-top:var(--space-5)" role="img" aria-label="Reserved slot for the closing plate, not yet produced.">
+        <p class="artslot__note">Closing plate pending &mdash; wide banner, 3:1 desktop / 3:2 mobile</p>
+        <span class="artslot__tag">Plate 02 &mdash; placeholder</span>
+      </div>
+      <div class="closing__copy">
+        <p class="closing__mark">BX-77 // End of field report</p>
+        <p class="meta">Known-good state preserved.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="pagefoot meta">
+    <span>boxwrench &mdash; R9700 generation lab &mdash; 2026</span>
+    <span class="pagefoot__links">
+      <a href="https://github.com/boxwrench/R9700">repository</a>
+      <a href="https://github.com/boxwrench/R9700/releases/tag/showcase-final-20260818">session media</a>
+      <a href="https://github.com/boxwrench/R9700/blob/main/docs/final-generation-acceptance-20260818.md">acceptance record</a>
+      <a href="https://boxwrench.dev/">boxwrench.dev</a>
+    </span>
   </footer>
-</main>
+
+</div>
 </body>
 </html>
