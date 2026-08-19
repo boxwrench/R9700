@@ -131,16 +131,11 @@ pre code{white-space:pre}
   font-family:var(--font-interface);font-size:clamp(14px,2.4vw,18px);
   letter-spacing:0.22em;text-transform:uppercase;color:var(--ink-muted);
 }
+.hero__sub{margin-top:var(--space-6)}
 .hero__deck{
   margin-top:var(--space-5);max-width:34ch;
   font-family:var(--font-interface);font-size:15px;line-height:1.55;color:var(--ink);
 }
-.hero__grid{display:grid;gap:var(--space-6);margin-top:var(--space-6)}
-@media (min-width:900px){
-  .hero__grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:end;gap:var(--space-8)}
-  .hero__deck{margin-top:0}
-}
-.hero__lede{font-size:20px;line-height:1.65;max-width:48ch}
 
 /* art slot — the loud moments */
 .artslot{
@@ -494,13 +489,8 @@ pre code{white-space:pre}
     <!-- ============ 2. HERO ============ -->
     <section class="hero" aria-labelledby="page-title">
       <h1 id="page-title">R9700<span class="line2">Generation Lab</span></h1>
-      <div class="hero__grid">
-        <div>
-          <p class="hero__sub">Measured. Tuned. Preserved.</p>
-          <p class="hero__deck">A practical field report on making LTX&nbsp;2.5, MiniMax&nbsp;H3, and MiniMax&nbsp;Music&nbsp;3 behave on AMD's Radeon AI PRO R9700.</p>
-        </div>
-        <p class="prose hero__lede">This project began as a performance investigation and ended as a known-good production stack: measured bottlenecks, selected fixes, documented dead ends, reproducible workflows, and a final session switching between generation models without rebuilding the machine between jobs.</p>
-      </div>
+      <p class="hero__sub">Measured. Tuned. Preserved.</p>
+      <p class="hero__deck">LTX&nbsp;2.5, MiniMax&nbsp;H3, and MiniMax&nbsp;Music&nbsp;3 on AMD's Radeon AI PRO R9700.</p>
 
       <figure class="artslot">
         <img src="assets/showcase-v2/hero-bx77-anchor.webp" alt="BX-77 Boxwrench: a heavy robot knight in burnished gunmetal plate with brass-trimmed pauldrons, a recessed visor slit, and a hexagonal chest core.">
