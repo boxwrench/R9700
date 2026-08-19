@@ -100,7 +100,7 @@ Per user confirmation, a new GitHub Release, [`showcase-final-20260818`](https:/
 
 Per the prior plan, voice cloning was only to be executed if an appropriate local voice-cloning path was already installed — no new installation was permitted.
 
-- Reference: `/home/boxwrench/Downloads/cylon.m4a` (24.067s, 48kHz stereo AAC)
+- Reference: operator-supplied local file `cylon.m4a` (24.067s, 48kHz stereo AAC), not tracked in this repository
 - Evaluated against the local runtime: no functional zero-install ROCm TTS voice-cloning path is configured (`libroctx64.so.4` dependency missing).
 - **VOICE CLONE NOT EXECUTED.**
 - Narration script retained at `showcase/prompts/voiceover-script.md` for future use.

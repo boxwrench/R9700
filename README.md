@@ -134,6 +134,16 @@ The full symptom map, measurements, dead ends, and quick discriminators are in [
 
 Each lane was one successful fresh-process/model-cold run. Filesystem and compiled-kernel caches remained warm, so "cold" here is not disk-cold.
 
+<table>
+<tr>
+<td><img src="docs/assets/h3-standard-fp8.jpg" alt="MiniMax H3 Standard FP8 poster frame" width="260"><br><sub>H3 Standard FP8</sub></td>
+<td><img src="docs/assets/h3-turbo-v4-fp8.jpg" alt="MiniMax H3 Turbo v4 FP8 poster frame" width="260"><br><sub>H3 Turbo v4 FP8</sub></td>
+<td><img src="docs/assets/ltx-2.5-distilled-int8.jpg" alt="LTX-2.5 distilled INT8 poster frame" width="260"><br><sub>LTX-2.5 distilled INT8</sub></td>
+</tr>
+</table>
+
+Baseline workflows are in [`workflows/`](workflows/); their SHA-256 values are in [`checksums/workflows.sha256`](checksums/workflows.sha256) and verified by `python3 scripts/verify.py`.
+
 **H3 dual-GPU residency, 2026-08-12.** Placing Qwen3-VL on an RX 7900 XT while H3 sampled on the R9700 improved changed-prompt wall by 7.9% and cut host-RAM peak from 56.8 GB to 35.5 GB, but stayed below the adoption threshold. It also exposed a real failure mode: `--disable-smart-memory` defeated intended encoder residency in that pinned build. The current recommendation is the simpler single-R9700 explicit Qwen pre-sampler offload.
 
 - [dual-GPU record](docs/archive/dual-gpu-residency-20260812.md) · [compatibility pointer](docs/dual-gpu-residency.md)

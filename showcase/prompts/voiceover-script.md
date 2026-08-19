@@ -1,7 +1,7 @@
 # Boxwrench Showcase Voiceover Script & Reference Record
 
 ## Voice Reference
-- **Source Audio:** [`/home/boxwrench/Downloads/cylon.m4a`](/home/boxwrench/Downloads/cylon.m4a)
+- **Source Audio:** operator-supplied local file, `cylon.m4a` (not tracked in this repository)
 - **Duration:** 24.067 s
 - **Sample Rate:** 48,000 Hz (Stereo AAC)
 - **Status:** Evaluated against local runtime; no functional zero-install ROCm TTS voice-cloning path is currently configured (`libroctx64.so.4` dependency missing in custom pack). Per non-negotiable rules, no packages were installed.

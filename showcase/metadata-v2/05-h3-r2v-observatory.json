@@ -27,7 +27,7 @@
       "duration_s": 12.0,
       "sample_rate": 32000,
       "channels": 2,
-      "derived_from": "/home/boxwrench/Downloads/cylon.m4a (24.067 s), window t=2.0..14.0",
+      "derived_from": "operator-supplied voice reference (24.067 s, 48 kHz stereo AAC), window t=2.0..14.0",
       "why_12s": "the full 24 s reference encodes to reference tokens that ride through every sampling step; 12 s is ample for timbre at half the cost"
     },
     "ref_image_size": "match",
