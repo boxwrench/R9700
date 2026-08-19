@@ -80,7 +80,6 @@ a:focus-visible,summary:focus-visible,video:focus-visible,audio:focus-visible{ou
 /* ---------- layout rails ---------- */
 .canvas{max-width:var(--canvas);margin-inline:auto;padding-inline:var(--gutter)}
 .measure{max-width:var(--measure)}
-.measure--center{margin-inline:auto}
 code{white-space:nowrap}
 pre code{white-space:pre}
 .prose{font-family:var(--font-prose);text-wrap:pretty}
@@ -92,7 +91,6 @@ pre code{white-space:pre}
 .label--muted{color:var(--ink-muted)}
 .meta{font-family:var(--font-interface);font-size:13px;line-height:1.4;letter-spacing:0.08em;color:var(--ink-muted)}
 .caption{font-family:var(--font-interface);font-size:13px;line-height:1.5;letter-spacing:0.06em;color:var(--ink-muted)}
-.mono{font-family:var(--font-code);font-size:14px;letter-spacing:0}
 
 /* ---------- 1. masthead ---------- */
 .masthead{
@@ -163,12 +161,6 @@ pre code{white-space:pre}
 /* placeholder art (no image yet) */
 .artslot--wide{aspect-ratio:3/2}
 @media (min-width:760px){ .artslot--wide{aspect-ratio:3/1} }
-.artslot--empty{display:grid;place-items:center;background:
-  repeating-linear-gradient(135deg,var(--paper-raised) 0 14px,var(--paper) 14px 28px)}
-.artslot--empty .artslot__note{
-  font-family:var(--font-interface);font-size:12px;letter-spacing:0.22em;text-transform:uppercase;
-  color:var(--ink-muted);text-align:center;padding:0 var(--space-5)
-}
 
 /* ---------- section chrome ---------- */
 .section{padding-top:var(--space-9)}
@@ -202,16 +194,6 @@ pre code{white-space:pre}
 }
 
 /* ---------- 4. bridge ---------- */
-.bridge{padding-top:var(--space-9)}
-.bridge h2{
-  font-size:clamp(1.5rem,4.4vw,2.6rem);line-height:1.15;letter-spacing:0.02em;text-transform:uppercase;
-  max-width:22ch;
-}
-.bridge p{margin-top:var(--space-5)}
-.bridge__turn{
-  margin-top:var(--space-6);font-family:var(--font-interface);font-size:clamp(15px,2.6vw,19px);
-  letter-spacing:0.14em;text-transform:uppercase;color:var(--visor-text);
-}
 
 /* ---------- 5. session sequence ---------- */
 .transition{
@@ -296,21 +278,6 @@ pre code{white-space:pre}
 .music__stat-num .u{font-size:0.42em;letter-spacing:0.1em;color:var(--chrome);margin-left:0.25em}
 .music__stat-lab{display:block;font-family:var(--font-interface);font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--chrome);margin-top:var(--space-1)}
 .music__stat-num{display:block}
-.sleeve{
-  margin-top:var(--space-7);border:2px solid var(--chrome);background:#0f0e12;
-  aspect-ratio:3/2;overflow:hidden;position:relative;display:grid;place-items:center;
-}
-@media (min-width:760px){ .sleeve{aspect-ratio:2.4/1} }
-.sleeve img{width:100%;height:100%;object-fit:cover}
-.sleeve__note{
-  font-family:var(--font-interface);font-size:12px;letter-spacing:0.22em;text-transform:uppercase;
-  color:var(--chrome);text-align:center;padding:0 var(--space-5);
-}
-.sleeve__tag{
-  position:absolute;left:0;bottom:0;
-  font-family:var(--font-interface);font-size:11px;letter-spacing:0.2em;text-transform:uppercase;
-  background:var(--paper);color:var(--ink);padding:var(--space-1) var(--space-3);
-}
 .player{margin-top:var(--space-6)}
 .player audio{width:100%;height:44px}
 .waveform{margin-top:var(--space-5);border-top:1px solid var(--chrome);padding-top:var(--space-5)}
@@ -460,15 +427,6 @@ pre code{white-space:pre}
 .stack dd em{font-style:normal;color:var(--ink-muted);font-size:13px;display:block;margin-top:2px}
 
 /* ---------- 8. method ---------- */
-.method{margin-top:var(--space-7);counter-reset:m}
-.method__item{
-  display:grid;gap:var(--space-3);align-items:baseline;
-  border-top:var(--hairline);padding:var(--space-6) 0;
-}
-@media (min-width:640px){ .method__item{grid-template-columns:auto minmax(0,1fr);gap:var(--space-6)} }
-.method__item:first-child{border-top:0}
-.method__n{font-family:var(--font-interface);font-size:clamp(2rem,6vw,3rem);line-height:0.85;color:var(--brass-text)}
-.method__s{font-family:var(--font-interface);font-size:clamp(1.15rem,3.6vw,1.75rem);line-height:1.2;letter-spacing:0.04em;text-transform:uppercase}
 
 /* ---------- 9. reproduce ---------- */
 .repro{margin-top:var(--space-7)}
@@ -582,14 +540,7 @@ pre code{white-space:pre}
       <p class="band__note">These are separate controlled experiments with different boundaries. They are not additive.</p>
     </section>
 
-    <!-- ============ 4. EDITORIAL BRIDGE ============ -->
-    <section class="bridge" aria-labelledby="bridge-title">
-      <h2 id="bridge-title">The point was not to win a benchmark.</h2>
-      <p class="prose measure">The useful question was whether the machine could move between real workloads without turning every model change into another debugging session.</p>
-      <p class="bridge__turn">So we ran one final creative session.</p>
-    </section>
-
-    <!-- ============ 5. BENCHMARK SEQUENCE ============ -->
+    <!-- ============ 4. BENCHMARK SEQUENCE ============ -->
     <section class="section" aria-labelledby="session-title">
       <div class="section__head">
         <h2 class="section__title" id="session-title">The benchmark sequence</h2>
@@ -651,7 +602,7 @@ pre code{white-space:pre}
     </section>
 
 
-    <!-- ============ 6. SHOWCASE RENDERS ============ -->
+    <!-- ============ 5. SHOWCASE RENDERS ============ -->
     <section class="section" aria-labelledby="showcase-title">
       <div class="section__head">
         <h2 class="section__title" id="showcase-title">The showcase renders</h2>
@@ -1096,7 +1047,7 @@ Carry the signal, deny the end</div>
       </div>
     </section>
 
-    <!-- ============ 7. WHAT TO CHECK ============ -->
+    <!-- ============ 6. WHAT TO CHECK ============ -->
     <section class="section" aria-labelledby="weird-title">
       <div class="section__head">
         <h2 class="section__title" id="weird-title">We found some weird stuff.</h2>
@@ -1137,7 +1088,7 @@ Carry the signal, deny the end</div>
       <p class="more"><a href="https://github.com/boxwrench/R9700/blob/main/TROUBLESHOOTING.md">Full troubleshooting field guide &rarr;</a></p>
     </section>
 
-    <!-- ============ 8. KNOWN-GOOD STATE ============ -->
+    <!-- ============ 7. KNOWN-GOOD STATE ============ -->
     <section class="section" aria-labelledby="stack-title">
       <div class="section__head">
         <h2 class="section__title" id="stack-title">Known-good state</h2>
@@ -1198,23 +1149,7 @@ Carry the signal, deny the end</div>
       </div>
     </section>
 
-    <!-- ============ 9. METHOD ============ -->
-    <section class="section" aria-labelledby="method-title">
-      <div class="section__head">
-        <h2 class="section__title" id="method-title">How we worked</h2>
-        <span class="label label--muted">Field method</span>
-      </div>
-      <ol class="method" style="list-style:none;margin:0;padding:0">
-        <li class="method__item"><span class="method__n">01</span><span class="method__s">Measure the components.</span></li>
-        <li class="method__item"><span class="method__n">02</span><span class="method__s">Find the big cost.</span></li>
-        <li class="method__item"><span class="method__n">03</span><span class="method__s">Run one discriminator.</span></li>
-        <li class="method__item"><span class="method__n">04</span><span class="method__s">Keep meaningful wins.</span></li>
-        <li class="method__item"><span class="method__n">05</span><span class="method__s">Record the dead ends.</span></li>
-        <li class="method__item"><span class="method__n">06</span><span class="method__s">Stop chasing 3%.</span></li>
-      </ol>
-    </section>
-
-    <!-- ============ 10. REPRODUCE ============ -->
+    <!-- ============ 8. REPRODUCE ============ -->
     <section class="section" aria-labelledby="repro-title">
       <div class="section__head">
         <h2 class="section__title" id="repro-title">Make your R9700 do this.</h2>
@@ -1234,7 +1169,7 @@ Carry the signal, deny the end</div>
       </div>
     </section>
 
-    <!-- ============ 11. CLOSING ART ============ -->
+    <!-- ============ 9. CLOSING ART ============ -->
     <section class="closing" aria-labelledby="closing-title">
       <h2 class="label label--brass" id="closing-title">End of field report</h2>
       <figure class="artslot artslot--wide" style="margin-top:var(--space-5)">
