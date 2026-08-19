@@ -368,6 +368,11 @@ pre code{white-space:pre}
 .hashes th{font-family:var(--font-interface);font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--ink-muted)}
 .hashes td:last-child{color:var(--ink-muted);word-break:break-all}
 .scroll-x{overflow-x:auto;-webkit-overflow-scrolling:touch}
+/* the run-timing table keeps its columns; only the wall time is emphasised */
+.runs-table{font-size:13px}
+.runs-table td:nth-child(4){font-variant-numeric:tabular-nums;color:var(--brass-text);white-space:nowrap}
+.runs-table td:nth-child(5){color:var(--ink-muted)}
+.runs-table td:last-child{word-break:normal}
 /* narrow: the hash table stops being a table and becomes stacked records */
 @media (max-width:700px){
   .hashes,.hashes tbody,.hashes tr,.hashes td{display:block;width:100%}
@@ -379,6 +384,15 @@ pre code{white-space:pre}
     color:var(--ink-muted);margin-top:var(--space-1);
   }
   .hashes td:last-child{margin-top:var(--space-1)}
+  /* the run table is a real 5-column record; stack it as labelled lines instead */
+  .runs-table td:nth-child(2){
+    font-family:var(--font-interface);font-size:13px;letter-spacing:0.08em;
+    text-transform:none;color:var(--ink);margin-top:0;
+  }
+  .runs-table tr{padding:var(--space-4) 0}
+  .runs-table td:first-child{
+    font-family:var(--font-interface);font-size:11px;letter-spacing:0.18em;color:var(--ink-muted);
+  }
 }
 
 /* ---------- 6. findings callouts ---------- */
@@ -495,7 +509,7 @@ pre code{white-space:pre}
       </div>
 
       <figure class="artslot">
-        <img src="assets/showcase/hero-bx77-anchor-placeholder.webp" alt="BX-77 Boxwrench: a heavy robot knight in burnished gunmetal plate with brass-trimmed pauldrons, a recessed visor slit, and a hexagonal chest core.">
+        <img src="assets/showcase-v2/hero-bx77-anchor-placeholder.webp" alt="BX-77 Boxwrench: a heavy robot knight in burnished gunmetal plate with brass-trimmed pauldrons, a recessed visor slit, and a hexagonal chest core.">
         <figcaption class="artslot__tag">Plate 01 — placeholder</figcaption>
       </figure>
       <p class="caption artslot__cap">Standing in for the final hero plate. Target slot 16:7 on desktop, 3:2 on mobile — see <a href="https://github.com/boxwrench/R9700/blob/main/showcase/media-spec.md">showcase/media-spec.md</a>.</p>
@@ -545,209 +559,24 @@ pre code{white-space:pre}
         <h2 class="section__title" id="session-title">One session, six runs</h2>
         <span class="label label--muted">2026.08.18 &middot; gfx1201</span>
       </div>
-      <p class="prose measure" style="margin-top:var(--space-6)">Four production workflows, executed back to back in one long-lived ComfyUI process. Every wall time below is the measured time for that run in this sequence — not a best-of, not a cold-start figure carried over from the optimization campaign.</p>
+      <p class="prose measure" style="margin-top:var(--space-6)">Four production workflows, executed back to back in one long-lived ComfyUI process. Every wall time below is the measured time for that run in this sequence — not a best-of, not a cold-start figure carried over from the optimization campaign. This is the timing record; the video from these runs was short by design and has been retired in favour of the full-length renders below.</p>
 
-      <!-- RUN 01 -->
-      <div class="transition"><span class="transition__label">&darr; Cold init &rarr; LTX</span></div>
-      <article class="run" aria-labelledby="run-01">
-        <div class="run__head">
-          <p class="run__no">01</p>
-          <div>
-            <h3 class="run__model" id="run-01">LTX 2.5</h3>
-            <p class="run__piece">The Artifact Forge</p>
-          </div>
-          <p class="run__wall"><span class="run__wall-num">11.48<span class="u">s</span></span><span class="run__wall-lab">Wall</span></p>
-        </div>
-        <figure class="slot">
-          <div class="slot__frame">
-            <span class="slot__tag">Media slot &mdash; source run</span>
-            <video controls preload="none" playsinline
-                   poster="assets/showcase/01-ltx-boxwrench-artifact-forge.jpg"
-                   aria-label="LTX 2.5 run 01, The Artifact Forge">
-              <source src="assets/media/01-ltx-boxwrench-artifact-forge_00001_.mp4" type="video/mp4">
-            </video>
-          </div>
-          <figcaption>
-            <span class="caption">Poster frame extracted from the run output. Captions land here.</span>
-            <span class="caption"><a href="https://github.com/boxwrench/R9700/releases/download/showcase-final-20260818/01-ltx-boxwrench-artifact-forge_00001_.mp4">open source file &rarr;</a></span>
-          </figcaption>
-        </figure>
-        <div class="run__foot">
-          <p class="cfg"><span>768&times;448</span><span>41 frames</span><span>8 steps</span></p>
-          <p class="run__note prose">Warm-cache final showcase run. The audio branch is dropped here on purpose — see the field notes below.</p>
-        </div>
-      </article>
-
-      <!-- RUN 02 -->
-      <div class="transition"><span class="transition__label">&darr; LTX &rarr; H3</span></div>
-      <article class="run" aria-labelledby="run-02">
-        <div class="run__head">
-          <p class="run__no">02</p>
-          <div>
-            <h3 class="run__model" id="run-02">MiniMax H3 &mdash; Text to Video</h3>
-            <p class="run__piece">Machine Cathedral</p>
-          </div>
-          <p class="run__wall"><span class="run__wall-num">131.94<span class="u">s</span></span><span class="run__wall-lab">Wall</span></p>
-        </div>
-        <figure class="slot">
-          <div class="slot__frame">
-            <span class="slot__tag">Media slot &mdash; source run</span>
-            <video controls preload="none" playsinline
-                   poster="assets/showcase/02-h3-t2v-boxwrench-cathedral.jpg"
-                   aria-label="MiniMax H3 text-to-video run 02, Machine Cathedral">
-              <source src="assets/media/02-h3-t2v-boxwrench-cathedral_00001_.mp4" type="video/mp4">
-            </video>
-          </div>
-          <figcaption>
-            <span class="caption">Poster frame extracted from the run output.</span>
-            <span class="caption"><a href="https://github.com/boxwrench/R9700/releases/download/showcase-final-20260818/02-h3-t2v-boxwrench-cathedral_00001_.mp4">open source file &rarr;</a></span>
-          </figcaption>
-        </figure>
-        <div class="run__foot">
-          <p class="cfg"><span>608&times;352</span><span>39 frames</span><span>20 steps</span></p>
-          <p class="run__note prose">The first model change of the session: LTX's Gemma stack out, H3's Qwen3-VL stack in. The longest run on the board, and the only one that had to pay for a full encoder swap.</p>
-        </div>
-      </article>
-
-      <!-- RUN 03 -->
-      <div class="transition"><span class="transition__label">&darr; H3 T2V &rarr; H3 I2V</span></div>
-      <article class="run" aria-labelledby="run-03">
-        <div class="run__head">
-          <p class="run__no">03</p>
-          <div>
-            <h3 class="run__model" id="run-03">MiniMax H3 &mdash; Image to Video</h3>
-            <p class="run__piece">Forge Awakening</p>
-          </div>
-          <p class="run__wall"><span class="run__wall-num">49.16<span class="u">s</span></span><span class="run__wall-lab">Wall</span></p>
-        </div>
-        <figure class="slot">
-          <div class="slot__frame">
-            <span class="slot__tag">Media slot &mdash; source run</span>
-            <video controls preload="none" playsinline
-                   poster="assets/showcase/03-h3-i2v-boxwrench-forge-awakening.jpg"
-                   aria-label="MiniMax H3 image-to-video run 03, Forge Awakening">
-              <source src="assets/media/03-h3-i2v-boxwrench-forge-awakening_00001_.mp4" type="video/mp4">
-            </video>
-          </div>
-          <figcaption>
-            <span class="caption">Poster frame extracted from the run output.</span>
-            <span class="caption"><a href="https://github.com/boxwrench/R9700/releases/download/showcase-final-20260818/03-h3-i2v-boxwrench-forge-awakening_00001_.mp4">open source file &rarr;</a></span>
-          </figcaption>
-        </figure>
-        <div class="run__foot">
-          <p class="cfg"><span>608&times;352</span><span>39 frames</span><span>20 steps</span><span>first_frame: anchor</span></p>
-          <p class="run__note prose">The same H3 weights as run 02, now conditioned on the BX-77 anchor frame. Identical resolution, frame count, and step count — and it finished in a little over a third of the time.</p>
-        </div>
-      </article>
-
-      <!-- RUN 04 — MUSIC FEATURE -->
-      <div class="transition"><span class="transition__label">&darr; H3 I2V &rarr; Music</span></div>
-      <article class="music" aria-labelledby="run-04">
-        <div class="music__head">
-          <p class="music__no">04</p>
-          <div>
-            <h3 class="music__model" id="run-04">MiniMax Music 3</h3>
-            <p class="music__title">Signal Against the End</p>
-          </div>
-          <div class="music__stats">
-            <p><span class="music__stat-num">28.48<span class="u">s</span></span><span class="music__stat-lab">Generation wall</span></p>
-            <p><span class="music__stat-num">14.99<span class="u">s</span></span><span class="music__stat-lab">Audio</span></p>
-          </div>
-        </div>
-
-        <div class="sleeve">
-          <p class="sleeve__note">Cover plate pending &mdash; wide slot, 2.4:1 desktop / 3:2 mobile</p>
-          <span class="sleeve__tag">Sleeve &mdash; placeholder</span>
-        </div>
-
-        <div class="player">
-          <audio controls preload="none" aria-label="Signal Against the End — MiniMax Music 3 output">
-            <source src="assets/media/04-music3-signal-against-the-end_00001.flac" type="audio/flac">
-          </audio>
-          <p class="caption" style="margin-top:var(--space-3)">FLAC, 14.99 s. <a href="https://github.com/boxwrench/R9700/releases/download/showcase-final-20260818/04-music3-signal-against-the-end_00001.flac">Open source file &rarr;</a></p>
-        </div>
-
-        <div class="waveform">
-          <img src="assets/showcase/04-music3-signal-against-the-end-waveform.png" alt="Waveform of the generated track: a dense, consistently loud block with sharp transient peaks across the full 14.99 seconds." loading="lazy">
-          <p class="caption" style="margin-top:var(--space-3)">Waveform, rendered from the FLAC output.</p>
-        </div>
-
-        <blockquote class="lyric">
-          &ldquo;Carry the signal, deny the end&hellip;&rdquo;
-          <cite>Chorus &mdash; lyric excerpt</cite>
-        </blockquote>
-
-        <details class="disclosure">
-          <summary>Technical detail &mdash; spectrum and parameters</summary>
-          <div class="disclosure__body">
-            <img src="assets/showcase/04-music3-signal-against-the-end-spectrum.png" alt="Spectrogram of the generated track showing energy concentrated below roughly 10 kHz with a broadband percussive layer." loading="lazy">
-            <p class="cfg" style="color:inherit"><span>seed 8112080</span><span>20 steps &middot; res_multistep &middot; simple</span><span>cfg 1.5 &middot; top-k 50</span><span>max duration 15.0 s</span></p>
-            <p class="caption">Roughly 19.8 s of the 28.48 s wall is the autoregressive lyric/text conditioner; the DiT itself is about 3.6 s. See <a href="https://github.com/boxwrench/R9700/blob/main/docs/minimax-music3-r9700-baseline-20260818.md">the Music 3 baseline</a>.</p>
-          </div>
-        </details>
-      </article>
-
-      <!-- RUN 05 -->
-      <div class="transition"><span class="transition__label">&darr; Music &rarr; H3 R2V</span></div>
-      <article class="run" aria-labelledby="run-05">
-        <div class="run__head">
-          <p class="run__no">05</p>
-          <div>
-            <h3 class="run__model" id="run-05">MiniMax H3 &mdash; Reference to Video</h3>
-            <p class="run__piece">Observatory</p>
-          </div>
-          <p class="run__wall"><span class="run__wall-num">81.47<span class="u">s</span></span><span class="run__wall-lab">Wall</span></p>
-        </div>
-        <figure class="slot">
-          <div class="slot__frame">
-            <span class="slot__tag">Media slot &mdash; source run</span>
-            <video controls preload="none" playsinline
-                   poster="assets/showcase/05-h3-r2v-boxwrench-observatory.jpg"
-                   aria-label="MiniMax H3 reference-to-video run 05, Observatory">
-              <source src="assets/media/05-h3-r2v-boxwrench-observatory_00001_.mp4" type="video/mp4">
-            </video>
-          </div>
-          <figcaption>
-            <span class="caption">Poster frame extracted from the run output.</span>
-            <span class="caption"><a href="https://github.com/boxwrench/R9700/releases/download/showcase-final-20260818/05-h3-r2v-boxwrench-observatory_00001_.mp4">open source file &rarr;</a></span>
-          </figcaption>
-        </figure>
-        <div class="run__foot">
-          <p class="cfg"><span>608&times;352</span><span>39 frames</span><span>20 steps</span><span>ref: anchor, match</span></p>
-          <p class="run__note prose">A different H3 transformer than runs 02 and 03, swapped in against the same anchor. This is the run that cost the most to get working, and none of that cost was the GPU's fault.</p>
-        </div>
-      </article>
-
-      <!-- RUN 06 -->
-      <div class="transition"><span class="transition__label">&darr; H3 R2V &rarr; LTX</span></div>
-      <article class="run" aria-labelledby="run-06">
-        <div class="run__head">
-          <p class="run__no">06</p>
-          <div>
-            <h3 class="run__model" id="run-06">LTX 2.5 &mdash; Return Run</h3>
-            <p class="run__piece">Signal Vault</p>
-          </div>
-          <p class="run__wall"><span class="run__wall-num">23.62<span class="u">s</span></span><span class="run__wall-lab">Wall</span></p>
-        </div>
-        <figure class="slot">
-          <div class="slot__frame">
-            <span class="slot__tag">Media slot &mdash; source run</span>
-            <video controls preload="none" playsinline
-                   poster="assets/showcase/06-ltx-boxwrench-signal-return.jpg"
-                   aria-label="LTX 2.5 return run 06, Signal Vault">
-              <source src="assets/media/06-ltx-boxwrench-signal-return_00001_.mp4" type="video/mp4">
-            </video>
-          </div>
-          <figcaption>
-            <span class="caption">Poster frame extracted from the run output.</span>
-            <span class="caption"><a href="https://github.com/boxwrench/R9700/releases/download/showcase-final-20260818/06-ltx-boxwrench-signal-return_00001_.mp4">open source file &rarr;</a></span>
-          </figcaption>
-        </figure>
-        <div class="run__foot">
-          <p class="cfg"><span>768&times;448</span><span>41 frames</span><span>8 steps</span></p>
-          <p class="run__note prose">Back to LTX after four intervening model changes. Run 01's 11.48 s came off an already-warm LTX cache; 23.62 s is what the round trip actually cost.</p>
-        </div>
-      </article>
+      <div class="scroll-x">
+        <table class="hashes runs-table">
+          <thead>
+            <tr><th>#</th><th>Model</th><th>Piece</th><th>Wall</th><th>Output</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>01</td><td>LTX 2.5</td><td>The Artifact Forge</td><td>11.48&nbsp;s</td><td>768&times;448 &middot; 41 frames &middot; 8 steps</td></tr>
+            <tr><td>02</td><td>MiniMax H3 &mdash; Text to Video</td><td>Machine Cathedral</td><td>131.94&nbsp;s</td><td>608&times;352 &middot; 39 frames &middot; 20 steps</td></tr>
+            <tr><td>03</td><td>MiniMax H3 &mdash; Image to Video</td><td>Forge Awakening</td><td>49.16&nbsp;s</td><td>608&times;352 &middot; 39 frames &middot; 20 steps &middot; first_frame: anchor</td></tr>
+            <tr><td>04</td><td>MiniMax Music 3</td><td>Signal Against the End</td><td>28.48&nbsp;s</td><td>15 s audio &middot; 20 steps</td></tr>
+            <tr><td>05</td><td>MiniMax H3 &mdash; Reference to Video</td><td>Observatory</td><td>81.47&nbsp;s</td><td>608&times;352 &middot; 39 frames &middot; 20 steps &middot; ref: anchor, match</td></tr>
+            <tr><td>06</td><td>LTX 2.5 &mdash; Return Run</td><td>Signal Vault</td><td>23.62&nbsp;s</td><td>768&times;448 &middot; 41 frames &middot; 8 steps</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="band__note" style="margin-top:var(--space-6)">326.15 s across the six, in one long-lived process. These were deliberately short clips at benchmark sizes &mdash; the point was the model switching, not the footage. The renders below are the ones worth watching.</p>
 
       <details class="disclosure">
         <summary>Field notes &mdash; provenance and compatibility issues</summary>
