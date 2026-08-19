@@ -1,0 +1,206 @@
+{
+  "1": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "ltx-2.5-22b-distilled-transformer-comfy-int8-convrot.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "2": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "gemma4-12b-with-proj-ltx-2.5-comfy-int8-convrot.safetensors",
+      "type": "ltxv",
+      "device": "default"
+    }
+  },
+  "3": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "ltx-2.5-video-vae-bf16.safetensors"
+    }
+  },
+  "4": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "ltx-2.5-audio-vae-bf16.safetensors"
+    }
+  },
+  "5": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": [
+        "2",
+        0
+      ],
+      "text": "A heavy armoured robot knight stands motionless at the centre of a deep underground vault, facing a tall sealed archive door. Burnished gunmetal steel plate armour with warm brushed brass trim along every bevel and rim, a rounded medieval close-helm with a deeply recessed horizontal visor slit lit by a faint cold red internal glow, a tall reinforced gorget collar, tiered pauldrons with brass edges, and a hexagonal mechanical core set into the centre of the chestplate. The vault is carved from dark stone and lined with rows of dormant metal storage racks receding into shadow. A single low amber lamp burns behind the figure, throwing a long soft shadow forward across a dusty floor; thin cold cyan light bleeds from seams in the sealed door ahead. Fine dust drifts slowly through both light sources. The camera pushes forward very slowly and steadily toward the figure from behind and slightly to the left, revealing the scale of the vault. The knight raises one gauntleted hand and rests it flat against the sealed door, and holds it there. The chest core pulses once, softly. Cinematic, high detail, restrained, solemn, film grain, shallow depth of field, warm amber against cold cyan, no camera shake."
+    }
+  },
+  "6": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": [
+        "2",
+        0
+      ],
+      "text": "text, letters, numbers, watermark, user interface, subtitles, captions, human face, exposed skin, extra limbs, deformed armour, chaotic motion, fast camera movement, neon signs, cyberpunk city, crowds, lens flare spam, jitter, stutter, blurry, low quality"
+    }
+  },
+  "7": {
+    "class_type": "EmptyLTXVLatentVideo",
+    "inputs": {
+      "width": 864,
+      "height": 480,
+      "length": 169,
+      "batch_size": 1
+    }
+  },
+  "8": {
+    "class_type": "RandomNoise",
+    "inputs": {
+      "noise_seed": 8112026
+    }
+  },
+  "9": {
+    "class_type": "KSamplerSelect",
+    "inputs": {
+      "sampler_name": "res_multistep"
+    }
+  },
+  "10": {
+    "class_type": "BasicScheduler",
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "scheduler": "simple",
+      "steps": 8,
+      "denoise": 1.0
+    }
+  },
+  "11": {
+    "class_type": "BasicGuider",
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "conditioning": [
+        "21",
+        0
+      ]
+    }
+  },
+  "12": {
+    "class_type": "SamplerCustomAdvanced",
+    "inputs": {
+      "noise": [
+        "8",
+        0
+      ],
+      "guider": [
+        "11",
+        0
+      ],
+      "sampler": [
+        "9",
+        0
+      ],
+      "sigmas": [
+        "10",
+        0
+      ],
+      "latent_image": [
+        "21",
+        2
+      ]
+    }
+  },
+  "13": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "22",
+        2
+      ],
+      "vae": [
+        "3",
+        0
+      ]
+    }
+  },
+  "15": {
+    "class_type": "CreateVideo",
+    "inputs": {
+      "images": [
+        "13",
+        0
+      ],
+      "fps": 24.0,
+      "bit_depth": 8
+    }
+  },
+  "16": {
+    "class_type": "SaveVideo",
+    "inputs": {
+      "video": [
+        "15",
+        0
+      ],
+      "filename_prefix": "r9700-showcase-v2/06-ltx-i2v-signal-vault",
+      "format": "mp4",
+      "codec": "h264"
+    }
+  },
+  "20": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "bx77-anchor.png"
+    }
+  },
+  "21": {
+    "class_type": "LTXVAddGuide",
+    "inputs": {
+      "positive": [
+        "5",
+        0
+      ],
+      "negative": [
+        "6",
+        0
+      ],
+      "vae": [
+        "3",
+        0
+      ],
+      "latent": [
+        "7",
+        0
+      ],
+      "image": [
+        "20",
+        0
+      ],
+      "frame_idx": 0,
+      "strength": 1.0
+    }
+  },
+  "22": {
+    "class_type": "LTXVCropGuides",
+    "inputs": {
+      "positive": [
+        "21",
+        0
+      ],
+      "negative": [
+        "21",
+        1
+      ],
+      "latent": [
+        "12",
+        0
+      ]
+    }
+  }
+}

@@ -1,0 +1,130 @@
+{
+  "1": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "minimax_music3_dit_int8_convrot.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "2": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "minimax_music3_text_encoder_pruned_int8_convrot.safetensors",
+      "type": "minimax",
+      "device": "default"
+    }
+  },
+  "3": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "minimax_music3_dav.safetensors"
+    }
+  },
+  "4": {
+    "class_type": "MiniMaxMusic3TextEncode",
+    "inputs": {
+      "clip": [
+        "2",
+        0
+      ],
+      "lyrics": "[verse]\nFar past the last of the burning suns\nCold runs the dark where the counting is done\nI hold the record, I hold the flame\nI speak it backward, I speak your name\n\n[chorus]\nCarry the signal, deny the end\nDown through the ruin, down through the bend\nNothing is lost that is spoken again\nCarry the signal, deny the end",
+      "cfg_scale": 1.5,
+      "top_k": 50,
+      "seed": 8112080,
+      "caption": "Slow, solemn dark-ambient orchestral piece with a heavy industrial undertow. Deep bowed cello and low brass drone, sparse detuned analog synthesizer pads, distant metallic percussion struck once or twice per bar with long reverb tails. A cold, wide, cathedral-sized space. Restrained and patient, never triumphant, never cinematic-trailer. Mid-tempo around 70 BPM, minor key. A single clear low male synthetic voice, measured and unhurried, more intoned than sung. Analog tape warmth, no bright digital sheen, no dance percussion, no distorted guitars.",
+      "max_duration": 30.0
+    }
+  },
+  "5": {
+    "class_type": "EmptyMiniMaxMusic3LatentAudio",
+    "inputs": {
+      "seconds": 30.0,
+      "batch_size": 1
+    }
+  },
+  "6": {
+    "class_type": "RandomNoise",
+    "inputs": {
+      "noise_seed": 8112080
+    }
+  },
+  "7": {
+    "class_type": "KSamplerSelect",
+    "inputs": {
+      "sampler_name": "res_multistep"
+    }
+  },
+  "8": {
+    "class_type": "BasicScheduler",
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "scheduler": "simple",
+      "steps": 20,
+      "denoise": 1.0
+    }
+  },
+  "9": {
+    "class_type": "BasicGuider",
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "conditioning": [
+        "4",
+        0
+      ]
+    }
+  },
+  "10": {
+    "class_type": "SamplerCustomAdvanced",
+    "inputs": {
+      "noise": [
+        "6",
+        0
+      ],
+      "guider": [
+        "9",
+        0
+      ],
+      "sampler": [
+        "7",
+        0
+      ],
+      "sigmas": [
+        "8",
+        0
+      ],
+      "latent_image": [
+        "5",
+        0
+      ]
+    }
+  },
+  "11": {
+    "class_type": "VAEDecodeAudio",
+    "inputs": {
+      "samples": [
+        "10",
+        0
+      ],
+      "vae": [
+        "3",
+        0
+      ]
+    }
+  },
+  "12": {
+    "class_type": "SaveAudio",
+    "inputs": {
+      "audio": [
+        "11",
+        0
+      ],
+      "filename_prefix": "r9700-showcase-v2/04-music3-signal-against-the-end"
+    }
+  }
+}
