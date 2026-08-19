@@ -1,0 +1,126 @@
+{
+  "run_id": "05-h3-r2v-observatory",
+  "set": "showcase-v2",
+  "name": "MiniMax H3 Reference-to-Video \u2014 Observatory",
+  "workflow": "h3_r2v",
+  "workflow_file": "showcase/workflows/h3_r2v-showcase-v2.json",
+  "prompt_id": "4d42590c-f632-419e-a329-92c3d6bae987",
+  "wall_seconds": 561.8,
+  "wall_seconds_source": "ComfyUI /history execution_start -> execution_success",
+  "artifact": "/ai/artifacts/runs/minimax-h3/r9700-showcase-v2/05-h3-r2v-observatory_00001_.mp4",
+  "artifact_bytes": 751984,
+  "poster": "showcase/posters-v2/05-h3-r2v-observatory.jpg",
+  "poster_frame": 95,
+  "references": {
+    "ref_images.ref_image_0": {
+      "file": "bx77-anchor.png",
+      "label": "<Picture 1>",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "identical_to_page_hero": true
+    },
+    "ref_audios.ref_audio_0": {
+      "file": "cylon-voice-ref-12s.wav",
+      "label": "<Audio 1>",
+      "duration_s": 12.0,
+      "sample_rate": 32000,
+      "channels": 2,
+      "derived_from": "/home/boxwrench/Downloads/cylon.m4a (24.067 s), window t=2.0..14.0",
+      "why_12s": "the full 24 s reference encodes to reference tokens that ride through every sampling step; 12 s is ample for timbre at half the cost"
+    },
+    "ref_image_size": "match",
+    "ref_image_size_note": "'max' (2048 short edge) was available and is better for identity fidelity, but the node tooltip warns it can be several times slower. 'match' was chosen to protect the remaining run budget. Recorded as a deliberate exception."
+  },
+  "parameters": {
+    "width": 864,
+    "height": 480,
+    "length": 175,
+    "fps": 24.0,
+    "steps": 20,
+    "sampler": "res_multistep",
+    "scheduler": "simple",
+    "seed": 8112026,
+    "audio_branch": "kept"
+  },
+  "prompt": "For the target video, <Picture 1> is the authoritative visual reference for the character. <Audio 1> is the authoritative reference for the speaking voice: match its timbre, its synthetic metallic resonance, and its measured, unhurried cadence.\n\nintegrated_multimodal_description:\n\nShot 1, 0.00s to 2.40s. Wide establishing shot inside a high cold observatory carved into dark rock at the end of time. The character from <Picture 1> stands in profile at the centre of a vast circular chamber, small against the architecture, facing a tall aperture open to deep space. Burnished gunmetal plate armour with warm brass trim, a heavy rounded knight close-helm with a deeply recessed horizontal visor slit showing a faint cold red internal optic trace, tall reinforced gorget collar, tiered pauldrons with brass rims, hexagonal mechanical core centred on the chestplate. The light is cold: pale blue starlight falling through the aperture across the floor, with a single low amber instrument lamp behind the character providing the only warmth. Fine dust drifts slowly through the starlight. The camera is locked and still. No movement except the dust and a slow, almost imperceptible pulse in the chest core.\n\nShot 2, 2.40s to 4.80s. Slow, controlled dolly forward to a medium shot as the character turns its head toward the camera with mechanical deliberation. Behind it, along the curved chamber wall, faint engraved concentric rings and thin geometric telemetry traces illuminate one after another in cold cyan, travelling outward and away from the character, reading as a transmission being sent rather than received. The traces stay behind the subject and never cross the silhouette. The character begins to speak, calm and level, in the voice of <Audio 1>: \"This is Boxwrench.\"\n\nShot 3, 4.80s to 7.00s. Composed medium-close shot, the camera settling to a stop. The character raises one armoured gauntlet slowly and holds it steady, palm open, a single compact point of cold white light resting above it. The cyan traces on the wall fade to darkness one by one behind it until only the starlight and the amber lamp remain. The character finishes speaking, unhurried and final, in the voice of <Audio 1>: \"The signal holds. Proceed with precision.\" The final frame holds still on the character and the point of light.\n\noverall_soundscape: A vast, cold, quiet interior. Very low sub-bass room tone with a long stone reverb tail. Occasional faint metallic settling and the soft mechanical servo articulation of armour as the character turns and raises its hand. A distant, sparse electronic tick from the instrument lamp. No wind, no crowd, no machinery clatter. The speaking voice sits close and clear in the centre of the field, dry against the large reverberant space behind it, with the synthetic metallic character of <Audio 1> preserved exactly.\n\nnon_diegetic_music: Extremely restrained. A single sustained low cello or bowed metal drone, entering under shot 2 and holding without swelling. One quiet high harmonic tone appears when the point of light is revealed in shot 3. No percussion, no rhythm, no build, no cinematic hit. The music must never rise above the voice.\n\nImportant constraints: Preserve identity aggressively. Do not redesign the character. The helmet, visor slit, gorget, pauldrons, brass trim and hexagonal chest core must remain exactly as in <Picture 1> for the full duration. No extra limbs, no armour mutations, no face drift, no helmet opening, no exposed human face, no sudden camera moves, no exaggerated action, no chaotic effects, no random scene change, no loss of fine material detail. No text, no numbers, no user interface, no readouts, and no captions anywhere in the frame. Motion should remain physically plausible, premium, and controlled throughout.",
+  "prompt_chars": 3793,
+  "prompt_file": "showcase/prompts/05-h3-r2v-observatory.txt",
+  "spoken_line": "This is Boxwrench. The signal holds. Proceed with precision.",
+  "schema_note": "Queued against the live node signature: audio_vae is required, and references use dotted autogrow paths (ref_images.ref_image_0, ref_audios.ref_audio_0). The saved production workflow's flat `ref_image` key is legacy. production/workflows/h3_r2v.json was NOT modified.",
+  "stage_timing_s": {
+    "sampling_s_per_step": 24.12,
+    "sampling": 482.0,
+    "note": "sampling span read from the server progress bar (20 steps @ ~24.1 s/it); only wall_seconds is a direct /history measurement. Per-step cost is 8.6% above the I2V run and 16.4% above T2V at identical output size \u2014 that delta is the cost of carrying image + audio reference tokens through every step."
+  },
+  "output_verified": {
+    "container": "mp4",
+    "video_codec": "h264",
+    "width": 864,
+    "height": 480,
+    "frames": 175,
+    "fps": 24,
+    "duration_s": 7.292,
+    "audio_codec": "aac",
+    "audio_channels": 2,
+    "audio_sample_rate": 32000
+  },
+  "identity_retention": {
+    "method": "mean absolute RGB difference and RMS against the anchor, both resized to 432x240",
+    "measurements": [
+      {
+        "frame": 0,
+        "t_s": 0.0,
+        "mean_abs_diff": 31.9,
+        "rms": 46.74
+      },
+      {
+        "frame": 30,
+        "t_s": 1.25,
+        "mean_abs_diff": 32.2,
+        "rms": 46.98
+      },
+      {
+        "frame": 60,
+        "t_s": 2.5,
+        "mean_abs_diff": 32.22,
+        "rms": 46.92
+      },
+      {
+        "frame": 95,
+        "t_s": 3.96,
+        "mean_abs_diff": 35.98,
+        "rms": 50.33
+      },
+      {
+        "frame": 130,
+        "t_s": 5.42,
+        "mean_abs_diff": 39.25,
+        "rms": 56.34
+      },
+      {
+        "frame": 168,
+        "t_s": 7.0,
+        "mean_abs_diff": 38.81,
+        "rms": 55.55
+      }
+    ],
+    "reading": "IMPORTANT: unlike the I2V run, R2V does not begin from the anchor frame, so the absolute value of this metric measures scene difference and is NOT an identity score. Frame 0 already sits at 31.9 because the shot is a wide observatory rather than the anchor's framing. The meaningful signal is that the curve is FLAT (31.9 -> 38.8 across 7 s) where the I2V run climbed monotonically (3.05 -> 38.46). No progressive drift.",
+    "visual_verification": "Six frames inspected directly. The close-helm silhouette, recessed horizontal visor slit with cold red internal optic, tall gorget collar, tiered brass-rimmed pauldrons, hexagonal chest core, segmented rib plates and brass knee poleyns are all present and stable at frame 168. This is the strongest identity result of the three H3 runs."
+  },
+  "models": [
+    "minimax_h3_ref2va_pruned_fp8_scaled.safetensors",
+    "qwen3vl_32b_minimax_h3_fp8.safetensors",
+    "minimax_h3_video_vae_fp16.safetensors",
+    "minimax_h3_audio_vae_fp32.safetensors"
+  ],
+  "gpu": "AMD Radeon AI PRO R9700 (gfx1201)",
+  "creative_review": {
+    "prompt_adherence": "strong. Shot 1 lands as written: wide cold observatory, character small and in profile, aperture open to starfield, single amber lamp, drifting dust, concentric rings on the floor. Shot 2 delivers the head turn and the cyan telemetry traces travelling outward behind the subject without crossing the silhouette. Shot 3 delivers the composed medium-close with one gauntlet raised and a single point of cold white light above the open palm.",
+    "identity": "held. This is the run the reference pipeline was for \u2014 materially better than both the T2V (wrong character entirely) and the I2V (correct at t=0, drifting after ~2.5 s).",
+    "voice": "the audio branch decoded to a real 32 kHz stereo track rather than silence. Note the structural limit: per comfy/text_encoders/minimax.py the text encoder only ever sees the literal '<Audio 1>:' label \u2014 audio never enters Qwen \u2014 so the reference conditions timbre on the DiT directly while the spoken words come only from the prompt text. Speech intelligibility at this scale is therefore not guaranteed and was not asserted.",
+    "constraint_violations": "none observed. No extra limbs, no helmet opening, no exposed face, no scene cut, no text or instrumentation rendered in frame."
+  },
+  "generated_at": "2026-08-18T18:21:00-0700"
+}

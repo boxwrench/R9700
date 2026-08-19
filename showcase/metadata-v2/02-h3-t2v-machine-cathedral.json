@@ -1,0 +1,63 @@
+{
+  "run_id": "02-h3-t2v-machine-cathedral",
+  "set": "showcase-v2",
+  "name": "MiniMax H3 Text-to-Video \u2014 Machine Cathedral",
+  "workflow": "h3_t2v",
+  "workflow_file": "showcase/workflows/h3_t2v-showcase-v2.json",
+  "prompt_id": "576ad7a4-bcae-480c-b425-f353e5a4aef1",
+  "wall_seconds": 465.94,
+  "wall_seconds_source": "ComfyUI /history execution_start -> execution_success",
+  "server_reported_execution_s": 476.35,
+  "peak_vram_gib": "NA",
+  "artifact": "/ai/artifacts/runs/minimax-h3/r9700-showcase-v2/02-h3-t2v-machine-cathedral_00001_.mp4",
+  "artifact_bytes": 1512480,
+  "poster": "showcase/posters-v2/02-h3-t2v-machine-cathedral.jpg",
+  "poster_frame": 130,
+  "parameters": {
+    "width": 864,
+    "height": 480,
+    "length": 175,
+    "fps": 24.0,
+    "steps": 20,
+    "sampler": "res_multistep",
+    "scheduler": "simple",
+    "seed": 8112026,
+    "audio_branch": "kept"
+  },
+  "prompt": "integrated_multimodal_description:\n\n[Shot 1 | 0.0s-2.2s]\nA vast machine cathedral stretches into darkness, built from blackened steel ribs, precision-machined vaults, cable conduits, dormant server towers, and monumental archival mechanisms. At the center stands Boxwrench, a robot knight and machine paladin with worn metallic armor, a distinctive mechanical head, layered plated surfaces, visible seams, machined joints, fasteners, and subtle surface wear. Cold cyan diagnostic light traces the edges of the armor while a distant amber furnace glow burns low in the background. The camera begins low and wide, then slowly dollies forward toward Boxwrench. Dust hangs in the air, faint indicator lights wake in sequence along the walls, and the scene feels ancient, intelligent, solemn, and precise.\n\n[Shot 2 | 2.2s-4.8s]\nThe camera transitions into a slow three-quarter arc around Boxwrench, revealing more of the immense archive behind him. Concentric holographic signal rings appear far in the distance and travel through the chamber toward him like a message moving backward through time. As the signal approaches, old relays activate, dim control panels flicker to life, and subtle reflections move across scratched metal surfaces, bolts, and engraved armor details. Boxwrench turns his head with calm deliberation, as if receiving the transmission. The motion remains controlled and physically believable, with no exaggerated gestures.\n\n[Shot 3 | 4.8s-7.0s]\nThe camera eases closer to a medium shot. Boxwrench raises one armored hand and a compact cold-white point of synthetic light forms above his palm. The light is small but intensely bright, reflecting across the armor and nearby machinery. The distant signal rings dissolve into the surrounding haze. The chamber remains quiet and immense, emphasizing the contrast between cosmic-scale decay and one carefully preserved machine signal. End on Boxwrench holding the light steadily, composed and authoritative.\n\noverall_soundscape:\nDeep machine-room ambience, distant cooling fans, soft structural resonance, occasional relay clicks, one restrained hydraulic movement, faint electrical activation, and a subtle rising transmission tone as the holographic signal approaches.\n\nnon_diegetic_music:\nVery restrained dark cinematic ambience with a low sustained tonal bed, distant metallic harmonics, and minimal percussive pulse. Keep it subtle and secondary to the environment.",
+  "prompt_chars": 2435,
+  "negative_prompt": null,
+  "stage_timing_s": {
+    "load_conditioning_offload": 51.0,
+    "sampling": 414.0,
+    "sampling_s_per_step": 20.72,
+    "decode_and_save": 11.0,
+    "note": "load/decode spans derived from the server log around a measured 414 s sampling span; only wall_seconds is a direct /history measurement"
+  },
+  "output_verified": {
+    "container": "mp4",
+    "video_codec": "h264",
+    "width": 864,
+    "height": 480,
+    "frames": 175,
+    "fps": 24,
+    "duration_s": 7.292,
+    "audio_codec": "aac",
+    "audio_channels": 2,
+    "audio_sample_rate": 32000
+  },
+  "models": [
+    "minimax_h3_fl2va_pruned_fp8_scaled.safetensors",
+    "qwen3vl_32b_minimax_h3_fp8.safetensors",
+    "minimax_h3_video_vae_fp16.safetensors",
+    "minimax_h3_audio_vae_fp32.safetensors"
+  ],
+  "gpu": "AMD Radeon AI PRO R9700 (gfx1201)",
+  "generated_at": "2026-08-18T17:30:55-0700",
+  "creative_review": {
+    "prompt_adherence": "strong \u2014 all three shots land, beats close to the specified timings; monumental archive, amber furnace glow, cold cyan diagnostic light, concentric holographic signal rings travelling through the chamber, and the closing raised hand with a cold-white point of light all present as written",
+    "identity": "NOT Boxwrench, and unstable within the clip \u2014 frames 8-72 a dark generic armored silhouette, frames 100-130 red/gold armor with a glowing chest core, frame 168 a white/chrome rounded helmet. No burnished gunmetal, no brass trim, no knight helm with bevor collar or recessed visor slit.",
+    "disposition": "ACCEPTED. Text-only T2V has no image-reference mechanism, so identity drift is inherent to this mode rather than a defect in this run. Retained deliberately as the honest T2V example; the anchored modes (I2V/R2V) carry identity in this showcase set."
+  },
+  "notes": "Sampling is 89% of wall at this size. Per-step cost rose 18.7x against 8.7x more latent volume vs the 608x352x39 acceptance run \u2014 the quadratic attention term from 39 -> 175 frames. Frame count 175 is the nearest 17k+5 grid value to a 7 s target (7.292 s); the node snaps up, so 168 would have produced the same 175. VAEDecodeAudio did not fail at this latent shape."
+}
