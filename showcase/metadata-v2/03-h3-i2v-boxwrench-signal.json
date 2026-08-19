@@ -1,0 +1,111 @@
+{
+  "run_id": "03-h3-i2v-boxwrench-signal",
+  "set": "showcase-v2",
+  "name": "MiniMax H3 Image-to-Video \u2014 Signal",
+  "workflow": "h3_i2v",
+  "workflow_file": "showcase/workflows/h3_i2v-showcase-v2.json",
+  "prompt_id": "1be13a49-de5e-4a21-9a25-2bb7e7409d86",
+  "wall_seconds": 513.89,
+  "wall_seconds_source": "ComfyUI /history execution_start -> execution_success",
+  "peak_vram_gib": "NA",
+  "artifact": "/ai/artifacts/runs/minimax-h3/r9700-showcase-v2/03-h3-i2v-boxwrench-signal_00001_.mp4",
+  "artifact_bytes": 1393957,
+  "poster": "showcase/posters-v2/03-h3-i2v-boxwrench-signal.jpg",
+  "poster_frame": 60,
+  "reference_image": {
+    "file": "bx77-anchor.png",
+    "role": "first_frame (<Picture 1>)",
+    "dimensions": [
+      1672,
+      941
+    ],
+    "identical_to_page_hero": true,
+    "sha256_16": "8421639c2a370572 (webp form; the png is the same image re-encoded)"
+  },
+  "parameters": {
+    "width": 864,
+    "height": 480,
+    "length": 175,
+    "fps": 24.0,
+    "steps": 20,
+    "sampler": "res_multistep",
+    "scheduler": "simple",
+    "seed": 8112026,
+    "audio_branch": "kept"
+  },
+  "prompt": "For the target video, at 0.00 seconds into the target video, <Picture 1> is fully referenced.\n\nintegrated_multimodal_description:\n\n[Shot 1 | 0.0s-2.4s]\nBegin exactly from <Picture 1>, preserving Boxwrench's recognizable robot-knight identity, head shape, armor geometry, materials, proportions, mechanical structure, and overall composition. The image should come to life gradually rather than changing abruptly. The camera performs a very slow, steady push inward. Tiny indicator lights begin to flicker subtly. Reflected light shifts across worn metallic surfaces, seams, bolts, machined edges, and layered armor plates. Dust particles drift in the air. The environment remains dark, solemn, and technical.\n\n[Shot 2 | 2.4s-4.8s]\nBoxwrench slowly turns his head as if detecting a distant transmission. A few restrained geometric telemetry elements and cold diagnostic traces appear behind him, staying secondary to the character and never obscuring the silhouette. Small environmental lights wake in sequence. The camera continues a gentle push with a slight three-quarter drift, keeping the motion controlled, stable, and cinematic. Fine surface detail must remain visible throughout: scratches, brushed metal, panel seams, fasteners, and subtle wear.\n\n[Shot 3 | 4.8s-7.0s]\nBoxwrench makes one small deliberate movement with an armored hand, as though acknowledging or receiving a signal. A compact cold-white synthetic light or faint signal glow appears near the hand or reflected across the armor, but remains restrained and elegant. End on a composed medium-close framing with Boxwrench visually stable, authoritative, and intact. The moment should feel precise, intelligent, and quietly mythic.\n\noverall_soundscape:\nLow machine-room ambience, distant ventilation, faint relay clicks, subtle servo movement during the head turn and hand motion, and a quiet high-frequency signal emerging near the end.\n\nnon_diegetic_music:\nSparse dark ambient underscore with a restrained low pulse and subtle metallic harmonic texture. Keep it secondary to the environmental sound.\n\nImportant constraints:\nPreserve identity aggressively. Do not redesign the character. No extra limbs, no armor mutations, no face drift, no sudden camera moves, no exaggerated action, no chaotic effects, no random scene change, and no loss of fine material detail. Motion should remain physically plausible, premium, and controlled.",
+  "prompt_chars": 2404,
+  "schema_note": "Queued with first_frame, not the saved production workflow's legacy `image` key. production/workflows/h3_i2v.json was not modified.",
+  "stage_timing_s": {
+    "sampling_s_per_step": 22.21,
+    "sampling": 444.0,
+    "note": "sampling span read from the server progress bar (20 steps @ 22.21 s/it); only wall_seconds is a direct /history measurement. Per-step cost is 7.2% above the T2V run at identical size \u2014 the first_frame conditioning is not free."
+  },
+  "output_verified": {
+    "container": "mp4",
+    "video_codec": "h264",
+    "width": 864,
+    "height": 480,
+    "frames": 175,
+    "fps": 24,
+    "duration_s": 7.292,
+    "audio_codec": "aac",
+    "audio_channels": 2
+  },
+  "identity_retention": {
+    "method": "mean absolute RGB difference and RMS against the anchor, both resized to 432x240",
+    "measurements": [
+      {
+        "frame": 0,
+        "t_s": 0.0,
+        "mean_abs_diff": 3.05,
+        "rms": 5.73
+      },
+      {
+        "frame": 30,
+        "t_s": 1.25,
+        "mean_abs_diff": 8.58,
+        "rms": 19.11
+      },
+      {
+        "frame": 60,
+        "t_s": 2.5,
+        "mean_abs_diff": 14.73,
+        "rms": 30.17
+      },
+      {
+        "frame": 95,
+        "t_s": 3.96,
+        "mean_abs_diff": 19.74,
+        "rms": 37.45
+      },
+      {
+        "frame": 130,
+        "t_s": 5.42,
+        "mean_abs_diff": 26.8,
+        "rms": 47.02
+      },
+      {
+        "frame": 168,
+        "t_s": 7.0,
+        "mean_abs_diff": 38.46,
+        "rms": 62.45
+      }
+    ],
+    "reading": "Frame 0 is effectively the anchor (mean 3.05/255, within VAE round-trip and JPEG noise). Drift is smooth and monotonic rather than a discontinuity \u2014 no scene cut, no identity swap."
+  },
+  "models": [
+    "minimax_h3_fl2va_pruned_fp8_scaled.safetensors",
+    "qwen3vl_32b_minimax_h3_fp8.safetensors",
+    "minimax_h3_video_vae_fp16.safetensors",
+    "minimax_h3_audio_vae_fp32.safetensors"
+  ],
+  "gpu": "AMD Radeon AI PRO R9700 (gfx1201)",
+  "generated_at": "2026-08-18T17:56:00-0700",
+  "creative_review": {
+    "prompt_adherence": "very strong \u2014 all three beats land close to the specified timings: slow steady push with flickering indicator lights and drifting dust (shot 1), head turn with restrained geometric telemetry traces appearing behind the character without covering the silhouette (shot 2), and a composed medium-close ending with one armored hand raised and a compact cold-white signal light (shot 3).",
+    "identity": "held well through ~2.5 s, then drifts gradually. Silhouette, gunmetal-and-brass palette, cape, layered plate and the hexagonal chest core all persist to the end. The head drifts most: the anchor's rounded knight close-helm with recessed horizontal visor slit becomes a brighter, more cylindrical glowing helmet by shot 3. The prompt's 'no face drift' constraint was therefore not fully met.",
+    "constraints_held": "no extra limbs, no armor mutation, no scene change, no sudden camera moves, no chaotic effects; motion physically plausible and controlled throughout",
+    "disposition": "ACCEPTED as the I2V example. Materially stronger identity retention than the text-only T2V run, which is the contrast this showcase set is meant to demonstrate."
+  }
+}

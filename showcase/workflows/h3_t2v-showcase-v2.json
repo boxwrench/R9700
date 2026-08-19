@@ -1,0 +1,161 @@
+{
+  "1": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "minimax_h3_fl2va_pruned_fp8_scaled.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "2": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "qwen3vl_32b_minimax_h3_fp8.safetensors",
+      "type": "minimax",
+      "device": "default"
+    }
+  },
+  "3": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+    }
+  },
+  "4": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "minimax_h3_audio_vae_fp32.safetensors"
+    }
+  },
+  "5": {
+    "class_type": "MiniMaxH3ImageToVideo",
+    "inputs": {
+      "clip": [
+        "2",
+        0
+      ],
+      "vae": [
+        "3",
+        0
+      ],
+      "prompt": "integrated_multimodal_description:\n\n[Shot 1 | 0.0s-2.2s]\nA vast machine cathedral stretches into darkness, built from blackened steel ribs, precision-machined vaults, cable conduits, dormant server towers, and monumental archival mechanisms. At the center stands Boxwrench, a robot knight and machine paladin with worn metallic armor, a distinctive mechanical head, layered plated surfaces, visible seams, machined joints, fasteners, and subtle surface wear. Cold cyan diagnostic light traces the edges of the armor while a distant amber furnace glow burns low in the background. The camera begins low and wide, then slowly dollies forward toward Boxwrench. Dust hangs in the air, faint indicator lights wake in sequence along the walls, and the scene feels ancient, intelligent, solemn, and precise.\n\n[Shot 2 | 2.2s-4.8s]\nThe camera transitions into a slow three-quarter arc around Boxwrench, revealing more of the immense archive behind him. Concentric holographic signal rings appear far in the distance and travel through the chamber toward him like a message moving backward through time. As the signal approaches, old relays activate, dim control panels flicker to life, and subtle reflections move across scratched metal surfaces, bolts, and engraved armor details. Boxwrench turns his head with calm deliberation, as if receiving the transmission. The motion remains controlled and physically believable, with no exaggerated gestures.\n\n[Shot 3 | 4.8s-7.0s]\nThe camera eases closer to a medium shot. Boxwrench raises one armored hand and a compact cold-white point of synthetic light forms above his palm. The light is small but intensely bright, reflecting across the armor and nearby machinery. The distant signal rings dissolve into the surrounding haze. The chamber remains quiet and immense, emphasizing the contrast between cosmic-scale decay and one carefully preserved machine signal. End on Boxwrench holding the light steadily, composed and authoritative.\n\noverall_soundscape:\nDeep machine-room ambience, distant cooling fans, soft structural resonance, occasional relay clicks, one restrained hydraulic movement, faint electrical activation, and a subtle rising transmission tone as the holographic signal approaches.\n\nnon_diegetic_music:\nVery restrained dark cinematic ambience with a low sustained tonal bed, distant metallic harmonics, and minimal percussive pulse. Keep it subtle and secondary to the environment.",
+      "width": 864,
+      "height": 480,
+      "length": 175
+    }
+  },
+  "6": {
+    "class_type": "RandomNoise",
+    "inputs": {
+      "noise_seed": 8112026
+    }
+  },
+  "7": {
+    "class_type": "KSamplerSelect",
+    "inputs": {
+      "sampler_name": "res_multistep"
+    }
+  },
+  "8": {
+    "class_type": "BasicScheduler",
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "scheduler": "simple",
+      "steps": 20,
+      "denoise": 1.0
+    }
+  },
+  "9": {
+    "class_type": "BasicGuider",
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "conditioning": [
+        "5",
+        0
+      ]
+    }
+  },
+  "10": {
+    "class_type": "SamplerCustomAdvanced",
+    "inputs": {
+      "noise": [
+        "6",
+        0
+      ],
+      "guider": [
+        "9",
+        0
+      ],
+      "sampler": [
+        "7",
+        0
+      ],
+      "sigmas": [
+        "8",
+        0
+      ],
+      "latent_image": [
+        "5",
+        1
+      ]
+    }
+  },
+  "11": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "10",
+        0
+      ],
+      "vae": [
+        "3",
+        0
+      ]
+    }
+  },
+  "12": {
+    "class_type": "VAEDecodeAudio",
+    "inputs": {
+      "samples": [
+        "10",
+        0
+      ],
+      "vae": [
+        "4",
+        0
+      ]
+    }
+  },
+  "13": {
+    "class_type": "CreateVideo",
+    "inputs": {
+      "images": [
+        "11",
+        0
+      ],
+      "audio": [
+        "12",
+        0
+      ],
+      "fps": 24.0,
+      "bit_depth": 8
+    }
+  },
+  "14": {
+    "class_type": "SaveVideo",
+    "inputs": {
+      "video": [
+        "13",
+        0
+      ],
+      "filename_prefix": "r9700-showcase-v2/02-h3-t2v-machine-cathedral",
+      "format": "mp4",
+      "codec": "h264"
+    }
+  }
+}
