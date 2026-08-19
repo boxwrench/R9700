@@ -1,0 +1,43 @@
+{
+  "run_id": "09-h3-observatory-extended",
+  "set": "showcase-v2",
+  "name": "MiniMax H3 \u2014 Observatory, extended",
+  "kind": "continuation \u2014 a second generation conditioned on the final frame of an earlier run, then joined",
+  "workflow_file": "showcase/workflows/h3_cont-showcase-v2.json",
+  "prompt_id_continuation": "fc859aca-3608-4e64-bc0a-fc72f4da88e0",
+  "wall_seconds_continuation": 529.2,
+  "wall_seconds_source": "ComfyUI /history execution_start -> execution_success",
+  "source_run": {
+    "run_id": "05-h3-r2v-observatory",
+    "wall_seconds": 561.8,
+    "note": "the first half of the delivered file is this earlier render, unmodified"
+  },
+  "total_generation_wall_seconds": 1091.0,
+  "artifact": "/ai/artifacts/runs/minimax-h3/r9700-showcase-v2/09-h3-observatory-extended.mp4",
+  "artifact_bytes": 2405482,
+  "poster": "showcase/posters-v2/09-h3-observatory-extended.jpg",
+  "conditioning": {
+    "method": "final frame of the source clip extracted to PNG and used as the continuation's first frame",
+    "h3_node": "MiniMaxH3ImageToVideo first_frame",
+    "ltx_node": null,
+    "seed": 8112027
+  },
+  "output_verified": {
+    "container": "mp4",
+    "video_codec": "h264",
+    "width": 864,
+    "height": 480,
+    "frames": 349,
+    "fps": 24,
+    "duration_s": 14.546,
+    "audio": "aac stereo 32 kHz"
+  },
+  "seam": {
+    "measured_mean_abs_diff": 3.56,
+    "method": "mean absolute RGB difference between the source's final frame and the continuation's first frame, both resized to 432x240",
+    "reading": "3.56/255 \u2014 within codec noise. The continuation reproduces the source's last frame almost exactly, so the join is frame-continuous rather than a cut.",
+    "assembly": "the continuation's duplicated first frame is dropped before joining, so the seam does not hold for two frames. No crossfade, no interpolation, no time remapping."
+  },
+  "gpu": "AMD Radeon AI PRO R9700 (gfx1201)",
+  "generated_at": "2026-08-18T19:20:00-0700"
+}
