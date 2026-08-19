@@ -1,0 +1,57 @@
+{
+  "run_id": "08-ltx-t2v-artifact-forge",
+  "set": "showcase-v2",
+  "name": "LTX 2.5 Text-to-Video \u2014 The Artifact Forge",
+  "workflow": "ltx25",
+  "workflow_file": "showcase/workflows/ltx25_t2v-showcase-v2.json",
+  "prompt_id": "54f95e33-b15c-4082-8e84-0e927c5b8c19",
+  "wall_seconds": 56.04,
+  "wall_seconds_source": "ComfyUI /history execution_start -> execution_success",
+  "artifact": "/ai/artifacts/runs/minimax-h3/r9700-showcase-v2/08-ltx-t2v-artifact-forge-final.mp4",
+  "artifact_bytes": 1092763,
+  "poster": "showcase/posters-v2/08-ltx-t2v-artifact-forge.jpg",
+  "poster_frame": 95,
+  "parameters": {
+    "width": 864,
+    "height": 480,
+    "length_requested": 169,
+    "fps": 24.0,
+    "steps": 8,
+    "denoise": 1.0,
+    "sampler": "res_multistep",
+    "scheduler": "simple",
+    "seed": 8112026,
+    "audio_branch": "dropped",
+    "conditioning": "text only \u2014 no image, no reference, no guide"
+  },
+  "prompt_file": "showcase/prompts/08-ltx-t2v-artifact-forge.txt",
+  "prompt": "Inside a vast underground forge at the end of time, a towering armoured robot knight works at an anvil of black stone. Burnished gunmetal plate armour with warm brushed brass trim, a rounded medieval close-helm with a deep horizontal visor slit lit by a faint red internal glow, tall reinforced gorget collar, tiered pauldrons with brass rims, heavy segmented gauntlets. It raises a heavy hammer and brings it down on a glowing white-hot ingot; a burst of orange sparks scatters across the frame and dies in the dark air. Molten metal light pulses from a channel running along the floor, throwing hard moving shadows up the carved stone walls. Cold blue light falls from a high shaft far above, cutting through drifting smoke and forge haze. The camera pushes in slowly and steadily from a low three-quarter angle, then settles. Heavy industrial atmosphere, deep shadow, volumetric light shafts, floating embers, fine dust. Cinematic, high detail, film grain, shallow depth of field, warm orange against cold blue, physically plausible motion, no camera shake.",
+  "negative_prompt": "text, letters, numbers, watermark, signature, user interface, subtitles, captions, human face, exposed skin, extra limbs, extra arms, deformed armour, chaotic motion, fast camera movement, strobing, neon signs, cyberpunk city, crowds, lens flare spam, jitter, stutter, blurry, low quality, oversaturated",
+  "output_verified": {
+    "container": "mp4",
+    "video_codec": "h264",
+    "width": 864,
+    "height": 480,
+    "frames": 161,
+    "fps": 24,
+    "duration_s": 6.708,
+    "audio": "none"
+  },
+  "defect_and_remedy": {
+    "observed": "Final latent group corrupt again \u2014 clean through frame 160 (high-frequency energy 2.93), noise at frame 168 (48.57).",
+    "significance": "Third independent reproduction, now with no guide node and no source video: plain text-to-video from an empty latent. The defect is confirmed as a property of decoding the last latent group of a 169-frame request, fully independent of conditioning.",
+    "remedy": "Trimmed to the 161 clean frames and re-encoded at CRF 18. Delivered duration 6.708 s."
+  },
+  "models": [
+    "ltx-2.5-22b-distilled-transformer-comfy-int8-convrot.safetensors",
+    "gemma4-12b-with-proj-ltx-2.5-comfy-int8-convrot.safetensors",
+    "ltx-2.5-video-vae-bf16.safetensors"
+  ],
+  "gpu": "AMD Radeon AI PRO R9700 (gfx1201)",
+  "creative_review": {
+    "prompt_adherence": "strong. The forge reads as written \u2014 armoured figure at work, hard warm key light against a cold blue shaft from above, embers, drifting haze, carved stone, slow controlled push. The hammer-strike beat is softer than specified; the motion is present but not the decisive impact the prompt describes.",
+    "identity": "not BX-77, and correctly so. Text-only conditioning produces a plausible armoured knight \u2014 close-helm, visor slit, layered plate \u2014 without the brass trim, gorget geometry or hexagonal chest core. This is the same ceiling the H3 text-to-video run hit, and it is the point of having both conditioned runs on the page.",
+    "value": "completes the matrix: LTX now appears as text-only, image-conditioned and video-conditioned, at one resolution and one duration, so the three conditioning modes are directly comparable at 56.04 / 70.90 / 59.37 s."
+  },
+  "generated_at": "2026-08-18T19:06:00-0700"
+}

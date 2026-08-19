@@ -623,6 +623,7 @@ pre code{white-space:pre}
       </div>
       <p class="prose measure" style="margin-top:var(--space-6)">The six runs above are the benchmark record &mdash; short clips at the sizes the timing campaign used. These five are the presentation renders: the same machine, the same day, the same production model stack, asked for roughly seven seconds at 864&times;480 instead of under two seconds at 608&times;352.</p>
       <p class="prose measure">That is about 8.7&times; the latent volume, and it does not cost 8.7&times; more. Attention is quadratic in sequence length, so per-step sampling cost rose about 18.7&times; between the two sizes. The wall times below are what that actually looks like, and they are the honest reason the benchmark section uses small clips.</p>
+
       <div class="transition"><span class="transition__label">&darr; Text only</span></div>
       <article class="run" aria-labelledby="v2-02-h3-t2v-machine-cathedral">
         <div class="run__head">
@@ -783,10 +784,50 @@ Important constraints: Preserve identity aggressively. Do not redesign the chara
           </div>
         </details>
       </article>
-      <div class="transition"><span class="transition__label">&darr; H3 &rarr; LTX, same shape</span></div>
-      <article class="run" aria-labelledby="v2-06-ltx-i2v-signal-vault">
+      <div class="transition"><span class="transition__label">&darr; H3 &rarr; LTX, text only</span></div>
+      <article class="run" aria-labelledby="v2-08-ltx-t2v-artifact-forge">
         <div class="run__head">
           <p class="run__no">D</p>
+          <div>
+            <h3 class="run__model" id="v2-08-ltx-t2v-artifact-forge">LTX 2.5 &mdash; Text to Video</h3>
+            <p class="run__piece">The Artifact Forge</p>
+          </div>
+          <p class="run__wall"><span class="run__wall-num">56.04<span class="u">s</span></span><span class="run__wall-lab">Wall</span></p>
+        </div>
+        <figure class="slot">
+          <div class="slot__frame">
+            <span class="slot__tag">The Artifact Forge</span>
+            <video controls preload="none" playsinline
+                   poster="assets/showcase-v2/08-ltx-t2v-artifact-forge.jpg"
+                   aria-label="LTX 2.5 text-to-video run, The Artifact Forge">
+              <source src="assets/media-v2/08-ltx-t2v-artifact-forge.mp4" type="video/mp4">
+            </video>
+          </div>
+          <figcaption>
+            <span class="caption">Poster frame 95, extracted from the delivered file.</span>
+            <span class="caption"><a href="assets/media-v2/08-ltx-t2v-artifact-forge.mp4">open source file &rarr;</a></span>
+          </figcaption>
+        </figure>
+        <div class="run__foot">
+          <p class="cfg"><span>864&times;480 &middot; 161 frames &middot; 6.708 s</span><span>8 steps &middot; distilled</span><span>no image, no reference</span></p>
+          <p class="run__note prose">LTX with nothing but text, for the same reason run A exists: it is the baseline the next two runs are measured against. The forge lands &mdash; hard warm key against a cold shaft, embers, haze, carved stone &mdash; and the knight is a plausible knight rather than this one. No brass trim, no gorget geometry, no hexagonal core. Same ceiling as run A, a different model reaching it.</p>
+        </div>
+        <details class="disclosure">
+          <summary>Prompt &amp; parameters <span aria-hidden="true">+</span></summary>
+          <div class="disclosure__body">
+            <p class="prompt-lab">Prompt as submitted</p>
+            <div class="promptbox">Inside a vast underground forge at the end of time, a towering armoured robot knight works at an anvil of black stone. Burnished gunmetal plate armour with warm brushed brass trim, a rounded medieval close-helm with a deep horizontal visor slit lit by a faint red internal glow, tall reinforced gorget collar, tiered pauldrons with brass rims, heavy segmented gauntlets. It raises a heavy hammer and brings it down on a glowing white-hot ingot; a burst of orange sparks scatters across the frame and dies in the dark air. Molten metal light pulses from a channel running along the floor, throwing hard moving shadows up the carved stone walls. Cold blue light falls from a high shaft far above, cutting through drifting smoke and forge haze. The camera pushes in slowly and steadily from a low three-quarter angle, then settles. Heavy industrial atmosphere, deep shadow, volumetric light shafts, floating embers, fine dust. Cinematic, high detail, film grain, shallow depth of field, warm orange against cold blue, physically plausible motion, no camera shake.</div>
+            <p class="prompt-lab">Negative prompt</p>
+            <div class="promptbox">text, letters, numbers, watermark, signature, user interface, subtitles, captions, human face, exposed skin, extra limbs, extra arms, deformed armour, chaotic motion, fast camera movement, strobing, neon signs, cyberpunk city, crowds, lens flare spam, jitter, stutter, blurry, low quality, oversaturated</div>
+            <p class="cfg"><span>864&times;480 &middot; 161 frames &middot; 24 fps &middot; 6.708 s</span><span>8 steps &middot; res_multistep &middot; simple</span><span>seed 8112026</span></p>
+          </div>
+        </details>
+      </article>
+
+      <div class="transition"><span class="transition__label">&darr; Same LTX, + anchor frame</span></div>
+      <article class="run" aria-labelledby="v2-06-ltx-i2v-signal-vault">
+        <div class="run__head">
+          <p class="run__no">E</p>
           <div>
             <h3 class="run__model" id="v2-06-ltx-i2v-signal-vault">LTX 2.5 &mdash; Image to Video</h3>
             <p class="run__piece">Signal Vault</p>
@@ -822,10 +863,58 @@ Important constraints: Preserve identity aggressively. Do not redesign the chara
           </div>
         </details>
       </article>
+      <div class="transition"><span class="transition__label">&darr; Restyle, not regenerate</span></div>
+      <article class="run" aria-labelledby="v2-07-ltx-v2v-anime-observatory">
+        <div class="run__head">
+          <p class="run__no">F</p>
+          <div>
+            <h3 class="run__model" id="v2-07-ltx-v2v-anime-observatory">LTX 2.5 &mdash; Video to Video</h3>
+            <p class="run__piece">Observatory, restyled</p>
+          </div>
+          <p class="run__wall"><span class="run__wall-num">59.37<span class="u">s</span></span><span class="run__wall-lab">Wall</span></p>
+        </div>
+        <figure class="slot">
+          <div class="slot__frame">
+            <span class="slot__tag">Observatory, restyled</span>
+            <video controls preload="none" playsinline
+                   poster="assets/showcase-v2/07-ltx-v2v-anime-observatory.jpg"
+                   aria-label="LTX 2.5 video-to-video restyle of the Observatory render">
+              <source src="assets/media-v2/07-ltx-v2v-anime-observatory.mp4" type="video/mp4">
+            </video>
+          </div>
+          <figcaption>
+            <span class="caption">Poster frame 95, extracted from the delivered file.</span>
+            <span class="caption"><a href="assets/media-v2/07-ltx-v2v-anime-observatory.mp4">open source file &rarr;</a></span>
+          </figcaption>
+        </figure>
+        <div class="run__foot">
+          <p class="cfg"><span>864&times;480 &middot; 161 frames &middot; 6.708 s</span><span>8 steps &middot; denoise 0.6</span><span>source: run C, VAE-encoded</span></p>
+          <p class="run__note prose">No empty latent and no guide frame &mdash; run C's finished video is VAE-encoded straight into the starting latent, and the sampler only partially renoises it. That is the difference between restyling something and generating it: 59.37 s here against the 561.80 s the source cost.</p>
+        </div>
+        <details class="disclosure">
+          <summary>Prompt, the denoise trade-off &amp; parameters <span aria-hidden="true">+</span></summary>
+          <div class="disclosure__body">
+            <p class="prompt-lab">Prompt as submitted</p>
+            <div class="promptbox">Cel-shaded anime style. A heavy armoured robot knight stands in a vast cold observatory chamber at the end of time, facing a tall aperture open onto a deep starfield. Hand-drawn Japanese animation aesthetic: bold clean ink linework, flat cel shading with hard-edged shadow shapes, limited colour banding instead of smooth gradients, painted matte background art, subtle paper grain. Burnished gunmetal armour rendered as flat grey planes with crisp white specular highlights and warm brass trim picked out in solid gold. A rounded knight close-helm with a deep horizontal visor slit and a single glowing red optic. Cold blue starlight from the aperture against one warm amber lamp, drawn as distinct pools of flat colour rather than photographic falloff. Thin cyan geometric telemetry rings on the chamber wall drawn as clean vector arcs. Cinematic anime key-art composition, high production value, studio quality, dramatic but restrained, film grain.</div>
+            <p class="prompt-lab">Negative prompt</p>
+            <div class="promptbox">photorealistic, photograph, 3d render, cgi, realistic skin texture, smooth photographic gradients, live action, text, letters, numbers, watermark, signature, user interface, subtitles, deformed anatomy, extra limbs, blurry, low quality, jitter, stutter, chromatic aberration</div>
+
+            <h3>Denoise is the whole trade-off</h3>
+            <p>The ask was cel-shaded anime. At the denoise that keeps the source video, you do not get it &mdash; you get stylised illustration with anime cues. The fully hand-drawn look is reachable, but only by giving the source up. Both ends were run:</p>
+            <ul>
+              <li><b>denoise 0.6 &mdash; shipped above.</b> SHIPPED. Source structure preserved — same camera, same staging, same telemetry rings, same character pose through the clip. Style genuinely changed: flat planar shading, heavier outlines, solid gold trim, graphic vector arcs, painted starfield. Reads as stylised key art rather than strict cel anime.</li>
+              <li><b>denoise 0.85 &mdash; not shipped.</b> NOT SHIPPED as the primary. Style is fully 2D — bold ink outlines, flat cel colour, painted background — but the source is essentially gone: different composition, different camera, character re-staged front-on and simplified. At this denoise it stops being a restyle and becomes a fresh generation that happens to share a prompt.</li>
+            </ul>
+            <p>Stronger style transfer and structure retention are directly opposed here, and eight distilled steps leaves little room to have both. The 0.85 take is kept because it shows that clearly: <a href="assets/media-v2/07b-ltx-v2v-anime-observatory-strong.mp4">open the 0.85 version &rarr;</a></p>
+
+            <p class="cfg"><span>864&times;480 &middot; 161 frames &middot; 24 fps &middot; 6.708 s</span><span>8 steps &middot; res_multistep &middot; simple</span><span>seed 8112026 &middot; denoise 0.6</span></p>
+          </div>
+        </details>
+      </article>
       <div class="transition"><span class="transition__label">&darr; Video &rarr; Music</span></div>
       <article class="music" aria-labelledby="v2-run-04">
         <div class="music__head">
-          <p class="music__no">E</p>
+          <p class="music__no">G</p>
           <div>
             <h3 class="music__model" id="v2-run-04">MiniMax Music 3</h3>
             <p class="music__title">Signal Against the End</p>
@@ -877,57 +966,7 @@ Carry the signal, deny the end</div>
           </div>
         </details>
       </article>
-
-      <div class="transition"><span class="transition__label">&darr; Restyle, not regenerate</span></div>
-      <article class="run" aria-labelledby="v2-07-ltx-v2v-anime-observatory">
-        <div class="run__head">
-          <p class="run__no">F</p>
-          <div>
-            <h3 class="run__model" id="v2-07-ltx-v2v-anime-observatory">LTX 2.5 &mdash; Video to Video</h3>
-            <p class="run__piece">Observatory, restyled</p>
-          </div>
-          <p class="run__wall"><span class="run__wall-num">59.37<span class="u">s</span></span><span class="run__wall-lab">Wall</span></p>
-        </div>
-        <figure class="slot">
-          <div class="slot__frame">
-            <span class="slot__tag">Observatory, restyled</span>
-            <video controls preload="none" playsinline
-                   poster="assets/showcase-v2/07-ltx-v2v-anime-observatory.jpg"
-                   aria-label="LTX 2.5 video-to-video restyle of the Observatory render">
-              <source src="assets/media-v2/07-ltx-v2v-anime-observatory.mp4" type="video/mp4">
-            </video>
-          </div>
-          <figcaption>
-            <span class="caption">Poster frame 95, extracted from the delivered file.</span>
-            <span class="caption"><a href="assets/media-v2/07-ltx-v2v-anime-observatory.mp4">open source file &rarr;</a></span>
-          </figcaption>
-        </figure>
-        <div class="run__foot">
-          <p class="cfg"><span>864&times;480 &middot; 161 frames &middot; 6.708 s</span><span>8 steps &middot; denoise 0.6</span><span>source: run C, VAE-encoded</span></p>
-          <p class="run__note prose">No empty latent and no guide frame &mdash; run C's finished video is VAE-encoded straight into the starting latent, and the sampler only partially renoises it. That is the difference between restyling something and generating it: 59.37 s here against the 561.80 s the source cost.</p>
-        </div>
-        <details class="disclosure">
-          <summary>Prompt, the denoise trade-off &amp; parameters <span aria-hidden="true">+</span></summary>
-          <div class="disclosure__body">
-            <p class="prompt-lab">Prompt as submitted</p>
-            <div class="promptbox">Cel-shaded anime style. A heavy armoured robot knight stands in a vast cold observatory chamber at the end of time, facing a tall aperture open onto a deep starfield. Hand-drawn Japanese animation aesthetic: bold clean ink linework, flat cel shading with hard-edged shadow shapes, limited colour banding instead of smooth gradients, painted matte background art, subtle paper grain. Burnished gunmetal armour rendered as flat grey planes with crisp white specular highlights and warm brass trim picked out in solid gold. A rounded knight close-helm with a deep horizontal visor slit and a single glowing red optic. Cold blue starlight from the aperture against one warm amber lamp, drawn as distinct pools of flat colour rather than photographic falloff. Thin cyan geometric telemetry rings on the chamber wall drawn as clean vector arcs. Cinematic anime key-art composition, high production value, studio quality, dramatic but restrained, film grain.</div>
-            <p class="prompt-lab">Negative prompt</p>
-            <div class="promptbox">photorealistic, photograph, 3d render, cgi, realistic skin texture, smooth photographic gradients, live action, text, letters, numbers, watermark, signature, user interface, subtitles, deformed anatomy, extra limbs, blurry, low quality, jitter, stutter, chromatic aberration</div>
-
-            <h3>Denoise is the whole trade-off</h3>
-            <p>The ask was cel-shaded anime. At the denoise that keeps the source video, you do not get it &mdash; you get stylised illustration with anime cues. The fully hand-drawn look is reachable, but only by giving the source up. Both ends were run:</p>
-            <ul>
-              <li><b>denoise 0.6 &mdash; shipped above.</b> SHIPPED. Source structure preserved — same camera, same staging, same telemetry rings, same character pose through the clip. Style genuinely changed: flat planar shading, heavier outlines, solid gold trim, graphic vector arcs, painted starfield. Reads as stylised key art rather than strict cel anime.</li>
-              <li><b>denoise 0.85 &mdash; not shipped.</b> NOT SHIPPED as the primary. Style is fully 2D — bold ink outlines, flat cel colour, painted background — but the source is essentially gone: different composition, different camera, character re-staged front-on and simplified. At this denoise it stops being a restyle and becomes a fresh generation that happens to share a prompt.</li>
-            </ul>
-            <p>Stronger style transfer and structure retention are directly opposed here, and eight distilled steps leaves little room to have both. The 0.85 take is kept because it shows that clearly: <a href="assets/media-v2/07b-ltx-v2v-anime-observatory-strong.mp4">open the 0.85 version &rarr;</a></p>
-
-            <p class="cfg"><span>864&times;480 &middot; 161 frames &middot; 24 fps &middot; 6.708 s</span><span>8 steps &middot; res_multistep &middot; simple</span><span>seed 8112026 &middot; denoise 0.6</span></p>
-          </div>
-        </details>
-      </article>
-
-      <p class="band__note" style="margin-top:var(--space-7)">Six renders, 1722.72 s of measured generation wall time on one R9700. Every figure above is read out of <a href="https://github.com/boxwrench/R9700/tree/main/showcase/metadata-v2">showcase/metadata-v2</a>, which also records what each run got wrong.</p>
+<p class="band__note" style="margin-top:var(--space-7)">Seven renders, 1778.76 s of measured generation wall time on one R9700. Every figure above is read out of <a href="https://github.com/boxwrench/R9700/tree/main/showcase/metadata-v2">showcase/metadata-v2</a>, which also records what each run got wrong.</p>
     </section>
 
     <!-- ============ 6. WHAT TO CHECK ============ -->

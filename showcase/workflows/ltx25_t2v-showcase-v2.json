@@ -1,0 +1,156 @@
+{
+  "1": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "ltx-2.5-22b-distilled-transformer-comfy-int8-convrot.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "2": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "gemma4-12b-with-proj-ltx-2.5-comfy-int8-convrot.safetensors",
+      "type": "ltxv",
+      "device": "default"
+    }
+  },
+  "3": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "ltx-2.5-video-vae-bf16.safetensors"
+    }
+  },
+  "4": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "ltx-2.5-audio-vae-bf16.safetensors"
+    }
+  },
+  "5": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": [
+        "2",
+        0
+      ],
+      "text": "Inside a vast underground forge at the end of time, a towering armoured robot knight works at an anvil of black stone. Burnished gunmetal plate armour with warm brushed brass trim, a rounded medieval close-helm with a deep horizontal visor slit lit by a faint red internal glow, tall reinforced gorget collar, tiered pauldrons with brass rims, heavy segmented gauntlets. It raises a heavy hammer and brings it down on a glowing white-hot ingot; a burst of orange sparks scatters across the frame and dies in the dark air. Molten metal light pulses from a channel running along the floor, throwing hard moving shadows up the carved stone walls. Cold blue light falls from a high shaft far above, cutting through drifting smoke and forge haze. The camera pushes in slowly and steadily from a low three-quarter angle, then settles. Heavy industrial atmosphere, deep shadow, volumetric light shafts, floating embers, fine dust. Cinematic, high detail, film grain, shallow depth of field, warm orange against cold blue, physically plausible motion, no camera shake."
+    }
+  },
+  "6": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": [
+        "2",
+        0
+      ],
+      "text": "text, letters, numbers, watermark, signature, user interface, subtitles, captions, human face, exposed skin, extra limbs, extra arms, deformed armour, chaotic motion, fast camera movement, strobing, neon signs, cyberpunk city, crowds, lens flare spam, jitter, stutter, blurry, low quality, oversaturated"
+    }
+  },
+  "7": {
+    "class_type": "EmptyLTXVLatentVideo",
+    "inputs": {
+      "width": 864,
+      "height": 480,
+      "length": 169,
+      "batch_size": 1
+    }
+  },
+  "8": {
+    "class_type": "RandomNoise",
+    "inputs": {
+      "noise_seed": 8112026
+    }
+  },
+  "9": {
+    "class_type": "KSamplerSelect",
+    "inputs": {
+      "sampler_name": "res_multistep"
+    }
+  },
+  "10": {
+    "class_type": "BasicScheduler",
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "scheduler": "simple",
+      "steps": 8,
+      "denoise": 1.0
+    }
+  },
+  "11": {
+    "class_type": "BasicGuider",
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "conditioning": [
+        "5",
+        0
+      ]
+    }
+  },
+  "12": {
+    "class_type": "SamplerCustomAdvanced",
+    "inputs": {
+      "noise": [
+        "8",
+        0
+      ],
+      "guider": [
+        "11",
+        0
+      ],
+      "sampler": [
+        "9",
+        0
+      ],
+      "sigmas": [
+        "10",
+        0
+      ],
+      "latent_image": [
+        "7",
+        0
+      ]
+    }
+  },
+  "13": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "12",
+        0
+      ],
+      "vae": [
+        "3",
+        0
+      ]
+    }
+  },
+  "15": {
+    "class_type": "CreateVideo",
+    "inputs": {
+      "images": [
+        "13",
+        0
+      ],
+      "fps": 24.0,
+      "bit_depth": 8
+    }
+  },
+  "16": {
+    "class_type": "SaveVideo",
+    "inputs": {
+      "video": [
+        "15",
+        0
+      ],
+      "filename_prefix": "r9700-showcase-v2/08-ltx-t2v-artifact-forge",
+      "format": "mp4",
+      "codec": "h264"
+    }
+  }
+}
