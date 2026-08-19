@@ -370,9 +370,40 @@ pre code{white-space:pre}
 .scroll-x{overflow-x:auto;-webkit-overflow-scrolling:touch}
 /* the run-timing table keeps its columns; only the wall time is emphasised */
 .runs-table{font-size:13px}
-.runs-table td:nth-child(4){font-variant-numeric:tabular-nums;color:var(--brass-text);white-space:nowrap}
-.runs-table td:nth-child(5){color:var(--ink-muted)}
+.runs-table td:nth-child(3){font-variant-numeric:tabular-nums;color:var(--brass-text);white-space:nowrap}
+.runs-table td:nth-child(4){color:var(--ink-muted)}
 .runs-table td:last-child{word-break:normal}
+
+/* the medium data layer: one strip per model family, read before the evidence */
+.compare{width:100%;border-collapse:collapse;margin-top:var(--space-6);font-size:14px}
+.compare th{
+  font-family:var(--font-interface);font-size:11px;letter-spacing:0.18em;text-transform:uppercase;
+  color:var(--ink-muted);text-align:left;padding:0 var(--space-4) var(--space-2) 0;
+  border-bottom:2px solid var(--ink);
+}
+.compare td{padding:var(--space-3) var(--space-4) var(--space-3) 0;border-bottom:var(--hairline);vertical-align:baseline}
+.compare td:first-child{
+  font-family:var(--font-interface);font-size:12px;letter-spacing:0.14em;text-transform:uppercase;white-space:nowrap;
+}
+.compare td:nth-child(3){
+  font-family:var(--font-code);color:var(--brass-text);
+  font-variant-numeric:tabular-nums;white-space:nowrap;
+}
+.compare td:last-child{color:var(--ink-muted)}
+@media (max-width:640px){
+  .compare,.compare tbody,.compare tr,.compare td{display:block;width:100%}
+  .compare thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .compare tr{border-bottom:var(--hairline);padding:var(--space-4) 0}
+  .compare td{border:0;padding:0}
+  .compare td:nth-child(3){margin-top:var(--space-1)}
+}
+
+/* one metadata line per clip; everything finer lives behind the disclosure */
+.runmeta{margin:0;font-family:var(--font-code);font-size:14px;line-height:1.7;color:var(--ink-muted)}
+
+/* long durations read as time first, seconds second */
+.dur{display:block;font-family:var(--font-interface);font-size:clamp(1.4rem,4vw,2.1rem);letter-spacing:0.04em;line-height:1.1;color:var(--ink);text-transform:none}
+.dur__exact{display:block;margin-top:var(--space-2);font-family:var(--font-code);font-size:13px;color:var(--ink-muted)}
 /* narrow: the hash table stops being a table and becomes stacked records */
 @media (max-width:700px){
   .hashes,.hashes tbody,.hashes tr,.hashes td{display:block;width:100%}
@@ -459,6 +490,11 @@ pre code{white-space:pre}
 .closing{padding-top:var(--space-9)}
 .closing__copy{margin-top:calc(var(--lift) + var(--space-6));display:flex;justify-content:space-between;gap:var(--space-5);flex-wrap:wrap;align-items:baseline}
 .closing__mark{font-family:var(--font-interface);font-size:clamp(1rem,3vw,1.5rem);letter-spacing:0.22em;text-transform:uppercase}
+.closing__proceed{
+  margin-top:var(--space-6);font-family:var(--font-interface);
+  font-size:clamp(1.15rem,4.2vw,2rem);letter-spacing:0.26em;text-transform:uppercase;
+  color:var(--brass-text);border-top:2px solid var(--brass);padding-top:var(--space-5);
+}
 
 /* ---------- footer ---------- */
 .pagefoot{
@@ -564,19 +600,19 @@ pre code{white-space:pre}
       <div class="scroll-x">
         <table class="hashes runs-table">
           <thead>
-            <tr><th>#</th><th>Model</th><th>Piece</th><th>Wall</th><th>Output</th></tr>
+            <tr><th>Run</th><th>Workflow</th><th>Wall</th><th>Output</th></tr>
           </thead>
           <tbody>
-            <tr><td>01</td><td>LTX 2.5</td><td>The Artifact Forge</td><td>11.48&nbsp;s</td><td>768&times;448 &middot; 41 frames &middot; 8 steps</td></tr>
-            <tr><td>02</td><td>MiniMax H3 &mdash; Text to Video</td><td>Machine Cathedral</td><td>131.94&nbsp;s</td><td>608&times;352 &middot; 39 frames &middot; 20 steps</td></tr>
-            <tr><td>03</td><td>MiniMax H3 &mdash; Image to Video</td><td>Forge Awakening</td><td>49.16&nbsp;s</td><td>608&times;352 &middot; 39 frames &middot; 20 steps &middot; first_frame: anchor</td></tr>
-            <tr><td>04</td><td>MiniMax Music 3</td><td>Signal Against the End</td><td>28.48&nbsp;s</td><td>15 s audio &middot; 20 steps</td></tr>
-            <tr><td>05</td><td>MiniMax H3 &mdash; Reference to Video</td><td>Observatory</td><td>81.47&nbsp;s</td><td>608&times;352 &middot; 39 frames &middot; 20 steps &middot; ref: anchor, match</td></tr>
-            <tr><td>06</td><td>LTX 2.5 &mdash; Return Run</td><td>Signal Vault</td><td>23.62&nbsp;s</td><td>768&times;448 &middot; 41 frames &middot; 8 steps</td></tr>
+            <tr><td>01</td><td>LTX 2.5</td><td>11.48&nbsp;s</td><td>768&times;448 &middot; 41f &middot; 8 steps</td></tr>
+            <tr><td>02</td><td>H3 T2V</td><td>131.94&nbsp;s</td><td>608&times;352 &middot; 39f &middot; 20 steps</td></tr>
+            <tr><td>03</td><td>H3 I2V</td><td>49.16&nbsp;s</td><td>608&times;352 &middot; 39f &middot; 20 steps</td></tr>
+            <tr><td>04</td><td>Music 3</td><td>28.48&nbsp;s</td><td>15 s audio</td></tr>
+            <tr><td>05</td><td>H3 R2V</td><td>81.47&nbsp;s</td><td>608&times;352 &middot; 39f &middot; 20 steps</td></tr>
+            <tr><td>06</td><td>LTX return</td><td>23.62&nbsp;s</td><td>768&times;448 &middot; 41f &middot; 8 steps</td></tr>
           </tbody>
         </table>
       </div>
-      <p class="band__note" style="margin-top:var(--space-6)">326.15 s across the six, in one long-lived process. These were deliberately short clips at benchmark sizes &mdash; the point was the model switching, not the footage. The renders below are the ones worth watching.</p>
+      <p class="band__note" style="margin-top:var(--space-6)">326.15 s total &middot; four workflows &middot; successful return to LTX</p>
 
       <details class="disclosure">
         <summary>Field notes &mdash; provenance and compatibility issues</summary>
@@ -621,8 +657,24 @@ pre code{white-space:pre}
         <h2 class="section__title" id="showcase-title">The showcase renders</h2>
         <span class="label label--muted">864&times;480 &middot; 24 fps</span>
       </div>
-      <p class="prose measure" style="margin-top:var(--space-6)">The six runs above are the benchmark record &mdash; short clips at the sizes the timing campaign used. These five are the presentation renders: the same machine, the same day, the same production model stack, asked for roughly seven seconds at 864&times;480 instead of under two seconds at 608&times;352.</p>
-      <p class="prose measure">That is about 8.7&times; the latent volume, and it does not cost 8.7&times; more. Attention is quadratic in sequence length, so per-step sampling cost rose about 18.7&times; between the two sizes. The wall times below are what that actually looks like, and they are the honest reason the benchmark section uses small clips.</p>
+      <p class="prose measure" style="margin-top:var(--space-6)">Below are the presentation renders: full-length demonstrations at 864&times;480, separated from the short benchmark sequence above.</p>
+      <details class="disclosure">
+        <summary>Why these cost so much more <span aria-hidden="true">+</span></summary>
+        <div class="disclosure__body">
+          <p>Roughly seven seconds at 864&times;480 is about 8.7&times; the latent volume of a sub-two-second clip at 608&times;352 &mdash; and it does not cost 8.7&times; more. Attention is quadratic in sequence length, so per-step sampling cost rose about 18.7&times; between the two sizes. That is the honest reason the benchmark sequence above uses small clips.</p>
+        </div>
+      </details>
+
+      <div class="scroll-x">
+        <table class="compare">
+          <thead><tr><th>Mode</th><th>Conditioning</th><th>Wall</th><th>Result</th></tr></thead>
+          <tbody>
+            <tr><td>T2V</td><td>Text only</td><td>465.94&nbsp;s</td><td>Scene lands; identity does not</td></tr>
+            <tr><td>I2V</td><td>First frame</td><td>513.89&nbsp;s</td><td>Starts exact; identity drifts</td></tr>
+            <tr><td>R2V</td><td>Image + voice reference</td><td>561.80&nbsp;s</td><td>Identity retained</td></tr>
+          </tbody>
+        </table>
+      </div>
 
       <div class="transition"><span class="transition__label">&darr; Text only</span></div>
       <article class="run" aria-labelledby="v2-02-h3-t2v-machine-cathedral">
@@ -649,7 +701,7 @@ pre code{white-space:pre}
           </figcaption>
         </figure>
         <div class="run__foot">
-          <p class="cfg"><span>864&times;480 &middot; 175 frames &middot; 7.292 s</span><span>20 steps &middot; 20.72 s/step</span><span>no image, no reference</span></p>
+          <p class="runmeta">864&times;480 &middot; 7.29 s &middot; 24 fps &middot; 20 steps &middot; 465.94 s wall</p>
           <p class="run__note prose">Nothing conditions this run but the prompt text. The architecture, the light and the staging all land as written &mdash; and the character is not Boxwrench, and does not stay the same character between shots. That is the honest ceiling of text-only conditioning, and it is the reason the next three runs exist.</p>
         </div>
         <details class="disclosure">
@@ -672,7 +724,7 @@ Deep machine-room ambience, distant cooling fans, soft structural resonance, occ
 
 non_diegetic_music:
 Very restrained dark cinematic ambience with a low sustained tonal bed, distant metallic harmonics, and minimal percussive pulse. Keep it subtle and secondary to the environment.</div>
-            <p class="cfg"><span>864&times;480 &middot; 175 frames &middot; 24 fps &middot; 7.292 s</span><span>20 steps &middot; res_multistep &middot; simple</span><span>seed 8112026</span></p>
+            <p class="cfg"><span>864&times;480 &middot; 175 frames &middot; 24 fps &middot; 7.292 s</span><span>20 steps &middot; res_multistep &middot; simple</span><span>seed 8112026</span><span>20.72 s/step &middot; text only, no image or reference</span></p>
           </div>
         </details>
       </article>
@@ -701,7 +753,7 @@ Very restrained dark cinematic ambience with a low sustained tonal bed, distant 
           </figcaption>
         </figure>
         <div class="run__foot">
-          <p class="cfg"><span>864&times;480 &middot; 175 frames &middot; 7.292 s</span><span>20 steps &middot; 22.21 s/step</span><span>first_frame: BX-77 anchor</span></p>
+          <p class="runmeta">864&times;480 &middot; 7.29 s &middot; 24 fps &middot; 20 steps &middot; 513.89 s wall</p>
           <p class="run__note prose">The same weights, now handed the anchor as frame zero. Identity is exact at the start and drifts smoothly from about 2.5 s &mdash; measured as mean absolute difference against the anchor, 3.05 rising to 38.46 by the final frame. The silhouette, palette and chest core survive; the helmet does not. Conditioning the first frame buys a beginning, not a whole clip.</p>
         </div>
         <details class="disclosure">
@@ -729,7 +781,7 @@ Sparse dark ambient underscore with a restrained low pulse and subtle metallic h
 
 Important constraints:
 Preserve identity aggressively. Do not redesign the character. No extra limbs, no armor mutations, no face drift, no sudden camera moves, no exaggerated action, no chaotic effects, no random scene change, and no loss of fine material detail. Motion should remain physically plausible, premium, and controlled.</div>
-            <p class="cfg"><span>864&times;480 &middot; 175 frames &middot; 24 fps &middot; 7.292 s</span><span>20 steps &middot; res_multistep &middot; simple</span><span>seed 8112026</span></p>
+            <p class="cfg"><span>864&times;480 &middot; 175 frames &middot; 24 fps &middot; 7.292 s</span><span>20 steps &middot; res_multistep &middot; simple</span><span>seed 8112026</span><span>22.21 s/step &middot; first_frame: BX-77 anchor</span></p>
           </div>
         </details>
       </article>
@@ -758,7 +810,7 @@ Preserve identity aggressively. Do not redesign the character. No extra limbs, n
           </figcaption>
         </figure>
         <div class="run__foot">
-          <p class="cfg"><span>864&times;480 &middot; 175 frames &middot; 7.292 s</span><span>20 steps &middot; 24.12 s/step</span><span>ref: anchor + voice, match</span></p>
+          <p class="runmeta">864&times;480 &middot; 7.29 s &middot; 24 fps &middot; 20 steps &middot; 561.80 s wall</p>
           <p class="run__note prose">The strongest of the three. A true reference run &mdash; the anchor as <code>&lt;Picture 1&gt;</code> and a twelve-second voice sample as <code>&lt;Audio 1&gt;</code> &mdash; and the only one where the helmet, visor, gorget and hexagonal core are still correct in the final frame. The same difference metric stays flat here rather than climbing, because the reference rides through every sampling step instead of only seeding the first one.</p>
         </div>
         <details class="disclosure">
@@ -780,10 +832,21 @@ overall_soundscape: A vast, cold, quiet interior. Very low sub-bass room tone wi
 non_diegetic_music: Extremely restrained. A single sustained low cello or bowed metal drone, entering under shot 2 and holding without swelling. One quiet high harmonic tone appears when the point of light is revealed in shot 3. No percussion, no rhythm, no build, no cinematic hit. The music must never rise above the voice.
 
 Important constraints: Preserve identity aggressively. Do not redesign the character. The helmet, visor slit, gorget, pauldrons, brass trim and hexagonal chest core must remain exactly as in &lt;Picture 1&gt; for the full duration. No extra limbs, no armour mutations, no face drift, no helmet opening, no exposed human face, no sudden camera moves, no exaggerated action, no chaotic effects, no random scene change, no loss of fine material detail. No text, no numbers, no user interface, no readouts, and no captions anywhere in the frame. Motion should remain physically plausible, premium, and controlled throughout.</div>
-            <p class="cfg"><span>864&times;480 &middot; 175 frames &middot; 24 fps &middot; 7.292 s</span><span>20 steps &middot; res_multistep &middot; simple</span><span>seed 8112026</span></p>
+            <p class="cfg"><span>864&times;480 &middot; 175 frames &middot; 24 fps &middot; 7.292 s</span><span>20 steps &middot; res_multistep &middot; simple</span><span>seed 8112026</span><span>24.12 s/step &middot; ref: anchor + voice, ref_image_size match</span></p>
           </div>
         </details>
       </article>
+      <div class="scroll-x">
+        <table class="compare">
+          <thead><tr><th>Mode</th><th>Conditioning</th><th>Wall</th><th>Result</th></tr></thead>
+          <tbody>
+            <tr><td>T2V</td><td>Text only</td><td>56.04&nbsp;s</td><td>Scene lands; generic knight</td></tr>
+            <tr><td>I2V</td><td>Anchor frame</td><td>70.90&nbsp;s</td><td>Boxwrench anchored</td></tr>
+            <tr><td>V2V</td><td>Source video</td><td>59.37&nbsp;s</td><td>Structure retained; restyled</td></tr>
+          </tbody>
+        </table>
+      </div>
+
       <div class="transition"><span class="transition__label">&darr; H3 &rarr; LTX, text only</span></div>
       <article class="run" aria-labelledby="v2-08-ltx-t2v-artifact-forge">
         <div class="run__head">
@@ -809,7 +872,7 @@ Important constraints: Preserve identity aggressively. Do not redesign the chara
           </figcaption>
         </figure>
         <div class="run__foot">
-          <p class="cfg"><span>864&times;480 &middot; 161 frames &middot; 6.708 s</span><span>8 steps &middot; distilled</span><span>no image, no reference</span></p>
+          <p class="runmeta">864&times;480 &middot; 6.71 s &middot; 24 fps &middot; 8 steps &middot; 56.04 s wall</p>
           <p class="run__note prose">LTX with nothing but text, for the same reason run A exists: it is the baseline the next two runs are measured against. The forge lands &mdash; hard warm key against a cold shaft, embers, haze, carved stone &mdash; and the knight is a plausible knight rather than this one. No brass trim, no gorget geometry, no hexagonal core. Same ceiling as run A, a different model reaching it.</p>
         </div>
         <details class="disclosure">
@@ -819,7 +882,7 @@ Important constraints: Preserve identity aggressively. Do not redesign the chara
             <div class="promptbox">Inside a vast underground forge at the end of time, a towering armoured robot knight works at an anvil of black stone. Burnished gunmetal plate armour with warm brushed brass trim, a rounded medieval close-helm with a deep horizontal visor slit lit by a faint red internal glow, tall reinforced gorget collar, tiered pauldrons with brass rims, heavy segmented gauntlets. It raises a heavy hammer and brings it down on a glowing white-hot ingot; a burst of orange sparks scatters across the frame and dies in the dark air. Molten metal light pulses from a channel running along the floor, throwing hard moving shadows up the carved stone walls. Cold blue light falls from a high shaft far above, cutting through drifting smoke and forge haze. The camera pushes in slowly and steadily from a low three-quarter angle, then settles. Heavy industrial atmosphere, deep shadow, volumetric light shafts, floating embers, fine dust. Cinematic, high detail, film grain, shallow depth of field, warm orange against cold blue, physically plausible motion, no camera shake.</div>
             <p class="prompt-lab">Negative prompt</p>
             <div class="promptbox">text, letters, numbers, watermark, signature, user interface, subtitles, captions, human face, exposed skin, extra limbs, extra arms, deformed armour, chaotic motion, fast camera movement, strobing, neon signs, cyberpunk city, crowds, lens flare spam, jitter, stutter, blurry, low quality, oversaturated</div>
-            <p class="cfg"><span>864&times;480 &middot; 161 frames &middot; 24 fps &middot; 6.708 s</span><span>8 steps &middot; res_multistep &middot; simple</span><span>seed 8112026</span></p>
+            <p class="cfg"><span>864&times;480 &middot; 161 frames &middot; 24 fps &middot; 6.708 s</span><span>8 steps &middot; res_multistep &middot; simple</span><span>seed 8112026</span><span>distilled &middot; text only, no image or reference</span></p>
           </div>
         </details>
       </article>
@@ -849,7 +912,7 @@ Important constraints: Preserve identity aggressively. Do not redesign the chara
           </figcaption>
         </figure>
         <div class="run__foot">
-          <p class="cfg"><span>864&times;480 &middot; 161 frames &middot; 6.708 s</span><span>8 steps &middot; distilled</span><span>guide: BX-77 anchor, frame 0</span></p>
+          <p class="runmeta">864&times;480 &middot; 6.71 s &middot; 24 fps &middot; 8 steps &middot; 70.90 s wall</p>
           <p class="run__note prose">The cost comparison. Same resolution, near-identical duration, guided from the same anchor &mdash; and 70.90 s against the 561.80 s the H3 reference run cost. An eight-step distilled model against a twenty-step one, with no audio branch. The last latent frame decoded to noise and was trimmed; the detail is in the field notes.</p>
         </div>
         <details class="disclosure">
@@ -859,7 +922,7 @@ Important constraints: Preserve identity aggressively. Do not redesign the chara
           <div class="promptbox">A heavy armoured robot knight stands motionless at the centre of a deep underground vault, facing a tall sealed archive door. Burnished gunmetal steel plate armour with warm brushed brass trim along every bevel and rim, a rounded medieval close-helm with a deeply recessed horizontal visor slit lit by a faint cold red internal glow, a tall reinforced gorget collar, tiered pauldrons with brass edges, and a hexagonal mechanical core set into the centre of the chestplate. The vault is carved from dark stone and lined with rows of dormant metal storage racks receding into shadow. A single low amber lamp burns behind the figure, throwing a long soft shadow forward across a dusty floor; thin cold cyan light bleeds from seams in the sealed door ahead. Fine dust drifts slowly through both light sources. The camera pushes forward very slowly and steadily toward the figure from behind and slightly to the left, revealing the scale of the vault. The knight raises one gauntleted hand and rests it flat against the sealed door, and holds it there. The chest core pulses once, softly. Cinematic, high detail, restrained, solemn, film grain, shallow depth of field, warm amber against cold cyan, no camera shake.</div>
           <p class="prompt-lab">Negative prompt</p>
           <div class="promptbox">text, letters, numbers, watermark, user interface, subtitles, captions, human face, exposed skin, extra limbs, deformed armour, chaotic motion, fast camera movement, neon signs, cyberpunk city, crowds, lens flare spam, jitter, stutter, blurry, low quality</div>
-            <p class="cfg"><span>864&times;480 &middot; 161 frames &middot; 24 fps &middot; 6.708 s</span><span>8 steps &middot; res_multistep &middot; simple</span><span>seed 8112026</span></p>
+            <p class="cfg"><span>864&times;480 &middot; 161 frames &middot; 24 fps &middot; 6.708 s</span><span>8 steps &middot; res_multistep &middot; simple</span><span>seed 8112026</span><span>distilled &middot; guide: BX-77 anchor at frame 0</span></p>
           </div>
         </details>
       </article>
@@ -888,7 +951,7 @@ Important constraints: Preserve identity aggressively. Do not redesign the chara
           </figcaption>
         </figure>
         <div class="run__foot">
-          <p class="cfg"><span>864&times;480 &middot; 161 frames &middot; 6.708 s</span><span>8 steps &middot; denoise 0.6</span><span>source: run C, VAE-encoded</span></p>
+          <p class="runmeta">864&times;480 &middot; 6.71 s &middot; 24 fps &middot; 8 steps &middot; 59.37 s wall</p>
           <p class="run__note prose">No empty latent and no guide frame &mdash; run C's finished video is VAE-encoded straight into the starting latent, and the sampler only partially renoises it. That is the difference between restyling something and generating it: 59.37 s here against the 561.80 s the source cost.</p>
         </div>
         <details class="disclosure">
@@ -907,7 +970,7 @@ Important constraints: Preserve identity aggressively. Do not redesign the chara
             </ul>
             <p>Stronger style transfer and structure retention are directly opposed here, and eight distilled steps leaves little room to have both. The 0.85 take is kept because it shows that clearly: <a href="assets/media-v2/07b-ltx-v2v-anime-observatory-strong.mp4">open the 0.85 version &rarr;</a></p>
 
-            <p class="cfg"><span>864&times;480 &middot; 161 frames &middot; 24 fps &middot; 6.708 s</span><span>8 steps &middot; res_multistep &middot; simple</span><span>seed 8112026 &middot; denoise 0.6</span></p>
+            <p class="cfg"><span>864&times;480 &middot; 161 frames &middot; 24 fps &middot; 6.708 s</span><span>8 steps &middot; res_multistep &middot; simple</span><span>seed 8112026 &middot; denoise 0.6</span><span>distilled &middot; source: run C, VAE-encoded</span></p>
           </div>
         </details>
       </article>
@@ -957,8 +1020,17 @@ Important constraints: Preserve identity aggressively. Do not redesign the chara
 
 
         <div class="run__foot">
-          <p class="cfg"><span>H3: 1091.0&nbsp;s total</span><span>LTX: 126.42&nbsp;s total</span><span>seed 8112027</span></p>
-          <p class="run__note prose">The cost gap holds at length. Fourteen and a half seconds of H3 with audio took 1091.0 s across both halves; thirteen and a bit of LTX took 126.42 s. Roughly seventeen to one, for the same shape of picture.</p>
+          <div class="scroll-x">
+            <table class="compare">
+              <thead><tr><th>Model</th><th>Output</th><th>Generation time</th><th>Per second of video</th></tr></thead>
+              <tbody>
+                <tr><td>H3</td><td>14.55 s, with audio</td><td>18m 11s</td><td>75.0 s</td></tr>
+                <tr><td>LTX</td><td>13.38 s, no audio</td><td>2m 06s</td><td>9.5 s</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="run__note prose" style="margin-top:var(--space-5)">H3 took 18m 11s to produce 14.55 s. LTX took 2m 06s to produce 13.38 s. That is an 8.6&times; difference in total wall for roughly comparable output length, or 7.9&times; once normalised per second of video.</p>
+          <p class="runmeta">seed 8112027 &middot; 1091.00 s and 126.42 s exact</p>
         </div>
       </article>
 
@@ -1017,7 +1089,11 @@ Carry the signal, deny the end</div>
           </div>
         </details>
       </article>
-<p class="band__note" style="margin-top:var(--space-7)">Nine renders, 2378.34 s of measured generation wall time on one R9700. Every figure above is read out of <a href="https://github.com/boxwrench/R9700/tree/main/showcase/metadata-v2">showcase/metadata-v2</a>, which also records what each run got wrong.</p>
+<div class="band__note" style="margin-top:var(--space-7)">
+        <span class="dur">39m 38s of measured generation time</span>
+        <span class="dur__exact">2378.34 s exact &middot; nine renders &middot; one R9700</span>
+        <p style="margin-top:var(--space-4)">Every figure above is read out of <a href="https://github.com/boxwrench/R9700/tree/main/showcase/metadata-v2">showcase/metadata-v2</a>, which also records what each run got wrong.</p>
+      </div>
     </section>
 
     <!-- ============ 7. WHAT TO CHECK ============ -->
@@ -1169,6 +1245,7 @@ Carry the signal, deny the end</div>
         <p class="closing__mark">BX-77 // End of field report</p>
         <p class="meta">Known-good state preserved.</p>
       </div>
+      <p class="closing__proceed">Proceed with precision.</p>
     </section>
 
   </main>
