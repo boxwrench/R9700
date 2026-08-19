@@ -1,0 +1,90 @@
+{
+  "run_id": "07-ltx-v2v-anime-observatory",
+  "set": "showcase-v2",
+  "name": "LTX 2.5 Video-to-Video \u2014 Observatory, restyled",
+  "workflow": "ltx25 (video-conditioned variant)",
+  "workflow_file": "showcase/workflows/ltx25_v2v-showcase-v2.json",
+  "prompt_id": "ede4a6df-74d9-4474-8335-e98ae8a4d438",
+  "wall_seconds": 59.37,
+  "wall_seconds_source": "ComfyUI /history execution_start -> execution_success",
+  "artifact": "/ai/artifacts/runs/minimax-h3/r9700-showcase-v2/07-ltx-v2v-anime-observatory-final.mp4",
+  "artifact_bytes": 706091,
+  "poster": "showcase/posters-v2/07-ltx-v2v-anime-observatory.jpg",
+  "poster_frame": 95,
+  "source_video": {
+    "file": "/ai/artifacts/runs/minimax-h3/r9700-showcase-v2/05-h3-r2v-observatory_00001_.mp4",
+    "run": "05-h3-r2v-observatory",
+    "frames_used": 169,
+    "of": 175,
+    "note": "the H3 reference-to-video render is the input; this run restyles it rather than generating new content"
+  },
+  "topology": {
+    "loader": "VHS_LoadVideoPath",
+    "encode": "VAEEncode (LTX video VAE)",
+    "note": "no EmptyLTXVLatentVideo and no guide node \u2014 the source frames are VAE-encoded straight to the starting latent, which is what makes this video-to-video rather than image-conditioned generation"
+  },
+  "parameters": {
+    "width": 864,
+    "height": 480,
+    "length_requested": 169,
+    "fps": 24.0,
+    "steps": 8,
+    "denoise": 0.6,
+    "sampler": "res_multistep",
+    "scheduler": "simple",
+    "seed": 8112026,
+    "audio_branch": "dropped"
+  },
+  "prompt_file": "showcase/prompts/07-ltx-v2v-anime-observatory.txt",
+  "prompt": "Cel-shaded anime style. A heavy armoured robot knight stands in a vast cold observatory chamber at the end of time, facing a tall aperture open onto a deep starfield. Hand-drawn Japanese animation aesthetic: bold clean ink linework, flat cel shading with hard-edged shadow shapes, limited colour banding instead of smooth gradients, painted matte background art, subtle paper grain. Burnished gunmetal armour rendered as flat grey planes with crisp white specular highlights and warm brass trim picked out in solid gold. A rounded knight close-helm with a deep horizontal visor slit and a single glowing red optic. Cold blue starlight from the aperture against one warm amber lamp, drawn as distinct pools of flat colour rather than photographic falloff. Thin cyan geometric telemetry rings on the chamber wall drawn as clean vector arcs. Cinematic anime key-art composition, high production value, studio quality, dramatic but restrained, film grain.",
+  "negative_prompt": "photorealistic, photograph, 3d render, cgi, realistic skin texture, smooth photographic gradients, live action, text, letters, numbers, watermark, signature, user interface, subtitles, deformed anatomy, extra limbs, blurry, low quality, jitter, stutter, chromatic aberration",
+  "output_verified": {
+    "container": "mp4",
+    "video_codec": "h264",
+    "width": 864,
+    "height": 480,
+    "frames": 161,
+    "fps": 24,
+    "duration_s": 6.708,
+    "audio": "none"
+  },
+  "defect_and_remedy": {
+    "observed": "Same last-latent-group corruption as the LTX image-to-video run: clean through frame 140, noise at frame 168 (high-frequency energy 4.28 -> 48.57).",
+    "significance": "This run has no guide node at all, and it reproduces the defect identically. That confirms the earlier diagnosis \u2014 the fault is in decoding the final latent group of a 169-frame (8*21+1) request, and has nothing to do with LTXVAddGuide or with conditioning.",
+    "remedy": "Trimmed to the 161 clean frames and re-encoded at CRF 18. Nothing interpolated or synthesised. Delivered duration 6.708 s."
+  },
+  "denoise_ab": {
+    "purpose": "denoise is the whole story in video-to-video, so both ends were run",
+    "runs": [
+      {
+        "denoise": 0.6,
+        "prompt_id": "ede4a6df-74d9-4474-8335-e98ae8a4d438",
+        "wall_seconds": 59.37,
+        "result": "SHIPPED. Source structure preserved \u2014 same camera, same staging, same telemetry rings, same character pose through the clip. Style genuinely changed: flat planar shading, heavier outlines, solid gold trim, graphic vector arcs, painted starfield. Reads as stylised key art rather than strict cel anime.",
+        "artifact": "07-ltx-v2v-anime-observatory-final.mp4"
+      },
+      {
+        "denoise": 0.85,
+        "prompt_id": "10fc9b5f-c7a4-40f1-82de-ef5d3ffa8498",
+        "wall_seconds": 54.7,
+        "workflow_file": "showcase/workflows/ltx25_v2v-showcase-v2b.json",
+        "result": "NOT SHIPPED as the primary. Style is fully 2D \u2014 bold ink outlines, flat cel colour, painted background \u2014 but the source is essentially gone: different composition, different camera, character re-staged front-on and simplified. At this denoise it stops being a restyle and becomes a fresh generation that happens to share a prompt.",
+        "artifact": "07b-ltx-v2v-anime-observatory-strong-final.mp4",
+        "kept_because": "it is the clearest available illustration of what denoise controls in a V2V pass"
+      }
+    ],
+    "reading": "0.6 keeps the source and changes the look; 0.85 changes everything. Stronger style transfer and structure retention are directly opposed here, and 8 distilled steps leaves little room to have both."
+  },
+  "models": [
+    "ltx-2.5-22b-distilled-transformer-comfy-int8-convrot.safetensors",
+    "gemma4-12b-with-proj-ltx-2.5-comfy-int8-convrot.safetensors",
+    "ltx-2.5-video-vae-bf16.safetensors"
+  ],
+  "gpu": "AMD Radeon AI PRO R9700 (gfx1201)",
+  "creative_review": {
+    "style_transfer": "partial against the literal ask. 'Cel-shaded anime' was requested; at the denoise that preserves the source, the model delivers stylised illustration with anime-adjacent cues rather than true hand-drawn cel animation. The fully-anime look was reachable, but only by giving up the source video.",
+    "identity": "preserved \u2014 armour silhouette, helm, visor, brass trim and chamber all carry over from run 05 intact.",
+    "value": "59.37 s to restyle an existing 7 s clip, against 561.80 s to generate the source. Restyling is roughly a tenth the cost of generating."
+  },
+  "generated_at": "2026-08-18T18:57:00-0700"
+}

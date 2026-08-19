@@ -1049,7 +1049,56 @@ Carry the signal, deny the end</div>
         </details>
       </article>
 
-      <p class="band__note" style="margin-top:var(--space-7)">Five renders, 1663.35 s of measured generation wall time on one R9700. Every figure above is read out of <a href="https://github.com/boxwrench/R9700/tree/main/showcase/metadata-v2">showcase/metadata-v2</a>, which also records what each run got wrong.</p>
+      <div class="transition"><span class="transition__label">&darr; Restyle, not regenerate</span></div>
+      <article class="run" aria-labelledby="v2-07-ltx-v2v-anime-observatory">
+        <div class="run__head">
+          <p class="run__no">F</p>
+          <div>
+            <h3 class="run__model" id="v2-07-ltx-v2v-anime-observatory">LTX 2.5 &mdash; Video to Video</h3>
+            <p class="run__piece">Observatory, restyled</p>
+          </div>
+          <p class="run__wall"><span class="run__wall-num">59.37<span class="u">s</span></span><span class="run__wall-lab">Wall</span></p>
+        </div>
+        <figure class="slot">
+          <div class="slot__frame">
+            <span class="slot__tag">Observatory, restyled</span>
+            <video controls preload="none" playsinline
+                   poster="assets/showcase-v2/07-ltx-v2v-anime-observatory.jpg"
+                   aria-label="LTX 2.5 video-to-video restyle of the Observatory render">
+              <source src="assets/media-v2/07-ltx-v2v-anime-observatory.mp4" type="video/mp4">
+            </video>
+          </div>
+          <figcaption>
+            <span class="caption">Poster frame 95, extracted from the delivered file.</span>
+            <span class="caption"><a href="assets/media-v2/07-ltx-v2v-anime-observatory.mp4">open source file &rarr;</a></span>
+          </figcaption>
+        </figure>
+        <div class="run__foot">
+          <p class="cfg"><span>864&times;480 &middot; 161 frames &middot; 6.708 s</span><span>8 steps &middot; denoise 0.6</span><span>source: run C, VAE-encoded</span></p>
+          <p class="run__note prose">No empty latent and no guide frame &mdash; run C's finished video is VAE-encoded straight into the starting latent, and the sampler only partially renoises it. That is the difference between restyling something and generating it: 59.37 s here against the 561.80 s the source cost.</p>
+        </div>
+        <details class="disclosure">
+          <summary>Prompt, the denoise trade-off &amp; parameters <span aria-hidden="true">+</span></summary>
+          <div class="disclosure__body">
+            <p class="prompt-lab">Prompt as submitted</p>
+            <div class="promptbox">Cel-shaded anime style. A heavy armoured robot knight stands in a vast cold observatory chamber at the end of time, facing a tall aperture open onto a deep starfield. Hand-drawn Japanese animation aesthetic: bold clean ink linework, flat cel shading with hard-edged shadow shapes, limited colour banding instead of smooth gradients, painted matte background art, subtle paper grain. Burnished gunmetal armour rendered as flat grey planes with crisp white specular highlights and warm brass trim picked out in solid gold. A rounded knight close-helm with a deep horizontal visor slit and a single glowing red optic. Cold blue starlight from the aperture against one warm amber lamp, drawn as distinct pools of flat colour rather than photographic falloff. Thin cyan geometric telemetry rings on the chamber wall drawn as clean vector arcs. Cinematic anime key-art composition, high production value, studio quality, dramatic but restrained, film grain.</div>
+            <p class="prompt-lab">Negative prompt</p>
+            <div class="promptbox">photorealistic, photograph, 3d render, cgi, realistic skin texture, smooth photographic gradients, live action, text, letters, numbers, watermark, signature, user interface, subtitles, deformed anatomy, extra limbs, blurry, low quality, jitter, stutter, chromatic aberration</div>
+
+            <h3>Denoise is the whole trade-off</h3>
+            <p>The ask was cel-shaded anime. At the denoise that keeps the source video, you do not get it &mdash; you get stylised illustration with anime cues. The fully hand-drawn look is reachable, but only by giving the source up. Both ends were run:</p>
+            <ul>
+              <li><b>denoise 0.6 &mdash; shipped above.</b> SHIPPED. Source structure preserved — same camera, same staging, same telemetry rings, same character pose through the clip. Style genuinely changed: flat planar shading, heavier outlines, solid gold trim, graphic vector arcs, painted starfield. Reads as stylised key art rather than strict cel anime.</li>
+              <li><b>denoise 0.85 &mdash; not shipped.</b> NOT SHIPPED as the primary. Style is fully 2D — bold ink outlines, flat cel colour, painted background — but the source is essentially gone: different composition, different camera, character re-staged front-on and simplified. At this denoise it stops being a restyle and becomes a fresh generation that happens to share a prompt.</li>
+            </ul>
+            <p>Stronger style transfer and structure retention are directly opposed here, and eight distilled steps leaves little room to have both. The 0.85 take is kept because it shows that clearly: <a href="assets/media-v2/07b-ltx-v2v-anime-observatory-strong.mp4">open the 0.85 version &rarr;</a></p>
+
+            <p class="cfg"><span>864&times;480 &middot; 161 frames &middot; 24 fps &middot; 6.708 s</span><span>8 steps &middot; res_multistep &middot; simple</span><span>seed 8112026 &middot; denoise 0.6</span></p>
+          </div>
+        </details>
+      </article>
+
+      <p class="band__note" style="margin-top:var(--space-7)">Six renders, 1722.72 s of measured generation wall time on one R9700. Every figure above is read out of <a href="https://github.com/boxwrench/R9700/tree/main/showcase/metadata-v2">showcase/metadata-v2</a>, which also records what each run got wrong.</p>
     </section>
 
     <!-- ============ 6. WHAT TO CHECK ============ -->
