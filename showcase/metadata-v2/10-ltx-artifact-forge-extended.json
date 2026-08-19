@@ -1,0 +1,47 @@
+{
+  "run_id": "10-ltx-artifact-forge-extended",
+  "set": "showcase-v2",
+  "name": "LTX 2.5 \u2014 The Artifact Forge, extended",
+  "kind": "continuation \u2014 a second generation conditioned on the final frame of an earlier run, then joined",
+  "workflow_file": "showcase/workflows/ltx25_cont-showcase-v2.json",
+  "prompt_id_continuation": "f8d9a70e-f70b-4c86-aafe-e8e5121ef783",
+  "wall_seconds_continuation": 70.38,
+  "wall_seconds_source": "ComfyUI /history execution_start -> execution_success",
+  "source_run": {
+    "run_id": "08-ltx-t2v-artifact-forge",
+    "wall_seconds": 56.04,
+    "note": "the first half of the delivered file is this earlier render, unmodified"
+  },
+  "total_generation_wall_seconds": 126.42,
+  "artifact": "/ai/artifacts/runs/minimax-h3/r9700-showcase-v2/10-ltx-artifact-forge-extended.mp4",
+  "artifact_bytes": 2325837,
+  "poster": "showcase/posters-v2/10-ltx-artifact-forge-extended.jpg",
+  "conditioning": {
+    "method": "final frame of the source clip extracted to PNG and used as the continuation's first frame",
+    "h3_node": null,
+    "ltx_node": "LTXVAddGuide frame_idx 0 + LTXVCropGuides",
+    "seed": 8112027
+  },
+  "output_verified": {
+    "container": "mp4",
+    "video_codec": "h264",
+    "width": 864,
+    "height": 480,
+    "frames": 321,
+    "fps": 24,
+    "duration_s": 13.375,
+    "audio": "none"
+  },
+  "seam": {
+    "measured_mean_abs_diff": 3.03,
+    "method": "mean absolute RGB difference between the source's final frame and the continuation's first frame, both resized to 432x240",
+    "reading": "3.03/255 \u2014 within codec noise. The continuation reproduces the source's last frame almost exactly, so the join is frame-continuous rather than a cut.",
+    "assembly": "the continuation's duplicated first frame is dropped before joining, so the seam does not hold for two frames. No crossfade, no interpolation, no time remapping."
+  },
+  "gpu": "AMD Radeon AI PRO R9700 (gfx1201)",
+  "generated_at": "2026-08-18T19:20:00-0700",
+  "defect_and_remedy": {
+    "observed": "the continuation reproduced the LTX final-latent-group corruption",
+    "remedy": "trimmed to 161 clean frames before joining, consistent with every other LTX run in this set"
+  }
+}

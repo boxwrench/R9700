@@ -509,10 +509,10 @@ pre code{white-space:pre}
       </div>
 
       <figure class="artslot">
-        <img src="assets/showcase-v2/hero-bx77-anchor-placeholder.webp" alt="BX-77 Boxwrench: a heavy robot knight in burnished gunmetal plate with brass-trimmed pauldrons, a recessed visor slit, and a hexagonal chest core.">
-        <figcaption class="artslot__tag">Plate 01 — placeholder</figcaption>
+        <img src="assets/showcase-v2/hero-bx77-anchor.webp" alt="BX-77 Boxwrench: a heavy robot knight in burnished gunmetal plate with brass-trimmed pauldrons, a recessed visor slit, and a hexagonal chest core.">
+        <figcaption class="artslot__tag">Plate 01 &mdash; the conditioning anchor</figcaption>
       </figure>
-      <p class="caption artslot__cap">Standing in for the final hero plate. Target slot 16:7 on desktop, 3:2 on mobile — see <a href="https://github.com/boxwrench/R9700/blob/main/showcase/media-spec.md">showcase/media-spec.md</a>.</p>
+      <p class="caption artslot__cap">BX-77. This exact image is the reference every conditioned run below is built on — the first frame of run B, the image reference of run C, and the guide frame of run E. Runs A and D never see it, which is the whole comparison.</p>
     </section>
 
     <!-- ============ 3. HEADLINE FINDINGS ============ -->
@@ -553,10 +553,10 @@ pre code{white-space:pre}
       <p class="bridge__turn">So we ran one final creative session.</p>
     </section>
 
-    <!-- ============ 5. REAL SESSION ============ -->
+    <!-- ============ 5. BENCHMARK SEQUENCE ============ -->
     <section class="section" aria-labelledby="session-title">
       <div class="section__head">
-        <h2 class="section__title" id="session-title">One session, six runs</h2>
+        <h2 class="section__title" id="session-title">The benchmark sequence</h2>
         <span class="label label--muted">2026.08.18 &middot; gfx1201</span>
       </div>
       <p class="prose measure" style="margin-top:var(--space-6)">Four production workflows, executed back to back in one long-lived ComfyUI process. Every wall time below is the measured time for that run in this sequence — not a best-of, not a cold-start figure carried over from the optimization campaign. This is the timing record; the video from these runs was short by design and has been retired in favour of the full-length renders below.</p>
@@ -615,7 +615,7 @@ pre code{white-space:pre}
     </section>
 
 
-    <!-- ============ 5b. SHOWCASE RENDERS ============ -->
+    <!-- ============ 6. SHOWCASE RENDERS ============ -->
     <section class="section" aria-labelledby="showcase-title">
       <div class="section__head">
         <h2 class="section__title" id="showcase-title">The showcase renders</h2>
@@ -911,6 +911,57 @@ Important constraints: Preserve identity aggressively. Do not redesign the chara
           </div>
         </details>
       </article>
+      <div class="transition"><span class="transition__label">&darr; Past the window</span></div>
+      <article class="run" aria-labelledby="v2-continuation">
+        <div class="run__head">
+          <p class="run__no">&mdash;</p>
+          <div>
+            <h3 class="run__model" id="v2-continuation">Continuation</h3>
+            <p class="run__piece">Two clips, joined at the frame</p>
+          </div>
+          <p class="run__wall"><span class="run__wall-num">14.55<span class="u">s</span></span><span class="run__wall-lab">Longest</span></p>
+        </div>
+
+        <p class="run__note prose" style="margin-top:var(--space-5)">Both models are bounded &mdash; H3 by its frame grid, LTX by the sequence length that stays coherent. Neither is bounded at the story. So the last frame of a finished clip becomes the first frame of the next one, and the two are joined.</p>
+        <p class="run__note prose">The joins measure 3.56 and 3.03 out of 255 &mdash; inside codec noise. The continuation reproduces the frame it was handed almost exactly, so these read as one continuous take rather than a cut. The duplicated frame is dropped before joining; there is no crossfade, no interpolation and no time remapping.</p>
+
+        <figure class="slot">
+          <div class="slot__frame">
+            <span class="slot__tag">Observatory, extended</span>
+            <video controls preload="none" playsinline
+                   poster="assets/showcase-v2/09-h3-observatory-extended.jpg"
+                   aria-label="Observatory, extended, two generations joined at the seam">
+              <source src="assets/media-v2/09-h3-observatory-extended.mp4" type="video/mp4">
+            </video>
+          </div>
+          <figcaption>
+            <span class="caption">14.546 s &middot; 349 frames &middot; seam at 7.29 s. The light lifts from the gauntlet and leaves through the aperture. Audio carries across the seam.</span>
+            <span class="caption"><a href="assets/media-v2/09-h3-observatory-extended.mp4">open source file &rarr;</a></span>
+          </figcaption>
+        </figure>
+
+        <figure class="slot">
+          <div class="slot__frame">
+            <span class="slot__tag">The Artifact Forge, extended</span>
+            <video controls preload="none" playsinline
+                   poster="assets/showcase-v2/10-ltx-artifact-forge-extended.jpg"
+                   aria-label="The Artifact Forge, extended, two generations joined at the seam">
+              <source src="assets/media-v2/10-ltx-artifact-forge-extended.mp4" type="video/mp4">
+            </video>
+          </div>
+          <figcaption>
+            <span class="caption">13.375 s &middot; 321 frames &middot; seam at 6.71 s. The ingot comes off the anvil and is carried to the molten channel. LTX, so no audio.</span>
+            <span class="caption"><a href="assets/media-v2/10-ltx-artifact-forge-extended.mp4">open source file &rarr;</a></span>
+          </figcaption>
+        </figure>
+
+
+        <div class="run__foot">
+          <p class="cfg"><span>H3: 1091.0&nbsp;s total</span><span>LTX: 126.42&nbsp;s total</span><span>seed 8112027</span></p>
+          <p class="run__note prose">The cost gap holds at length. Fourteen and a half seconds of H3 with audio took 1091.0 s across both halves; thirteen and a bit of LTX took 126.42 s. Roughly seventeen to one, for the same shape of picture.</p>
+        </div>
+      </article>
+
       <div class="transition"><span class="transition__label">&darr; Video &rarr; Music</span></div>
       <article class="music" aria-labelledby="v2-run-04">
         <div class="music__head">
@@ -966,10 +1017,10 @@ Carry the signal, deny the end</div>
           </div>
         </details>
       </article>
-<p class="band__note" style="margin-top:var(--space-7)">Seven renders, 1778.76 s of measured generation wall time on one R9700. Every figure above is read out of <a href="https://github.com/boxwrench/R9700/tree/main/showcase/metadata-v2">showcase/metadata-v2</a>, which also records what each run got wrong.</p>
+<p class="band__note" style="margin-top:var(--space-7)">Nine renders, 2378.34 s of measured generation wall time on one R9700. Every figure above is read out of <a href="https://github.com/boxwrench/R9700/tree/main/showcase/metadata-v2">showcase/metadata-v2</a>, which also records what each run got wrong.</p>
     </section>
 
-    <!-- ============ 6. WHAT TO CHECK ============ -->
+    <!-- ============ 7. WHAT TO CHECK ============ -->
     <section class="section" aria-labelledby="weird-title">
       <div class="section__head">
         <h2 class="section__title" id="weird-title">We found some weird stuff.</h2>
@@ -1010,7 +1061,7 @@ Carry the signal, deny the end</div>
       <p class="more"><a href="https://github.com/boxwrench/R9700/blob/main/TROUBLESHOOTING.md">Full troubleshooting field guide &rarr;</a></p>
     </section>
 
-    <!-- ============ 7. KNOWN-GOOD STATE ============ -->
+    <!-- ============ 8. KNOWN-GOOD STATE ============ -->
     <section class="section" aria-labelledby="stack-title">
       <div class="section__head">
         <h2 class="section__title" id="stack-title">Known-good state</h2>
@@ -1071,7 +1122,7 @@ Carry the signal, deny the end</div>
       </div>
     </section>
 
-    <!-- ============ 8. METHOD ============ -->
+    <!-- ============ 9. METHOD ============ -->
     <section class="section" aria-labelledby="method-title">
       <div class="section__head">
         <h2 class="section__title" id="method-title">How we worked</h2>
@@ -1087,7 +1138,7 @@ Carry the signal, deny the end</div>
       </ol>
     </section>
 
-    <!-- ============ 9. REPRODUCE ============ -->
+    <!-- ============ 10. REPRODUCE ============ -->
     <section class="section" aria-labelledby="repro-title">
       <div class="section__head">
         <h2 class="section__title" id="repro-title">Make your R9700 do this.</h2>
@@ -1107,13 +1158,13 @@ Carry the signal, deny the end</div>
       </div>
     </section>
 
-    <!-- ============ 10. CLOSING ART ============ -->
+    <!-- ============ 11. CLOSING ART ============ -->
     <section class="closing" aria-labelledby="closing-title">
       <h2 class="label label--brass" id="closing-title">End of field report</h2>
-      <div class="artslot artslot--wide artslot--empty" style="margin-top:var(--space-5)" role="img" aria-label="Reserved slot for the closing plate, not yet produced.">
-        <p class="artslot__note">Closing plate pending &mdash; wide banner, 3:1 desktop / 3:2 mobile</p>
-        <span class="artslot__tag">Plate 02 &mdash; placeholder</span>
-      </div>
+      <figure class="artslot artslot--wide" style="margin-top:var(--space-5)">
+        <img src="assets/showcase-v2/closing-plate-observatory.webp" alt="BX-77 standing alone in profile at the centre of the dark observatory chamber, small against the architecture, lit by cold starlight from a tall aperture and a single low amber lamp." loading="lazy">
+        <figcaption class="artslot__tag">Plate 02 &mdash; from run C</figcaption>
+      </figure>
       <div class="closing__copy">
         <p class="closing__mark">BX-77 // End of field report</p>
         <p class="meta">Known-good state preserved.</p>

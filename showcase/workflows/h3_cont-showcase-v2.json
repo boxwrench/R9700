@@ -1,0 +1,171 @@
+{
+  "1": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "minimax_h3_fl2va_pruned_fp8_scaled.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "2": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "qwen3vl_32b_minimax_h3_fp8.safetensors",
+      "type": "minimax",
+      "device": "default"
+    }
+  },
+  "3": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+    }
+  },
+  "4": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "minimax_h3_audio_vae_fp32.safetensors"
+    }
+  },
+  "5": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "cont-h3-observatory-last.png"
+    }
+  },
+  "6": {
+    "class_type": "MiniMaxH3ImageToVideo",
+    "inputs": {
+      "clip": [
+        "2",
+        0
+      ],
+      "vae": [
+        "3",
+        0
+      ],
+      "prompt": "For the target video, at 0.00 seconds into the target video, <Picture 1> is fully referenced. The target video continues directly from that exact frame with no cut, no jump and no change of location, lighting, lens or subject. Treat <Picture 1> as the immediately preceding moment, not as a new establishing shot.\n\nintegrated_multimodal_description:\n\nShot 1, 0.00s to 2.60s. Continuing without interruption from <Picture 1>. The heavy armoured robot knight holds the single point of cold white light above its open gauntlet. Burnished gunmetal plate armour with warm brass trim, rounded knight close-helm with a deeply recessed horizontal visor slit and a faint cold red internal optic, tall reinforced gorget collar, tiered brass-rimmed pauldrons, hexagonal mechanical core centred on the chestplate. The point of light slowly brightens and begins to rise from the palm. The camera holds still. Fine dust drifts through the cold starlight from the aperture behind. The chest core pulses once, softly, in time with the light.\n\nShot 2, 2.60s to 4.80s. The point of light lifts clear of the gauntlet and travels slowly upward and away toward the tall aperture open onto deep space. The character lowers its hand with mechanical deliberation and raises its head to follow the light, the visor slit catching a thin cold highlight. The camera tilts up very gently to follow, revealing more of the vast dark chamber and the starfield beyond the aperture. Faint cyan telemetry arcs illuminate briefly along the curved wall behind the character, travelling outward, then fade.\n\nShot 3, 4.80s to 7.00s. The point of light passes through the aperture and is gone into the starfield. The chamber returns to darkness, lit only by the cold starlight and one low amber instrument lamp. The character lowers its head and stands motionless, facing the empty aperture. The camera settles and holds. The final frame rests on the still figure in the dark, the transmission finished.\n\noverall_soundscape: A vast cold quiet interior. Very low sub-bass room tone with a long stone reverberation tail. The soft mechanical servo articulation of armour as the hand lowers and the head lifts. A faint sustained high shimmer while the light rises, thinning to nothing as it passes through the aperture. A single distant electronic tick from the instrument lamp. No wind, no crowd, no machinery clatter, no speech.\n\nnon_diegetic_music: Extremely restrained. A single sustained low bowed drone continuing from before, holding without swelling, thinning gradually across the final two seconds until only room tone remains. One quiet high harmonic as the light passes through the aperture. No percussion, no rhythm, no build, no cinematic hit.\n\nImportant constraints: Preserve identity aggressively. Do not redesign the character. The helmet, visor slit, gorget, pauldrons, brass trim and hexagonal chest core must remain exactly as in <Picture 1> for the full duration. No extra limbs, no armour mutations, no face drift, no helmet opening, no exposed human face, no scene change, no cut, no sudden camera moves, no exaggerated action, no chaotic effects. No text, no numbers, no user interface and no readouts anywhere in the frame. Motion must remain physically plausible, premium and controlled.",
+      "width": 864,
+      "height": 480,
+      "length": 175,
+      "first_frame": [
+        "5",
+        0
+      ]
+    }
+  },
+  "7": {
+    "class_type": "RandomNoise",
+    "inputs": {
+      "noise_seed": 8112027
+    }
+  },
+  "8": {
+    "class_type": "KSamplerSelect",
+    "inputs": {
+      "sampler_name": "res_multistep"
+    }
+  },
+  "9": {
+    "class_type": "BasicScheduler",
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "scheduler": "simple",
+      "steps": 20,
+      "denoise": 1.0
+    }
+  },
+  "10": {
+    "class_type": "BasicGuider",
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "conditioning": [
+        "6",
+        0
+      ]
+    }
+  },
+  "11": {
+    "class_type": "SamplerCustomAdvanced",
+    "inputs": {
+      "noise": [
+        "7",
+        0
+      ],
+      "guider": [
+        "10",
+        0
+      ],
+      "sampler": [
+        "8",
+        0
+      ],
+      "sigmas": [
+        "9",
+        0
+      ],
+      "latent_image": [
+        "6",
+        1
+      ]
+    }
+  },
+  "12": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "11",
+        0
+      ],
+      "vae": [
+        "3",
+        0
+      ]
+    }
+  },
+  "13": {
+    "class_type": "VAEDecodeAudio",
+    "inputs": {
+      "samples": [
+        "11",
+        0
+      ],
+      "vae": [
+        "4",
+        0
+      ]
+    }
+  },
+  "14": {
+    "class_type": "CreateVideo",
+    "inputs": {
+      "images": [
+        "12",
+        0
+      ],
+      "audio": [
+        "13",
+        0
+      ],
+      "fps": 24.0,
+      "bit_depth": 8
+    }
+  },
+  "15": {
+    "class_type": "SaveVideo",
+    "inputs": {
+      "video": [
+        "14",
+        0
+      ],
+      "filename_prefix": "r9700-showcase-v2/09-h3-cont-observatory",
+      "format": "mp4",
+      "codec": "h264"
+    }
+  }
+}
