@@ -1,0 +1,173 @@
+{
+  "1": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "ltx-2.5-22b-distilled-transformer-comfy-int8-convrot.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "2": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "gemma4-12b-with-proj-ltx-2.5-comfy-int8-convrot.safetensors",
+      "type": "ltxv",
+      "device": "default"
+    }
+  },
+  "3": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "ltx-2.5-video-vae-bf16.safetensors"
+    }
+  },
+  "4": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "ltx-2.5-audio-vae-bf16.safetensors"
+    }
+  },
+  "5": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": [
+        "2",
+        0
+      ],
+      "text": "Traditional 2D hand-drawn Japanese anime, cel animation still, flat cel shading. Bold black ink outlines of varying weight around every form. Hard-edged two-tone shadows, no soft gradients, no photographic lighting falloff. Limited flat colour palette, painted watercolour background art. Cel-shaded anime style. A heavy armoured robot knight stands in a vast cold observatory chamber at the end of time, facing a tall aperture open onto a deep starfield. Hand-drawn Japanese animation aesthetic: bold clean ink linework, flat cel shading with hard-edged shadow shapes, limited colour banding instead of smooth gradients, painted matte background art, subtle paper grain. Burnished gunmetal armour rendered as flat grey planes with crisp white specular highlights and warm brass trim picked out in solid gold. A rounded knight close-helm with a deep horizontal visor slit and a single glowing red optic. Cold blue starlight from the aperture against one warm amber lamp, drawn as distinct pools of flat colour rather than photographic falloff. Thin cyan geometric telemetry rings on the chamber wall drawn as clean vector arcs. Cinematic anime key-art composition, high production value, studio quality, dramatic but restrained, film grain."
+    }
+  },
+  "6": {
+    "class_type": "CLIPTextEncode",
+    "inputs": {
+      "clip": [
+        "2",
+        0
+      ],
+      "text": "photorealistic, photograph, 3d render, cgi, realistic skin texture, smooth photographic gradients, live action, text, letters, numbers, watermark, signature, user interface, subtitles, deformed anatomy, extra limbs, blurry, low quality, jitter, stutter, chromatic aberration"
+    }
+  },
+  "8": {
+    "class_type": "RandomNoise",
+    "inputs": {
+      "noise_seed": 8112026
+    }
+  },
+  "9": {
+    "class_type": "KSamplerSelect",
+    "inputs": {
+      "sampler_name": "res_multistep"
+    }
+  },
+  "10": {
+    "class_type": "BasicScheduler",
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "scheduler": "simple",
+      "steps": 8,
+      "denoise": 0.85
+    }
+  },
+  "11": {
+    "class_type": "BasicGuider",
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "conditioning": [
+        "5",
+        0
+      ]
+    }
+  },
+  "12": {
+    "class_type": "SamplerCustomAdvanced",
+    "inputs": {
+      "noise": [
+        "8",
+        0
+      ],
+      "guider": [
+        "11",
+        0
+      ],
+      "sampler": [
+        "9",
+        0
+      ],
+      "sigmas": [
+        "10",
+        0
+      ],
+      "latent_image": [
+        "21",
+        0
+      ]
+    }
+  },
+  "13": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "12",
+        0
+      ],
+      "vae": [
+        "3",
+        0
+      ]
+    }
+  },
+  "15": {
+    "class_type": "CreateVideo",
+    "inputs": {
+      "images": [
+        "13",
+        0
+      ],
+      "fps": 24.0,
+      "bit_depth": 8
+    }
+  },
+  "16": {
+    "class_type": "SaveVideo",
+    "inputs": {
+      "video": [
+        "15",
+        0
+      ],
+      "filename_prefix": "r9700-showcase-v2/07b-ltx-v2v-anime-observatory-strong",
+      "format": "mp4",
+      "codec": "h264"
+    }
+  },
+  "20": {
+    "class_type": "VHS_LoadVideoPath",
+    "inputs": {
+      "video": "/ai/artifacts/runs/minimax-h3/r9700-showcase-v2/05-h3-r2v-observatory_00001_.mp4",
+      "force_rate": 24.0,
+      "custom_width": 864,
+      "custom_height": 480,
+      "frame_load_cap": 169,
+      "skip_first_frames": 0,
+      "select_every_nth": 1,
+      "format": "None"
+    }
+  },
+  "21": {
+    "class_type": "VAEEncode",
+    "inputs": {
+      "pixels": [
+        "20",
+        0
+      ],
+      "vae": [
+        "3",
+        0
+      ]
+    }
+  }
+}
