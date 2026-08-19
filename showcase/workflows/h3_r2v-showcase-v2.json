@@ -1,0 +1,186 @@
+{
+  "1": {
+    "class_type": "UNETLoader",
+    "inputs": {
+      "unet_name": "minimax_h3_ref2va_pruned_fp8_scaled.safetensors",
+      "weight_dtype": "default"
+    }
+  },
+  "2": {
+    "class_type": "CLIPLoader",
+    "inputs": {
+      "clip_name": "qwen3vl_32b_minimax_h3_fp8.safetensors",
+      "type": "minimax",
+      "device": "default"
+    }
+  },
+  "3": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+    }
+  },
+  "4": {
+    "class_type": "VAELoader",
+    "inputs": {
+      "vae_name": "minimax_h3_audio_vae_fp32.safetensors"
+    }
+  },
+  "5": {
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "bx77-anchor.png"
+    }
+  },
+  "6": {
+    "class_type": "MiniMaxH3ReferenceToVideo",
+    "inputs": {
+      "clip": [
+        "2",
+        0
+      ],
+      "vae": [
+        "3",
+        0
+      ],
+      "prompt": "For the target video, <Picture 1> is the authoritative visual reference for the character. <Audio 1> is the authoritative reference for the speaking voice: match its timbre, its synthetic metallic resonance, and its measured, unhurried cadence.\n\nintegrated_multimodal_description:\n\nShot 1, 0.00s to 2.40s. Wide establishing shot inside a high cold observatory carved into dark rock at the end of time. The character from <Picture 1> stands in profile at the centre of a vast circular chamber, small against the architecture, facing a tall aperture open to deep space. Burnished gunmetal plate armour with warm brass trim, a heavy rounded knight close-helm with a deeply recessed horizontal visor slit showing a faint cold red internal optic trace, tall reinforced gorget collar, tiered pauldrons with brass rims, hexagonal mechanical core centred on the chestplate. The light is cold: pale blue starlight falling through the aperture across the floor, with a single low amber instrument lamp behind the character providing the only warmth. Fine dust drifts slowly through the starlight. The camera is locked and still. No movement except the dust and a slow, almost imperceptible pulse in the chest core.\n\nShot 2, 2.40s to 4.80s. Slow, controlled dolly forward to a medium shot as the character turns its head toward the camera with mechanical deliberation. Behind it, along the curved chamber wall, faint engraved concentric rings and thin geometric telemetry traces illuminate one after another in cold cyan, travelling outward and away from the character, reading as a transmission being sent rather than received. The traces stay behind the subject and never cross the silhouette. The character begins to speak, calm and level, in the voice of <Audio 1>: \"This is Boxwrench.\"\n\nShot 3, 4.80s to 7.00s. Composed medium-close shot, the camera settling to a stop. The character raises one armoured gauntlet slowly and holds it steady, palm open, a single compact point of cold white light resting above it. The cyan traces on the wall fade to darkness one by one behind it until only the starlight and the amber lamp remain. The character finishes speaking, unhurried and final, in the voice of <Audio 1>: \"The signal holds. Proceed with precision.\" The final frame holds still on the character and the point of light.\n\noverall_soundscape: A vast, cold, quiet interior. Very low sub-bass room tone with a long stone reverb tail. Occasional faint metallic settling and the soft mechanical servo articulation of armour as the character turns and raises its hand. A distant, sparse electronic tick from the instrument lamp. No wind, no crowd, no machinery clatter. The speaking voice sits close and clear in the centre of the field, dry against the large reverberant space behind it, with the synthetic metallic character of <Audio 1> preserved exactly.\n\nnon_diegetic_music: Extremely restrained. A single sustained low cello or bowed metal drone, entering under shot 2 and holding without swelling. One quiet high harmonic tone appears when the point of light is revealed in shot 3. No percussion, no rhythm, no build, no cinematic hit. The music must never rise above the voice.\n\nImportant constraints: Preserve identity aggressively. Do not redesign the character. The helmet, visor slit, gorget, pauldrons, brass trim and hexagonal chest core must remain exactly as in <Picture 1> for the full duration. No extra limbs, no armour mutations, no face drift, no helmet opening, no exposed human face, no sudden camera moves, no exaggerated action, no chaotic effects, no random scene change, no loss of fine material detail. No text, no numbers, no user interface, no readouts, and no captions anywhere in the frame. Motion should remain physically plausible, premium, and controlled throughout.",
+      "width": 864,
+      "height": 480,
+      "length": 175,
+      "audio_vae": [
+        "4",
+        0
+      ],
+      "ref_image_size": "match",
+      "ref_images.ref_image_0": [
+        "5",
+        0
+      ],
+      "ref_audios.ref_audio_0": [
+        "20",
+        0
+      ]
+    }
+  },
+  "7": {
+    "class_type": "RandomNoise",
+    "inputs": {
+      "noise_seed": 8112026
+    }
+  },
+  "8": {
+    "class_type": "KSamplerSelect",
+    "inputs": {
+      "sampler_name": "res_multistep"
+    }
+  },
+  "9": {
+    "class_type": "BasicScheduler",
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "scheduler": "simple",
+      "steps": 20,
+      "denoise": 1.0
+    }
+  },
+  "10": {
+    "class_type": "BasicGuider",
+    "inputs": {
+      "model": [
+        "1",
+        0
+      ],
+      "conditioning": [
+        "6",
+        0
+      ]
+    }
+  },
+  "11": {
+    "class_type": "SamplerCustomAdvanced",
+    "inputs": {
+      "noise": [
+        "7",
+        0
+      ],
+      "guider": [
+        "10",
+        0
+      ],
+      "sampler": [
+        "8",
+        0
+      ],
+      "sigmas": [
+        "9",
+        0
+      ],
+      "latent_image": [
+        "6",
+        1
+      ]
+    }
+  },
+  "12": {
+    "class_type": "VAEDecode",
+    "inputs": {
+      "samples": [
+        "11",
+        0
+      ],
+      "vae": [
+        "3",
+        0
+      ]
+    }
+  },
+  "13": {
+    "class_type": "VAEDecodeAudio",
+    "inputs": {
+      "samples": [
+        "11",
+        0
+      ],
+      "vae": [
+        "4",
+        0
+      ]
+    }
+  },
+  "14": {
+    "class_type": "CreateVideo",
+    "inputs": {
+      "images": [
+        "12",
+        0
+      ],
+      "audio": [
+        "13",
+        0
+      ],
+      "fps": 24.0,
+      "bit_depth": 8
+    }
+  },
+  "15": {
+    "class_type": "SaveVideo",
+    "inputs": {
+      "video": [
+        "14",
+        0
+      ],
+      "filename_prefix": "r9700-showcase-v2/05-h3-r2v-observatory",
+      "format": "mp4",
+      "codec": "h264"
+    }
+  },
+  "20": {
+    "class_type": "LoadAudio",
+    "inputs": {
+      "audio": "cylon-voice-ref-12s.wav"
+    }
+  }
+}

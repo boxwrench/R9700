@@ -1,0 +1,64 @@
+{
+  "run_id": "04-music3-signal-against-the-end",
+  "set": "showcase-v2",
+  "name": "MiniMax Music 3 \u2014 Signal Against the End",
+  "workflow": "music3",
+  "workflow_file": "showcase/workflows/music3-showcase-v2.json",
+  "prompt_id": "b05062e1-b553-432c-a634-5c333b203511",
+  "wall_seconds": 50.82,
+  "wall_seconds_source": "ComfyUI /history execution_start -> execution_success",
+  "artifact": "/ai/artifacts/runs/minimax-h3/r9700-showcase-v2/04-music3-signal-against-the-end_00001.flac",
+  "artifact_bytes": 2754950,
+  "parameters": {
+    "seconds": 30.0,
+    "max_duration": 30.0,
+    "cfg_scale": 1.5,
+    "top_k": 50,
+    "seed": 8112080,
+    "steps": 20,
+    "sampler": "res_multistep",
+    "scheduler": "simple",
+    "noise_seed": 8112080
+  },
+  "caption": "Slow, solemn dark-ambient orchestral piece with a heavy industrial undertow. Deep bowed cello and low brass drone, sparse detuned analog synthesizer pads, distant metallic percussion struck once or twice per bar with long reverb tails. A cold, wide, cathedral-sized space. Restrained and patient, never triumphant, never cinematic-trailer. Mid-tempo around 70 BPM, minor key. A single clear low male synthetic voice, measured and unhurried, more intoned than sung. Analog tape warmth, no bright digital sheen, no dance percussion, no distorted guitars.",
+  "lyrics": "[verse]\nFar past the last of the burning suns\nCold runs the dark where the counting is done\nI hold the record, I hold the flame\nI speak it backward, I speak your name\n\n[chorus]\nCarry the signal, deny the end\nDown through the ruin, down through the bend\nNothing is lost that is spoken again\nCarry the signal, deny the end",
+  "prompt_file": "showcase/prompts/04-music3-signal-against-the-end.md",
+  "schema_note": "The live MiniMaxMusic3TextEncode takes `caption` and `max_duration`; the saved production workflow's `prompt` and `max_audio_frames` keys are legacy. EmptyMiniMaxMusic3LatentAudio also requires an explicit `batch_size` (first queue attempt returned required_input_missing and was corrected). production/workflows/music3.json was NOT modified.",
+  "output_verified": {
+    "container": "flac",
+    "audio_codec": "flac",
+    "channels": 2,
+    "sample_rate": 44100,
+    "duration_s": 29.989
+  },
+  "loudness": {
+    "integrated_lufs": -17.8,
+    "loudness_range_lu": 9.3,
+    "true_peak_dbfs": -3.2,
+    "mean_volume_db": -21.3,
+    "max_volume_db": -3.2,
+    "reading": "real programme material, not silence and not a decode failure; no clipping"
+  },
+  "assets": {
+    "waveform": "docs/assets/showcase-v2/04-music3-signal-against-the-end-waveform.png",
+    "waveform_dimensions": [
+      1200,
+      300
+    ],
+    "spectrum": "docs/assets/showcase-v2/04-music3-signal-against-the-end-spectrum.png",
+    "spectrum_dimensions": [
+      1200,
+      400
+    ],
+    "note": "waveform is rendered dark-on-light and inverted by CSS on the page's dark record-sleeve block"
+  },
+  "duration_note": "The earlier acceptance run capped at 15.0 s. That was a workflow parameter, not a model limit: EmptyMiniMaxMusic3LatentAudio accepts up to 360 s and MiniMaxMusic3TextEncode's max_duration matches. 30 s was requested and delivered at 29.989 s \u2014 the model may end earlier than max_duration, and here it effectively used the full budget.",
+  "cost_note": "50.82 s wall for 30 s of stereo audio. This is by far the cheapest run in the set \u2014 roughly a ninth of the wall time of any of the three 864x480 H3 video runs.",
+  "models": [
+    "minimax_music3_dit_int8_convrot.safetensors",
+    "minimax_music3_text_encoder_pruned_int8_convrot.safetensors",
+    "minimax_music3_dav.safetensors"
+  ],
+  "gpu": "AMD Radeon AI PRO R9700 (gfx1201)",
+  "generated_at": "2026-08-18T18:23:00-0700"
+}
