@@ -11,6 +11,13 @@
 *.mov
 *.mkv
 
+# Exception: the published page's own media. GitHub serves release assets as
+# application/octet-stream, which browsers refuse to decode in a <video>
+# element, so the clips have to be served by Pages to be playable at all.
+# Scoped deliberately to the two page media directories, ~10 MB total.
+!docs/assets/media/*.mp4
+!docs/assets/media-v2/*.mp4
+
 # Local runtime state.
 .env
 .env.*
