@@ -157,7 +157,7 @@ Baseline workflows are in [`workflows/`](workflows/); their SHA-256 values are i
 | 540p | 131.37 s | 106.39 s | **19.0% faster** |
 | 720p | 188.98 s | 223.03 s | **18.0% slower** |
 
-A genuine crossover, not a flat win for either card, and not yet explained by profiling. Do not compare these numbers against the ComfyUI LTX 2.5 records below — different app, different request shape, no INT8-ConvRot/Gemma-floor tuning applied. Full record: [`ltx-desktop-rocm-walltime-20260823.md`](docs/ltx-desktop-rocm-walltime-20260823.md).
+A genuine crossover, not a flat win for either card. Plausibly explained by raw specs, not software immaturity: the 7900 XT has ~31% more shader throughput and ~25% more bandwidth despite being the older card; neither card used FP8 here, so the R9700's peak-matrix-throughput advantage wasn't in play. Not confirmed by profiling. Do not compare these numbers against the ComfyUI LTX 2.5 records below — different app, different request shape, no INT8-ConvRot/Gemma-floor tuning applied. Full record: [`ltx-desktop-rocm-walltime-20260823.md`](docs/ltx-desktop-rocm-walltime-20260823.md).
 
 ## Data and measurements
 

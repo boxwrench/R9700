@@ -39,7 +39,22 @@ Resolution scaling within each card (540p -> 720p):
 
 ## Interpretation
 
-The R9700 is faster at 540p and slower at 720p than the 7900 XT — a crossover, not a flat win or loss for either card. This is one clean sample per cell, not a variance study; no component-level breakdown (encoder load, conditioning, sampling, decode) was captured, since `ltx2_server.py`'s own timing log reports `load=0.00s, text=0.00s` for both cards under `streaming_models_loading` and puts everything under `inference`. No profiling was done to explain *why* the R9700 scales worse with resolution here — candidates worth checking before drawing a hardware conclusion include RDNA4 kernel/tuning maturity in this ROCm build for the shapes involved, streaming-mode staging overhead, and memory bandwidth at the larger tile size, but none of that has been measured. Treat this as a discriminator that a difference exists, not an explanation of its cause.
+The R9700 is faster at 540p and slower at 720p than the 7900 XT — a crossover, not a flat win or loss for either card. This is one clean sample per cell, not a variance study; no component-level breakdown (encoder load, conditioning, sampling, decode) was captured, since `ltx2_server.py`'s own timing log reports `load=0.00s, text=0.00s` for both cards under `streaming_models_loading` and puts everything under `inference`. No GPU-level profiling (rocprof, etc.) was done on this run.
+
+**A spec-based explanation is plausible and doesn't require invoking software immaturity.** Per vendor/TechPowerUp specs, the 7900 XT (RDNA3, Navi 31) is not the weaker card on raw shader throughput or bandwidth despite being the older generation:
+
+| | RX 7900 XT (RDNA3) | R9700 (RDNA4) |
+|---|---:|---:|
+| Compute units | 84 | 64 |
+| Stream processors | 5,376 | 4,096 |
+| Memory bus | 320-bit | 256-bit |
+| Bandwidth | 800 GB/s | 640 GB/s |
+| Boost clock | ~2,400 MHz | ~2,920 MHz |
+| VRAM | 20 GB | 32 GB |
+
+The 7900 XT has ~31% more shader throughput and ~25% more memory bandwidth. The R9700's real advantages are VRAM capacity and a much higher *peak* dedicated-matrix-unit throughput — but this run never exercised that advantage: `fp8_capable=False` forced bf16/`streaming_models_loading` on both cards (see the two-bugs section above), so neither card used its FP8 path here. A resolution jump that shifts the workload further into compute/bandwidth-bound territory (720p vs 540p) would plausibly favor the CU-heavier, higher-bandwidth 7900 XT, while a smaller problem size at 540p — more dispatch/overhead-bound — would let the higher-clocked R9700 edge ahead. This is a hypothesis consistent with the measured crossover, not a confirmed mechanism; it has not been isolated by profiling.
+
+One related, real software gap was found but does **not** apply to this specific result: [ROCm/TransformerEngine#520](https://github.com/ROCm/TransformerEngine/issues/520) documents `gfx1201` (this exact R9700) missing from AITER's architecture table in ROCm 7.2.1, causing a silent FP8→FP32 fallback with ~50% throughput loss. That's a real, confirmed `gfx1201` kernel-dispatch gap in the ROCm 7.2.x cycle — but this LTX-Desktop-ROCm run used no FP8 on either card, and LTX-Desktop-ROCm/PyTorch's FP8 dispatch here doesn't go through AITER at all, so it's cited as context on gfx1201 software maturity generally, not as a cause of this particular number.
 
 ## Comparison boundary
 
