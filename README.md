@@ -148,9 +148,20 @@ Baseline workflows are in [`workflows/`](workflows/); their SHA-256 values are i
 
 - [dual-GPU record](docs/archive/dual-gpu-residency-20260812.md) · [compatibility pointer](docs/dual-gpu-residency.md)
 
+## Cross-GPU comparison — LTX-Desktop-ROCm (experimental, separate app stack)
+
+**EXPERIMENTAL, not a ComfyUI production config.** [LTX-Desktop-ROCm](https://github.com/boxwrench/LTX-Desktop-ROCm) is a separate community AMD/ROCm port of Lightricks' standalone LTX-Desktop FastAPI backend, bring-up work distinct from this repository's selected ComfyUI configuration. First cross-GPU wall-time comparison, one clean cold-process sample per cell, T2V, seed 42:
+
+| Resolution | 7900 XT (`gfx1100`, 20 GiB) | R9700 (`gfx1201`, 32 GiB) | R9700 vs 7900 XT |
+|---|---:|---:|---:|
+| 540p | 131.37 s | 106.39 s | **19.0% faster** |
+| 720p | 188.98 s | 223.03 s | **18.0% slower** |
+
+A genuine crossover, not a flat win for either card, and not yet explained by profiling. Do not compare these numbers against the ComfyUI LTX 2.5 records below — different app, different request shape, no INT8-ConvRot/Gemma-floor tuning applied. Full record: [`ltx-desktop-rocm-walltime-20260823.md`](docs/ltx-desktop-rocm-walltime-20260823.md).
+
 ## Data and measurements
 
-Generation: [H3 wall time](data/experimental/h3-walltime-20260818.tsv) · [LTX token floor](data/experimental/ltx25-token-floor-20260818.tsv) · [LTX wall time](data/experimental/ltx25-walltime-20260818.tsv) · [workflow transitions](data/experimental/workflow-transitions-20260818.tsv) · [Music 3 baseline](data/experimental/minimax-music3-baseline-20260818.tsv)
+Generation: [H3 wall time](data/experimental/h3-walltime-20260818.tsv) · [LTX token floor](data/experimental/ltx25-token-floor-20260818.tsv) · [LTX wall time](data/experimental/ltx25-walltime-20260818.tsv) · [workflow transitions](data/experimental/workflow-transitions-20260818.tsv) · [Music 3 baseline](data/experimental/minimax-music3-baseline-20260818.tsv) · [LTX-Desktop-ROCm cross-GPU wall time](data/experimental/ltx-desktop-rocm-walltime-20260823.tsv)
 
 Inference: [Qwen3.8 quant](data/experimental/qwen3-8-27b-quant.tsv) · [Qwen3.8 sweep](data/experimental/qwen3-8-27b-sweep.tsv) · [Qwen3.8 KV cache](data/experimental/qwen3-8-27b-kv-cache.tsv) · [MTP proposer](data/experimental/qwen3-8-27b-mtp-proposer.tsv) · [IQ4_XS pipeline](data/experimental/qwen3-8-27b-iq4xs-pipeline-stats.tsv) · [IQ4_XS path](data/experimental/qwen3-8-27b-iq4xs-path.tsv) · [DeepSeek V4](data/experimental/deepseek-v4-flash.tsv)
 

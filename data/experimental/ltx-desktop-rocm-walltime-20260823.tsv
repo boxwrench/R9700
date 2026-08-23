@@ -1,0 +1,5 @@
+run_id	app	gpu	gfx_arch	vram_total_gib	resolution	width	height	duration_s	fps	model	local_generation_mode	fp8_capable	wall_s	server_reported_s	video_sha256	notes
+7900xt-540p-cold	LTX-Desktop-ROCm	Radeon RX 7900 XT	gfx1100	20	540p	1024	576	5	24	fast	streaming_models_loading	false	131.37	131.30	eb31be66b096b4c98333f418ccf9b429bf094b20dc8fcda4b52fac28d1f10950	cold process, fresh model load, T2V, seed 42
+r9700-540p-cold	LTX-Desktop-ROCm	AMD Radeon AI PRO R9700	gfx1201	32	540p	1024	576	5	24	fast	streaming_models_loading	false	106.39	106.33	eb334a49bd9e8ea6ad88698320daff169c5a2f4487c3f9ec8e3abba804cb81b4	cold process, fresh model load, T2V, seed 42
+7900xt-720p-cold	LTX-Desktop-ROCm	Radeon RX 7900 XT	gfx1100	20	720p	1280	704	5	24	fast	streaming_models_loading	false	188.98	188.91	9568af978ba099b0f56cc20ed4e1543495874494f34585b7da6be81856913a3d	cold process, fresh model load, T2V, seed 42
+r9700-720p-cold	LTX-Desktop-ROCm	AMD Radeon AI PRO R9700	gfx1201	32	720p	1280	704	5	24	fast	streaming_models_loading	false	223.03	222.97	ee5411f260bd4a72e4b10821c112ca18dbd26a1d9291bb166384904bf7e1bc54	cold process, fresh model load, T2V, seed 42

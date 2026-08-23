@@ -41,6 +41,10 @@ Common interpretation rules:
 - these are mostly one- or two-run engineering discriminators, not publication-grade variance studies
 - workloads with different geometry, frame count, step count, cache state, or model format must not be presented as direct before/after headline comparisons
 
+## 2026-08-23 LTX-Desktop-ROCm cross-GPU table
+
+[`ltx-desktop-rocm-walltime-20260823.tsv`](../data/experimental/ltx-desktop-rocm-walltime-20260823.tsv) records four cold-process wall-time samples (one per GPU x resolution cell) from a separate application stack, [LTX-Desktop-ROCm](https://github.com/boxwrench/LTX-Desktop-ROCm), not ComfyUI. Each row is one clean sample, not a mean; a discarded first pass at 540p (stale-server port collision) is described in [the companion doc](ltx-desktop-rocm-walltime-20260823.md) rather than included in the table. `video_sha256` is a full SHA-256 of the generated MP4, independently verified against the file, not copied blind from a log.
+
 ## Experimental dual-GPU table
 
 [The experimental nine-row table](../data/experimental/dual-gpu-residency.tsv) records three single-R9700 controls, three initial dual-GPU runs with aggressive offload, and three corrected dual-GPU residency runs. It uses the same timing boundary and derived ratio as the canonical table, while also recording topology, state, model placement, and source artifact hash. These single-pass measurements support an engineering decision; they are not publication-grade variance statistics.
