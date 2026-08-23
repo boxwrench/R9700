@@ -1,0 +1,69 @@
+{
+  "run_id": "04-music3-proceed-with-precision",
+  "set": "showcase-v2",
+  "name": "MiniMax Music 3 — Proceed with Precision",
+  "workflow": "music3",
+  "workflow_file": "showcase/workflows/music3-showcase-v2.json",
+  "prompt_id": "56db6344-1bc8-4c19-9a0c-9a9af569dad6",
+  "wall_seconds": 185.99,
+  "wall_seconds_source": "ComfyUI /history execution_start -> execution_success",
+  "artifact": "/ai/artifacts/runs/minimax-h3/audio/audio_minimax_music3_00012.mp3",
+  "artifact_bytes": 3156202,
+  "parameters": {
+    "seconds": 90.0,
+    "max_duration": 90.0,
+    "cfg_scale": 1.7,
+    "top_k": 50,
+    "seed": 1012263102365060,
+    "steps": 30,
+    "sampler": "euler",
+    "scheduler": "simple",
+    "noise_seed": 1012263102365060,
+    "tiled_decode": true,
+    "tile_size": 1536,
+    "tile_overlap": 64
+  },
+  "caption": "Brutal 1990s old-school death metal. Down-tuned buzzsaw guitars, tremolo-picked riffs and chugging palm-muted breakdowns, blast beats and double-kick drums, thick distorted bass. Deep guttural death growl vocals, low and monstrous, shouted gang backing vocals on the hook. Raw analog production, dry mix, no modern polish, no clean singing, no melodic choruses. Fast and heavy, around 180 BPM, minor key, with a half-time breakdown.",
+  "lyrics": "[Intro]\n[Solo lyrical cello, rising D minor melody]\n[Distorted guitars and galloping drums enter]\n\n[Verse]\nI walked the crooked road beneath a broken sky\nWhere every mile was measured by the things I left behind\nThe stones were cut by doubt, the bridges burned by fear\nBut every scar became a mark that brought the future near\n\n[Pre-Chorus]\nNo hand can turn the river\nNo king can still the tide\nThe past becomes a compass\nWhen purpose is your guide\n\n[Chorus]\nProceed with precision\nThrough the fire and the noise\nProceed with precision\nLet the future hear your voice\nFrom the crooked path behind us\nTo the line we now envision\nWe rise, we build, we burn\nProceed with precision\n\n[Verse]\nThe old machines are sleeping in the dust beneath the rain\nTheir iron hearts remember every failure, every name\nBut in the pulse of wire and light, a clearer compass turns\nA thousand lost equations become lessons as we learn\n\n[Pre-Chorus]\nThe wheel is still in motion\nThe dark gives way to dawn\nThe map is drawn in action\nThe road is never gone\n\n[Chorus]\nProceed with precision\nThrough the fire and the noise\nProceed with precision\nLet the future hear your voice\nFrom the crooked path behind us\nTo the line we now envision\nWe rise, we build, we burn\nProceed with precision\n\n[Solo]\n[Cello and harmonized lead guitar exchange the main melody]\n[Galloping drums and rhythm guitars continue]\n\n[Bridge]\nI am not the shadow\nOf the road beneath my feet\nI am every broken answer\nMade relentless, made complete\n\n[Instrumental]\n[Solo cello carries the melody]\n[Brief rising transition into final chorus]\n\n[Final Chorus]\nProceed with precision\nThrough the fire and the noise\nProceed with precision\nLet the future hear your voice\nFrom the crooked path behind us\nTo the line we now envision\nWe rise, we build, we burn\nProceed with precision\n\n[Outro]\n[Solo cello reprises the opening melody]\n[D major resolution]",
+  "prompt_file": "showcase/prompts/04-music3-proceed-with-precision.md",
+  "schema_note": "The live MiniMaxMusic3TextEncode takes `caption` and `max_duration`; the saved production workflow's `prompt` and `max_audio_frames` keys are legacy. EmptyMiniMaxMusic3LatentAudio also requires an explicit `batch_size`. production/workflows/music3.json was NOT modified.",
+  "output_verified": {
+    "container": "mp3",
+    "audio_codec": "mp3",
+    "channels": 2,
+    "sample_rate": 44100,
+    "duration_s": 90.018,
+    "bit_rate_kbps": 280.5,
+    "encoder_quality": "LAME V0 (variable bitrate)"
+  },
+  "loudness": {
+    "integrated_lufs": -14.16,
+    "loudness_range_lu": 5.50,
+    "true_peak_dbtp": 0.67,
+    "mean_volume_db": -16.9,
+    "max_volume_db": 0.0,
+    "reading": "real programme material, not silence and not a decode failure, but this render is hot: true peak sits above 0 dBTP (inter-sample clipping) versus -3.2 dBFS on the previous showcase render. Turn it down before using it anywhere loudness-sensitive; not re-mastered or limited for this record."
+  },
+  "assets": {
+    "waveform": "docs/assets/showcase-v2/04-music3-proceed-with-precision-waveform.png",
+    "waveform_dimensions": [
+      1200,
+      300
+    ],
+    "spectrum": "docs/assets/showcase-v2/04-music3-proceed-with-precision-spectrum.png",
+    "spectrum_dimensions": [
+      1200,
+      400
+    ],
+    "note": "waveform is rendered dark-on-light and inverted by CSS on the page's dark record-sleeve block"
+  },
+  "duration_note": "90 s was requested (max_duration) and delivered at 90.018 s — the model may end earlier than max_duration; here it again used essentially the full budget, same behavior as the previous 30 s render.",
+  "cost_note": "185.99 s wall for 90 s of stereo audio, versus the previous showcase render's 50.82 s for 30 s. That is not explained by duration alone (3x the audio would predict roughly 152 s at the same per-second cost): sampling steps also went up 20 -> 30, and tiled VAE decode was enabled for this longer render, both adding wall time beyond duration scaling. At this length it costs roughly a third of an H3 video run's wall time (465.94 / 513.89 / 561.80 s), but it is now slower than any single LTX video run in the set (56.04 / 70.90 / 59.37 s) — no longer the cheapest render on the page.",
+  "models": [
+    "minimax_music3_dit_int8_convrot.safetensors",
+    "minimax_music3_text_encoder_pruned_int8_convrot.safetensors",
+    "minimax_music3_dav.safetensors"
+  ],
+  "gpu": "AMD Radeon AI PRO R9700 (gfx1201)",
+  "generated_at": "2026-08-23T10:24:51-0700"
+}

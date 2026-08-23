@@ -1,130 +1,186 @@
 {
-  "1": {
-    "class_type": "UNETLoader",
+  "35": {
+    "inputs": {
+      "filename_prefix": "audio/audio_minimax_music3",
+      "format": "mp3",
+      "format.quality": "V0",
+      "audio": [
+        "37:43",
+        0
+      ]
+    },
+    "class_type": "SaveAudioAdvanced",
+    "_meta": {
+      "title": "Save Audio (Advanced)"
+    }
+  },
+  "37:6": {
     "inputs": {
       "unet_name": "minimax_music3_dit_int8_convrot.safetensors",
       "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Load Diffusion Model"
     }
   },
-  "2": {
-    "class_type": "CLIPLoader",
+  "37:13": {
+    "inputs": {
+      "caption": "Brutal 1990s old-school death metal. Down-tuned buzzsaw guitars,\ntremolo-picked riffs and chugging palm-muted breakdowns, blast beats and\ndouble-kick drums, thick distorted bass. Deep guttural death growl vocals,\nlow and monstrous, shouted gang backing vocals on the hook. Raw analog\nproduction, dry mix, no modern polish, no clean singing, no melodic\nchoruses. Fast and heavy, around 180 BPM, minor key, with a half-time\nbreakdown.\n",
+      "lyrics": "[Intro]\n[Solo lyrical cello, rising D minor melody]\n[Distorted guitars and galloping drums enter]\n\n[Verse]\nI walked the crooked road beneath a broken sky\nWhere every mile was measured by the things I left behind\nThe stones were cut by doubt, the bridges burned by fear\nBut every scar became a mark that brought the future near\n\n[Pre-Chorus]\nNo hand can turn the river\nNo king can still the tide\nThe past becomes a compass\nWhen purpose is your guide\n\n[Chorus]\nProceed with precision\nThrough the fire and the noise\nProceed with precision\nLet the future hear your voice\nFrom the crooked path behind us\nTo the line we now envision\nWe rise, we build, we burn\nProceed with precision\n\n[Verse]\nThe old machines are sleeping in the dust beneath the rain\nTheir iron hearts remember every failure, every name\nBut in the pulse of wire and light, a clearer compass turns\nA thousand lost equations become lessons as we learn\n\n[Pre-Chorus]\nThe wheel is still in motion\nThe dark gives way to dawn\nThe map is drawn in action\nThe road is never gone\n\n[Chorus]\nProceed with precision\nThrough the fire and the noise\nProceed with precision\nLet the future hear your voice\nFrom the crooked path behind us\nTo the line we now envision\nWe rise, we build, we burn\nProceed with precision\n\n[Solo]\n[Cello and harmonized lead guitar exchange the main melody]\n[Galloping drums and rhythm guitars continue]\n\n[Bridge]\nI am not the shadow\nOf the road beneath my feet\nI am every broken answer\nMade relentless, made complete\n\n[Instrumental]\n[Solo cello carries the melody]\n[Brief rising transition into final chorus]\n\n[Final Chorus]\nProceed with precision\nThrough the fire and the noise\nProceed with precision\nLet the future hear your voice\nFrom the crooked path behind us\nTo the line we now envision\nWe rise, we build, we burn\nProceed with precision\n\n[Outro]\n[Solo cello reprises the opening melody]\n[D major resolution]",
+      "seed": [
+        "37:38",
+        0
+      ],
+      "max_duration": 90.0,
+      "cfg_scale": 1.7,
+      "top_k": 50,
+      "clip": [
+        "37:3",
+        0
+      ]
+    },
+    "class_type": "MiniMaxMusic3TextEncode",
+    "_meta": {
+      "title": "MiniMax Music3 Text Encode"
+    }
+  },
+  "37:3": {
     "inputs": {
       "clip_name": "minimax_music3_text_encoder_pruned_int8_convrot.safetensors",
       "type": "minimax",
       "device": "default"
+    },
+    "class_type": "CLIPLoader",
+    "_meta": {
+      "title": "Load CLIP"
     }
   },
-  "3": {
-    "class_type": "VAELoader",
+  "37:7": {
     "inputs": {
       "vae_name": "minimax_music3_dav.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load VAE"
     }
   },
-  "4": {
-    "class_type": "MiniMaxMusic3TextEncode",
+  "37:10": {
     "inputs": {
-      "clip": [
-        "2",
-        0
-      ],
-      "lyrics": "[verse]\nFar past the last of the burning suns\nCold runs the dark where the counting is done\nI hold the record, I hold the flame\nI speak it backward, I speak your name\n\n[chorus]\nCarry the signal, deny the end\nDown through the ruin, down through the bend\nNothing is lost that is spoken again\nCarry the signal, deny the end",
-      "cfg_scale": 1.5,
-      "top_k": 50,
-      "seed": 8112080,
-      "caption": "Slow, solemn dark-ambient orchestral piece with a heavy industrial undertow. Deep bowed cello and low brass drone, sparse detuned analog synthesizer pads, distant metallic percussion struck once or twice per bar with long reverb tails. A cold, wide, cathedral-sized space. Restrained and patient, never triumphant, never cinematic-trailer. Mid-tempo around 70 BPM, minor key. A single clear low male synthetic voice, measured and unhurried, more intoned than sung. Analog tape warmth, no bright digital sheen, no dance percussion, no distorted guitars.",
-      "max_duration": 30.0
-    }
-  },
-  "5": {
-    "class_type": "EmptyMiniMaxMusic3LatentAudio",
-    "inputs": {
-      "seconds": 30.0,
-      "batch_size": 1
-    }
-  },
-  "6": {
-    "class_type": "RandomNoise",
-    "inputs": {
-      "noise_seed": 8112080
-    }
-  },
-  "7": {
-    "class_type": "KSamplerSelect",
-    "inputs": {
-      "sampler_name": "res_multistep"
-    }
-  },
-  "8": {
-    "class_type": "BasicScheduler",
-    "inputs": {
-      "model": [
-        "1",
-        0
-      ],
-      "scheduler": "simple",
-      "steps": 20,
-      "denoise": 1.0
-    }
-  },
-  "9": {
-    "class_type": "BasicGuider",
-    "inputs": {
-      "model": [
-        "1",
-        0
-      ],
       "conditioning": [
-        "4",
+        "37:13",
         0
       ]
+    },
+    "class_type": "ConditioningZeroOut",
+    "_meta": {
+      "title": "Conditioning Zero Out"
     }
   },
-  "10": {
-    "class_type": "SamplerCustomAdvanced",
+  "37:15": {
     "inputs": {
-      "noise": [
-        "6",
+      "seconds": [
+        "37:13",
+        1
+      ],
+      "batch_size": 1
+    },
+    "class_type": "EmptyMiniMaxMusic3LatentAudio",
+    "_meta": {
+      "title": "Empty MiniMax Music3 Latent Audio"
+    }
+  },
+  "37:9": {
+    "inputs": {
+      "seed": [
+        "37:38",
         0
       ],
-      "guider": [
-        "9",
+      "steps": 30,
+      "cfg": 1.7,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1.0,
+      "model": [
+        "37:6",
         0
       ],
-      "sampler": [
-        "7",
+      "positive": [
+        "37:13",
         0
       ],
-      "sigmas": [
-        "8",
+      "negative": [
+        "37:10",
         0
       ],
       "latent_image": [
-        "5",
+        "37:15",
         0
       ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "KSampler"
     }
   },
-  "11": {
-    "class_type": "VAEDecodeAudio",
+  "37:12": {
     "inputs": {
       "samples": [
-        "10",
+        "37:9",
         0
       ],
       "vae": [
-        "3",
+        "37:7",
         0
       ]
+    },
+    "class_type": "VAEDecodeAudio",
+    "_meta": {
+      "title": "VAE Decode Audio"
     }
   },
-  "12": {
-    "class_type": "SaveAudio",
+  "37:38": {
     "inputs": {
-      "audio": [
-        "11",
+      "seed": 1012263102365060
+    },
+    "class_type": "SeedNode",
+    "_meta": {
+      "title": "Seed"
+    }
+  },
+  "37:42": {
+    "inputs": {
+      "tile_size": 1536,
+      "overlap": 64,
+      "samples": [
+        "37:9",
         0
       ],
-      "filename_prefix": "r9700-showcase-v2/04-music3-signal-against-the-end"
+      "vae": [
+        "37:7",
+        0
+      ]
+    },
+    "class_type": "VAEDecodeAudioTiled",
+    "_meta": {
+      "title": "VAE Decode Audio (Tiled)"
+    }
+  },
+  "37:43": {
+    "inputs": {
+      "switch": true,
+      "on_false": [
+        "37:12",
+        0
+      ],
+      "on_true": [
+        "37:42",
+        0
+      ]
+    },
+    "class_type": "ComfySwitchNode",
+    "_meta": {
+      "title": "If/Else Switch"
     }
   }
 }

@@ -981,58 +981,122 @@ Important constraints: Preserve identity aggressively. Do not redesign the chara
           <p class="music__no">G</p>
           <div>
             <h3 class="music__model" id="v2-run-04">MiniMax Music 3</h3>
-            <p class="music__title">Signal Against the End</p>
+            <p class="music__title">Proceed with Precision</p>
           </div>
           <div class="music__stats">
-            <p><span class="music__stat-num">50.82<span class="u">s</span></span><span class="music__stat-lab">Generation wall</span></p>
-            <p><span class="music__stat-num">29.99<span class="u">s</span></span><span class="music__stat-lab">Audio</span></p>
+            <p><span class="music__stat-num">185.99<span class="u">s</span></span><span class="music__stat-lab">Generation wall</span></p>
+            <p><span class="music__stat-num">90.02<span class="u">s</span></span><span class="music__stat-lab">Audio</span></p>
           </div>
         </div>
 
         <div class="player">
-          <audio controls preload="none" aria-label="Signal Against the End, 30 second MiniMax Music 3 render">
-            <source src="assets/media-v2/04-music3-signal-against-the-end.flac" type="audio/flac">
+          <audio controls preload="none" aria-label="Proceed with Precision, 90 second MiniMax Music 3 render">
+            <source src="assets/media-v2/04-music3-proceed-with-precision.mp3" type="audio/mpeg">
           </audio>
-          <p class="caption" style="margin-top:var(--space-3)">FLAC, 29.99 s, 44 kHz stereo. <a href="https://github.com/boxwrench/R9700/releases/download/showcase-v2-20260818/04-music3-signal-against-the-end.flac">Open source file &rarr;</a></p>
+          <p class="caption" style="margin-top:var(--space-3)">MP3, LAME V0, 90.02 s, 44 kHz stereo. <a href="https://github.com/boxwrench/R9700/releases/download/showcase-v2-20260818/04-music3-proceed-with-precision.mp3">Open source file &rarr;</a></p>
         </div>
 
         <div class="waveform">
-          <img src="assets/showcase-v2/04-music3-signal-against-the-end-waveform.png" alt="Waveform of the 30 second render: a sustained mid-level body with slow swells and long decays rather than sharp percussive transients." loading="lazy">
-          <p class="caption" style="margin-top:var(--space-3)">Waveform, rendered from the delivered FLAC. Integrated loudness -17.8 LUFS, range 9.3 LU, true peak -3.2 dBFS.</p>
+          <img src="assets/showcase-v2/04-music3-proceed-with-precision-waveform.png" alt="Waveform of the 90 second render: dense, near-constant high-energy transients throughout, consistent with blast-beat drumming and distorted guitars." loading="lazy">
+          <p class="caption" style="margin-top:var(--space-3)">Waveform, rendered from the delivered MP3. Integrated loudness -14.16 LUFS, range 5.5 LU, true peak +0.67 dBTP &mdash; hotter than the earlier render and clipping at the inter-sample level; not re-mastered for this page.</p>
         </div>
 
         <blockquote class="lyric">
-          &ldquo;Nothing is lost that is spoken again&hellip;&rdquo;
+          &ldquo;Proceed with precision, through the fire and the noise&hellip;&rdquo;
           <cite>Chorus &mdash; lyric excerpt</cite>
         </blockquote>
 
-        <p class="run__note prose" style="margin-top:var(--space-5)">Thirty seconds, and the cheapest thing on this page. The earlier 15 s ceiling was a workflow parameter, not a model limit &mdash; the latent node accepts up to 360 s. At 50.82 s wall this run costs about a ninth of any single video above, for four times the duration.</p>
+        <p class="run__note prose" style="margin-top:var(--space-5)">Ninety seconds this time, three times the previous render's length. 185.99 s wall doesn't scale linearly with duration alone &mdash; sampling steps went up 20&nbsp;&rarr;&nbsp;30 and tiled VAE decode was switched on for the longer render, both adding cost on top of the 3&times; audio. That puts it at roughly a third of an H3 video run's wall time, but it's now slower than any single LTX video run above &mdash; no longer the cheapest thing on this page.</p>
 
         <details class="disclosure">
           <summary>Prompt, lyrics &amp; parameters <span aria-hidden="true">+</span></summary>
           <div class="disclosure__body">
           <p class="prompt-lab">Caption (style prompt)</p>
-          <div class="promptbox">Slow, solemn dark-ambient orchestral piece with a heavy industrial undertow. Deep bowed cello and low brass drone, sparse detuned analog synthesizer pads, distant metallic percussion struck once or twice per bar with long reverb tails. A cold, wide, cathedral-sized space. Restrained and patient, never triumphant, never cinematic-trailer. Mid-tempo around 70 BPM, minor key. A single clear low male synthetic voice, measured and unhurried, more intoned than sung. Analog tape warmth, no bright digital sheen, no dance percussion, no distorted guitars.</div>
+          <div class="promptbox">Brutal 1990s old-school death metal. Down-tuned buzzsaw guitars, tremolo-picked riffs and chugging palm-muted breakdowns, blast beats and double-kick drums, thick distorted bass. Deep guttural death growl vocals, low and monstrous, shouted gang backing vocals on the hook. Raw analog production, dry mix, no modern polish, no clean singing, no melodic choruses. Fast and heavy, around 180 BPM, minor key, with a half-time breakdown.</div>
           <p class="prompt-lab">Lyrics</p>
-          <div class="promptbox">[verse]
-Far past the last of the burning suns
-Cold runs the dark where the counting is done
-I hold the record, I hold the flame
-I speak it backward, I speak your name
+          <div class="promptbox">[Intro]
+[Solo lyrical cello, rising D minor melody]
+[Distorted guitars and galloping drums enter]
 
-[chorus]
-Carry the signal, deny the end
-Down through the ruin, down through the bend
-Nothing is lost that is spoken again
-Carry the signal, deny the end</div>
-            <img src="assets/showcase-v2/04-music3-signal-against-the-end-spectrum.png" alt="Spectrogram of the 30 second render showing sustained low-frequency energy with sparse upper-band content." loading="lazy">
-            <p class="cfg" style="color:inherit"><span>seed 8112080</span><span>20 steps &middot; res_multistep &middot; simple</span><span>cfg 1.5 &middot; top-k 50</span><span>max duration 30.0 s</span></p>
+[Verse]
+I walked the crooked road beneath a broken sky
+Where every mile was measured by the things I left behind
+The stones were cut by doubt, the bridges burned by fear
+But every scar became a mark that brought the future near
+
+[Pre-Chorus]
+No hand can turn the river
+No king can still the tide
+The past becomes a compass
+When purpose is your guide
+
+[Chorus]
+Proceed with precision
+Through the fire and the noise
+Proceed with precision
+Let the future hear your voice
+From the crooked path behind us
+To the line we now envision
+We rise, we build, we burn
+Proceed with precision
+
+[Verse]
+The old machines are sleeping in the dust beneath the rain
+Their iron hearts remember every failure, every name
+But in the pulse of wire and light, a clearer compass turns
+A thousand lost equations become lessons as we learn
+
+[Pre-Chorus]
+The wheel is still in motion
+The dark gives way to dawn
+The map is drawn in action
+The road is never gone
+
+[Chorus]
+Proceed with precision
+Through the fire and the noise
+Proceed with precision
+Let the future hear your voice
+From the crooked path behind us
+To the line we now envision
+We rise, we build, we burn
+Proceed with precision
+
+[Solo]
+[Cello and harmonized lead guitar exchange the main melody]
+[Galloping drums and rhythm guitars continue]
+
+[Bridge]
+I am not the shadow
+Of the road beneath my feet
+I am every broken answer
+Made relentless, made complete
+
+[Instrumental]
+[Solo cello carries the melody]
+[Brief rising transition into final chorus]
+
+[Final Chorus]
+Proceed with precision
+Through the fire and the noise
+Proceed with precision
+Let the future hear your voice
+From the crooked path behind us
+To the line we now envision
+We rise, we build, we burn
+Proceed with precision
+
+[Outro]
+[Solo cello reprises the opening melody]
+[D major resolution]</div>
+            <img src="assets/showcase-v2/04-music3-proceed-with-precision-spectrum.png" alt="Spectrogram of the 90 second render showing dense broadband energy across the low and mid range, consistent with distorted guitars and blast-beat drumming." loading="lazy">
+            <p class="cfg" style="color:inherit"><span>seed 1012263102365060</span><span>30 steps &middot; euler &middot; simple</span><span>cfg 1.7 &middot; top-k 50</span><span>max duration 90.0 s &middot; tiled decode</span></p>
           </div>
         </details>
       </article>
 <div class="band__note" style="margin-top:var(--space-7)">
-        <span class="dur">39m 38s of measured generation time</span>
-        <span class="dur__exact">2378.34 s exact &middot; nine renders &middot; one R9700</span>
+        <span class="dur">41m 54s of measured generation time</span>
+        <span class="dur__exact">2513.51 s exact &middot; nine renders &middot; one R9700</span>
         <p style="margin-top:var(--space-4)">Every figure above is read out of <a href="https://github.com/boxwrench/R9700/tree/main/showcase/metadata-v2">showcase/metadata-v2</a>, which also records what each run got wrong.</p>
       </div>
     </section>

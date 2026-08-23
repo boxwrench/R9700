@@ -57,12 +57,12 @@ python3 scripts/production-preflight.py
 </tr>
 </table>
 
-Nine renders at 864×480, 39m 38s of measured generation time on one card.
+Nine renders at 864×480, 41m 54s of measured generation time on one card.
 
 - **H3 conditioning comparison.** Text-only lands the scene but not the character; first-frame conditioning starts exact and drifts after ~2.5 s; image-plus-voice reference retains identity to the final frame. 465.94 / 513.89 / 561.80 s.
 - **LTX conditioning comparison.** Text-only produces a generic knight; an anchor frame pins the character; a source video retains structure and restyles it. 56.04 / 70.90 / 59.37 s.
 - **Continuation.** The last frame of a finished clip becomes the first frame of the next. Joins measure ~3/255 against the frame they continue from, so they read as one take. H3 reaches 14.55 s with audio, LTX 13.38 s.
-- **Music 3 at 30 s.** The 15-second figure in the benchmark table is a workflow parameter, not a model limit; the latent node accepts up to 360 s. The showcase track is 29.99 s in 50.82 s of wall time.
+- **Music 3 at 90 s.** The 15-second figure in the benchmark table is a workflow parameter, not a model limit; the latent node accepts up to 360 s. The showcase track is 90.02 s in 185.99 s of wall time — no longer the cheapest render in the set (that was true at the earlier 30 s / 50.82 s point, before duration, an extra 10 sampling steps, and tiled decode were added).
 
 Per-run records — prompts, seeds, stage timing, identity measurements, and what each run got wrong — are in [`showcase/metadata-v2/`](showcase/metadata-v2/). Slot geometry is in [`showcase/media-spec.md`](showcase/media-spec.md). The page source is [`docs/index.html`](docs/index.html); see [`docs/publishing-video.md`](docs/publishing-video.md) for the Pages and release setup.
 
