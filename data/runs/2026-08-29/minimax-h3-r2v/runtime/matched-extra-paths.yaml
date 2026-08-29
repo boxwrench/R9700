@@ -1,0 +1,7 @@
+h3_r2v_probe:
+  base_path: /ai/github/R9700/data/runs/2026-08-29/minimax-h3-r2v/instrumentation
+  custom_nodes: .
+
+h3_r2v_multigpu:
+  base_path: /ai/lab/experiments/minimax-h3/dual-gpu/runtime/ComfyUI/custom_nodes
+  custom_nodes: ComfyUI-MultiGPU

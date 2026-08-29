@@ -1,0 +1,7 @@
+h3_r2v_probe:
+  base_path: /ai/github/R9700/data/runs/2026-08-29/minimax-h3-r2v/instrumentation
+  custom_nodes: .
+
+historical_h3_encoder:
+  base_path: /ai/models/minimax_h3
+  text_encoders: .

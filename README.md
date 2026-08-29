@@ -23,6 +23,7 @@ These are measured improvements on this R9700 system, not generic AMD marketing 
 | LTX short 768x448 / 41-frame / 8-step workload | 43.78 s wall | 25.69 s wall | **41% less wall time / ~1.70x throughput** |
 | H3 paired changed-prompt T2V | 44.95 s wall | 41.30 s with Qwen pre-sampler offload | **8.1% less wall time** |
 | H3 sampler inside that paired A/B | 29.51 s | 22.15 s | **24.9% faster sampling** |
+| H3 R2V 960x544 / 124f Turbo | `ref_image_size=max` OOM | `match`, 4/4 passes | **No output reduction required** |
 | MiniMax Music 3 | ~24.42 s warm wall | AR bottleneck characterized | **FixedKV/compile evaluated and closed** |
 
 The spectacular mmap numbers are **model-loading fixes**, not generation speedups. Once models are warm, they do not compound with the recurring LTX/H3 improvements.
@@ -80,7 +81,7 @@ Exact model filenames, SHA-256 values, runtime versions, launcher, environment, 
 
 **The two largest wins.** On the short 768×448 / 41-frame / 8-step benchmark, reducing the Gemma minimum sequence floor from 1024 to 256 cut conditioning from 22.51 s to 5.35 s and wall from 43.78 s to 25.69 s. This is not pixel-preserving: conditioning stays numerically close but the later diffusion trajectory changes. Separately, in a paired identical-prompt/seed A/B, leaving Qwen3-VL resident produced 29.51 s sampling at 1.476 s/step; unloading it before sampling reduced that to 22.15 s at 1.108 s/step, and the 4.03 s offload still left a net 8.1% wall improvement.
 
-Records: [LTX 2.5](docs/ltx25-r9700-optimization-20260818.md) · [MiniMax H3](docs/minimax-h3-r9700-optimization-20260818.md) · [Music 3 baseline](docs/minimax-music3-r9700-baseline-20260818.md)
+Records: [LTX 2.5](docs/ltx25-r9700-optimization-20260818.md) · [MiniMax H3](docs/minimax-h3-r9700-optimization-20260818.md) · [H3 R2V memory boundary](data/runs/2026-08-29/minimax-h3-r2v/README.md) · [Music 3 baseline](docs/minimax-music3-r9700-baseline-20260818.md)
 
 ### For an AI agent
 
@@ -161,7 +162,7 @@ A genuine crossover, not a flat win for either card. Plausibly explained by raw 
 
 ## Data and measurements
 
-Generation: [H3 wall time](data/experimental/h3-walltime-20260818.tsv) · [LTX token floor](data/experimental/ltx25-token-floor-20260818.tsv) · [LTX wall time](data/experimental/ltx25-walltime-20260818.tsv) · [workflow transitions](data/experimental/workflow-transitions-20260818.tsv) · [Music 3 baseline](data/experimental/minimax-music3-baseline-20260818.tsv) · [LTX-Desktop-ROCm cross-GPU wall time](data/experimental/ltx-desktop-rocm-walltime-20260823.tsv)
+Generation: [H3 wall time](data/experimental/h3-walltime-20260818.tsv) · [H3 R2V reference-size and dual-GPU campaign](data/runs/2026-08-29/minimax-h3-r2v/RESULTS.md) · [LTX token floor](data/experimental/ltx25-token-floor-20260818.tsv) · [LTX wall time](data/experimental/ltx25-walltime-20260818.tsv) · [workflow transitions](data/experimental/workflow-transitions-20260818.tsv) · [Music 3 baseline](data/experimental/minimax-music3-baseline-20260818.tsv) · [LTX-Desktop-ROCm cross-GPU wall time](data/experimental/ltx-desktop-rocm-walltime-20260823.tsv)
 
 Inference: [Qwen3.8 quant](data/experimental/qwen3-8-27b-quant.tsv) · [Qwen3.8 sweep](data/experimental/qwen3-8-27b-sweep.tsv) · [Qwen3.8 KV cache](data/experimental/qwen3-8-27b-kv-cache.tsv) · [MTP proposer](data/experimental/qwen3-8-27b-mtp-proposer.tsv) · [IQ4_XS pipeline](data/experimental/qwen3-8-27b-iq4xs-pipeline-stats.tsv) · [IQ4_XS path](data/experimental/qwen3-8-27b-iq4xs-path.tsv) · [DeepSeek V4](data/experimental/deepseek-v4-flash.tsv)
 

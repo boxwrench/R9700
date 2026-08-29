@@ -1,0 +1,42 @@
+{
+  "schema_version": 2,
+  "run_id": "S1-match-turbo-960x544-124f-cold",
+  "probe_point": "CFGGuider.inner_sample",
+  "configured_attention": "auto",
+  "enter_time": 1788037285.7795317,
+  "before": {
+    "cuda:0": {
+      "name": "AMD Radeon AI PRO R9700",
+      "arch": "gfx1201",
+      "total": 34208743424,
+      "driver_free": 12331253760,
+      "driver_total": 34208743424,
+      "driver_used": 21877489664,
+      "allocated": 21236848640,
+      "reserved": 21315452928,
+      "max_allocated": 21236848640,
+      "max_reserved": 21315452928
+    }
+  },
+  "status": "exception",
+  "exception": {
+    "type": "InterruptProcessingException",
+    "message": ""
+  },
+  "exit_time": 1788037357.169407,
+  "elapsed_seconds": 71.38987517356873,
+  "after": {
+    "cuda:0": {
+      "name": "AMD Radeon AI PRO R9700",
+      "arch": "gfx1201",
+      "total": 34208743424,
+      "driver_free": 8667529216,
+      "driver_total": 34208743424,
+      "driver_used": 25541214208,
+      "allocated": 21272500736,
+      "reserved": 24891097088,
+      "max_allocated": 23670969856,
+      "max_reserved": 24891097088
+    }
+  }
+}

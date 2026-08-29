@@ -1,0 +1,3025 @@
+{
+  "row": {
+    "run_id": "D2-matched-960x544-124f-cold",
+    "timestamp": "2026-08-29T21:55:21Z",
+    "service": "matched dual :8192",
+    "topology": "matched-dual",
+    "gpu_mapping": "[{\"index\": 0, \"name\": \"AMD Radeon AI PRO R9700\", \"arch\": \"gfx1201\"}, {\"index\": 1, \"name\": \"Radeon RX 7900 XT\", \"arch\": \"gfx1100\"}]",
+    "workflow_sha256": "5548a173bc7ebce0fb0d36b97e01117a64d7264d2636171594b52c3b6c71ce7f",
+    "resolution": "960x544",
+    "frames": 124,
+    "reference_type": "image",
+    "ref_image_size": "match",
+    "turbo_lora": "on",
+    "sampler": "MiniMaxH3TurboSampler",
+    "steps": 5,
+    "attention_configured": "auto",
+    "smart_memory": "disabled",
+    "result": "PASS",
+    "wall_seconds": "144.959",
+    "sampler_seconds": "95.503",
+    "r9700_entry_allocated": 21690947584,
+    "r9700_entry_reserved": 21833449472,
+    "r9700_peak_allocated": 24816046592,
+    "r9700_peak_reserved": 26948403200,
+    "r9700_driver_entry_used": 22519218176,
+    "r9700_rocm_peak_used": 27688812544,
+    "rx7900_entry_allocated": 17103248384,
+    "rx7900_entry_reserved": 17104371712,
+    "rx7900_peak_allocated": 17103248384,
+    "rx7900_peak_reserved": 17104371712,
+    "rx7900_driver_entry_used": 17678401536,
+    "rx7900_rocm_peak_used": 19674189824,
+    "oom_requested": "",
+    "oom_free": "",
+    "oom_allocated": "",
+    "output_sanity": "history_output_present expected=960x544/124f",
+    "notes": "prompt_id=72261f8f-ff41-45d7-bb77-d6875cdafbf5; fixed image/prompt; distinct seed per repetition"
+  },
+  "graph": {
+    "1": {
+      "class_type": "CLIPLoaderMultiGPU",
+      "inputs": {
+        "clip_name": "qwen3vl_32b_minimax_h3_fp8.safetensors",
+        "type": "minimax",
+        "device": "cuda:1"
+      },
+      "_meta": {
+        "title": "Load CLIP"
+      }
+    },
+    "2": {
+      "class_type": "UNETLoader",
+      "inputs": {
+        "unet_name": "minimax_h3_ref2va_pruned_int8_convrot.safetensors",
+        "weight_dtype": "default"
+      },
+      "_meta": {
+        "title": "Load Diffusion Model"
+      }
+    },
+    "3": {
+      "class_type": "VAELoader",
+      "inputs": {
+        "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+      },
+      "_meta": {
+        "title": "Load Video VAE"
+      }
+    },
+    "4": {
+      "class_type": "VAELoader",
+      "inputs": {
+        "vae_name": "minimax_h3_audio_vae_fp32.safetensors"
+      },
+      "_meta": {
+        "title": "Load Audio VAE"
+      }
+    },
+    "5": {
+      "class_type": "MiniMaxH3SigmaShift",
+      "inputs": {
+        "model": [
+          "100",
+          0
+        ],
+        "shift_video": 12,
+        "shift_audio": 3
+      },
+      "_meta": {
+        "title": "Sigma Shift"
+      }
+    },
+    "6": {
+      "class_type": "MiniMaxH3ReferenceToVideo",
+      "inputs": {
+        "clip": [
+          "1",
+          0
+        ],
+        "vae": [
+          "3",
+          0
+        ],
+        "audio_vae": [
+          "4",
+          0
+        ],
+        "prompt": "subject_definitions:\n<Subject 1> is the person in <Picture 1>: mid-20s, dark hair, light jacket.\n\nsummary:\n[reference generation] Generate a short video starring <Subject 1>.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1]): fully_preserved - identity kept exactly as in <Picture 1>.\n\ndetailed_description:\nThe target video is cinematic live-action, soft window light.\n[Shot 1] <Subject 1> turns slowly toward the camera and smiles, small head movement, static camera.\n\noverall_soundscape:\nQuiet room tone, soft cloth movement.\n\nnon_diegetic_music:\nN/A",
+        "width": 960,
+        "height": 544,
+        "length": 124,
+        "ref_image_size": "match",
+        "ref_images.ref_image_0": [
+          "200",
+          0
+        ]
+      },
+      "_meta": {
+        "title": "H3 Conditioning"
+      }
+    },
+    "7": {
+      "class_type": "BasicGuider",
+      "inputs": {
+        "model": [
+          "5",
+          0
+        ],
+        "conditioning": [
+          "6",
+          0
+        ]
+      },
+      "_meta": {
+        "title": "Basic Guider"
+      }
+    },
+    "8": {
+      "class_type": "RandomNoise",
+      "inputs": {
+        "noise_seed": 8292026
+      },
+      "_meta": {
+        "title": "Noise"
+      }
+    },
+    "9": {
+      "class_type": "BasicScheduler",
+      "inputs": {
+        "model": [
+          "5",
+          0
+        ],
+        "scheduler": "simple",
+        "steps": 5,
+        "denoise": 1
+      },
+      "_meta": {
+        "title": "Scheduler"
+      }
+    },
+    "10": {
+      "class_type": "MiniMaxH3TurboSampler",
+      "inputs": {},
+      "_meta": {
+        "title": "Turbo Sampler"
+      }
+    },
+    "11": {
+      "class_type": "SamplerCustomAdvanced",
+      "inputs": {
+        "noise": [
+          "8",
+          0
+        ],
+        "guider": [
+          "7",
+          0
+        ],
+        "sampler": [
+          "10",
+          0
+        ],
+        "sigmas": [
+          "9",
+          0
+        ],
+        "latent_image": [
+          "6",
+          1
+        ]
+      },
+      "_meta": {
+        "title": "Sampler Custom Advanced"
+      }
+    },
+    "12": {
+      "class_type": "VAEDecode",
+      "inputs": {
+        "samples": [
+          "11",
+          0
+        ],
+        "vae": [
+          "3",
+          0
+        ]
+      },
+      "_meta": {
+        "title": "VAE Decode"
+      }
+    },
+    "13": {
+      "class_type": "VAEDecodeAudio",
+      "inputs": {
+        "samples": [
+          "11",
+          0
+        ],
+        "vae": [
+          "4",
+          0
+        ]
+      },
+      "_meta": {
+        "title": "VAE Decode Audio"
+      }
+    },
+    "14": {
+      "class_type": "CreateVideo",
+      "inputs": {
+        "images": [
+          "12",
+          0
+        ],
+        "fps": 24,
+        "audio": [
+          "13",
+          0
+        ],
+        "bit_depth": 8
+      },
+      "_meta": {
+        "title": "Create Video"
+      }
+    },
+    "15": {
+      "class_type": "SaveVideo",
+      "inputs": {
+        "video": [
+          "14",
+          0
+        ],
+        "filename_prefix": "minimax-h3-r2v/D2-matched-960x544-124f-cold",
+        "format": "auto",
+        "codec": "auto"
+      },
+      "_meta": {
+        "title": "Save Video"
+      }
+    },
+    "200": {
+      "class_type": "LoadImage",
+      "inputs": {
+        "image": "Gemini_Generated_Image_cajce7cajce7cajc.jpeg"
+      },
+      "_meta": {
+        "title": "Fixed R2V reference"
+      }
+    },
+    "100": {
+      "class_type": "MiniMaxH3TurboLoRA",
+      "inputs": {
+        "model": [
+          "2",
+          0
+        ],
+        "lora_name": "minimax_h3_turbo_v4_step600_ema.safetensors",
+        "strength": 1.0,
+        "low_vram": false
+      },
+      "_meta": {
+        "title": "Turbo LoRA (bypass mode)"
+      }
+    }
+  },
+  "history": {
+    "prompt": [
+      4,
+      "72261f8f-ff41-45d7-bb77-d6875cdafbf5",
+      {
+        "1": {
+          "class_type": "CLIPLoaderMultiGPU",
+          "inputs": {
+            "clip_name": "qwen3vl_32b_minimax_h3_fp8.safetensors",
+            "type": "minimax",
+            "device": "cuda:1"
+          },
+          "_meta": {
+            "title": "Load CLIP"
+          }
+        },
+        "2": {
+          "class_type": "UNETLoader",
+          "inputs": {
+            "unet_name": "minimax_h3_ref2va_pruned_int8_convrot.safetensors",
+            "weight_dtype": "default"
+          },
+          "_meta": {
+            "title": "Load Diffusion Model"
+          }
+        },
+        "3": {
+          "class_type": "VAELoader",
+          "inputs": {
+            "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+          },
+          "_meta": {
+            "title": "Load Video VAE"
+          }
+        },
+        "4": {
+          "class_type": "VAELoader",
+          "inputs": {
+            "vae_name": "minimax_h3_audio_vae_fp32.safetensors"
+          },
+          "_meta": {
+            "title": "Load Audio VAE"
+          }
+        },
+        "5": {
+          "class_type": "MiniMaxH3SigmaShift",
+          "inputs": {
+            "model": [
+              "100",
+              0
+            ],
+            "shift_video": 12.0,
+            "shift_audio": 3.0
+          },
+          "_meta": {
+            "title": "Sigma Shift"
+          }
+        },
+        "6": {
+          "class_type": "MiniMaxH3ReferenceToVideo",
+          "inputs": {
+            "clip": [
+              "1",
+              0
+            ],
+            "vae": [
+              "3",
+              0
+            ],
+            "audio_vae": [
+              "4",
+              0
+            ],
+            "prompt": "subject_definitions:\n<Subject 1> is the person in <Picture 1>: mid-20s, dark hair, light jacket.\n\nsummary:\n[reference generation] Generate a short video starring <Subject 1>.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1]): fully_preserved - identity kept exactly as in <Picture 1>.\n\ndetailed_description:\nThe target video is cinematic live-action, soft window light.\n[Shot 1] <Subject 1> turns slowly toward the camera and smiles, small head movement, static camera.\n\noverall_soundscape:\nQuiet room tone, soft cloth movement.\n\nnon_diegetic_music:\nN/A",
+            "width": 960,
+            "height": 544,
+            "length": 124,
+            "ref_image_size": "match",
+            "ref_images.ref_image_0": [
+              "200",
+              0
+            ]
+          },
+          "_meta": {
+            "title": "H3 Conditioning"
+          }
+        },
+        "7": {
+          "class_type": "BasicGuider",
+          "inputs": {
+            "model": [
+              "5",
+              0
+            ],
+            "conditioning": [
+              "6",
+              0
+            ]
+          },
+          "_meta": {
+            "title": "Basic Guider"
+          }
+        },
+        "8": {
+          "class_type": "RandomNoise",
+          "inputs": {
+            "noise_seed": 8292026
+          },
+          "_meta": {
+            "title": "Noise"
+          }
+        },
+        "9": {
+          "class_type": "BasicScheduler",
+          "inputs": {
+            "model": [
+              "5",
+              0
+            ],
+            "scheduler": "simple",
+            "steps": 5,
+            "denoise": 1.0
+          },
+          "_meta": {
+            "title": "Scheduler"
+          }
+        },
+        "10": {
+          "class_type": "MiniMaxH3TurboSampler",
+          "inputs": {},
+          "_meta": {
+            "title": "Turbo Sampler"
+          }
+        },
+        "11": {
+          "class_type": "SamplerCustomAdvanced",
+          "inputs": {
+            "noise": [
+              "8",
+              0
+            ],
+            "guider": [
+              "7",
+              0
+            ],
+            "sampler": [
+              "10",
+              0
+            ],
+            "sigmas": [
+              "9",
+              0
+            ],
+            "latent_image": [
+              "6",
+              1
+            ]
+          },
+          "_meta": {
+            "title": "Sampler Custom Advanced"
+          }
+        },
+        "12": {
+          "class_type": "VAEDecode",
+          "inputs": {
+            "samples": [
+              "11",
+              0
+            ],
+            "vae": [
+              "3",
+              0
+            ]
+          },
+          "_meta": {
+            "title": "VAE Decode"
+          }
+        },
+        "13": {
+          "class_type": "VAEDecodeAudio",
+          "inputs": {
+            "samples": [
+              "11",
+              0
+            ],
+            "vae": [
+              "4",
+              0
+            ]
+          },
+          "_meta": {
+            "title": "VAE Decode Audio"
+          }
+        },
+        "14": {
+          "class_type": "CreateVideo",
+          "inputs": {
+            "images": [
+              "12",
+              0
+            ],
+            "fps": 24.0,
+            "audio": [
+              "13",
+              0
+            ],
+            "bit_depth": 8
+          },
+          "_meta": {
+            "title": "Create Video"
+          }
+        },
+        "15": {
+          "class_type": "SaveVideo",
+          "inputs": {
+            "video": [
+              "14",
+              0
+            ],
+            "filename_prefix": "minimax-h3-r2v/D2-matched-960x544-124f-cold",
+            "format": "auto",
+            "codec": "auto"
+          },
+          "_meta": {
+            "title": "Save Video"
+          }
+        },
+        "200": {
+          "class_type": "LoadImage",
+          "inputs": {
+            "image": "Gemini_Generated_Image_cajce7cajce7cajc.jpeg"
+          },
+          "_meta": {
+            "title": "Fixed R2V reference"
+          }
+        },
+        "100": {
+          "class_type": "MiniMaxH3TurboLoRA",
+          "inputs": {
+            "model": [
+              "2",
+              0
+            ],
+            "lora_name": "minimax_h3_turbo_v4_step600_ema.safetensors",
+            "strength": 1.0,
+            "low_vram": false
+          },
+          "_meta": {
+            "title": "Turbo LoRA (bypass mode)"
+          }
+        }
+      },
+      {
+        "client_id": "h3-r2v-D2-matched-960x544-124f-cold",
+        "create_time": 1788040376466
+      },
+      [
+        "15"
+      ]
+    ],
+    "outputs": {
+      "15": {
+        "images": [
+          {
+            "filename": "D2-matched-960x544-124f-cold_00001_.mp4",
+            "subfolder": "minimax-h3-r2v",
+            "type": "output"
+          }
+        ],
+        "animated": [
+          true
+        ]
+      }
+    },
+    "status": {
+      "status_str": "success",
+      "completed": true,
+      "messages": [
+        [
+          "execution_start",
+          {
+            "prompt_id": "72261f8f-ff41-45d7-bb77-d6875cdafbf5",
+            "timestamp": 1788040376466
+          }
+        ],
+        [
+          "execution_cached",
+          {
+            "nodes": [],
+            "prompt_id": "72261f8f-ff41-45d7-bb77-d6875cdafbf5",
+            "timestamp": 1788040376470
+          }
+        ],
+        [
+          "execution_success",
+          {
+            "prompt_id": "72261f8f-ff41-45d7-bb77-d6875cdafbf5",
+            "timestamp": 1788040516062
+          }
+        ]
+      ]
+    },
+    "meta": {
+      "15": {
+        "node_id": "15",
+        "display_node": "15",
+        "parent_node": null,
+        "real_node_id": "15"
+      }
+    }
+  },
+  "probe": {
+    "schema_version": 2,
+    "run_id": "D2-matched-960x544-124f-cold",
+    "probe_point": "CFGGuider.inner_sample",
+    "configured_attention": "auto",
+    "enter_time": 1788040399.5277555,
+    "before": {
+      "cuda:0": {
+        "name": "AMD Radeon AI PRO R9700",
+        "arch": "gfx1201",
+        "total": 34208743424,
+        "driver_free": 11689525248,
+        "driver_total": 34208743424,
+        "driver_used": 22519218176,
+        "allocated": 21690947584,
+        "reserved": 21833449472,
+        "max_allocated": 21690947584,
+        "max_reserved": 21833449472
+      },
+      "cuda:1": {
+        "name": "Radeon RX 7900 XT",
+        "arch": "gfx1100",
+        "total": 21458059264,
+        "driver_free": 3779657728,
+        "driver_total": 21458059264,
+        "driver_used": 17678401536,
+        "allocated": 17103248384,
+        "reserved": 17104371712,
+        "max_allocated": 17103248384,
+        "max_reserved": 17104371712
+      }
+    },
+    "status": "success",
+    "exit_time": 1788040495.0309474,
+    "elapsed_seconds": 95.50319194793701,
+    "after": {
+      "cuda:0": {
+        "name": "AMD Radeon AI PRO R9700",
+        "arch": "gfx1201",
+        "total": 34208743424,
+        "driver_free": 6574571520,
+        "driver_total": 34208743424,
+        "driver_used": 27634171904,
+        "allocated": 21712886784,
+        "reserved": 26948403200,
+        "max_allocated": 24816046592,
+        "max_reserved": 26948403200
+      },
+      "cuda:1": {
+        "name": "Radeon RX 7900 XT",
+        "arch": "gfx1100",
+        "total": 21458059264,
+        "driver_free": 3779657728,
+        "driver_total": 21458059264,
+        "driver_used": 17678401536,
+        "allocated": 17103248384,
+        "reserved": 17104371712,
+        "max_allocated": 17103248384,
+        "max_reserved": 17104371712
+      }
+    }
+  },
+  "rocm_telemetry": [
+    {
+      "time": 1788040376.4644752,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 1716813824
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 881889280
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17178624
+        }
+      }
+    },
+    {
+      "time": 1788040377.5180793,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 1718906880
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 881889280
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17178624
+        }
+      }
+    },
+    {
+      "time": 1788040378.5851896,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 1718910976
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 881889280
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17178624
+        }
+      }
+    },
+    {
+      "time": 1788040379.6722348,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 1718919168
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 881889280
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17178624
+        }
+      }
+    },
+    {
+      "time": 1788040380.7748168,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 1718906880
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 881889280
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17178624
+        }
+      }
+    },
+    {
+      "time": 1788040381.832384,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 1725198336
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 6522134528
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17178624
+        }
+      }
+    },
+    {
+      "time": 1788040382.8803618,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 8037888000
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 6522134528
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17178624
+        }
+      }
+    },
+    {
+      "time": 1788040383.929504,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18459107328
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 6527709184
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17178624
+        }
+      }
+    },
+    {
+      "time": 1788040384.9786842,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18498650112
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 6527893504
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17178624
+        }
+      }
+    },
+    {
+      "time": 1788040386.0263376,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18498650112
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 6527893504
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17178624
+        }
+      }
+    },
+    {
+      "time": 1788040387.0742626,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18498650112
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 6527893504
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17178624
+        }
+      }
+    },
+    {
+      "time": 1788040388.1224878,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18498650112
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 6527893504
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17178624
+        }
+      }
+    },
+    {
+      "time": 1788040389.1702785,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18498650112
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 6527893504
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17178624
+        }
+      }
+    },
+    {
+      "time": 1788040390.2189307,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18498650112
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 6527893504
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17178624
+        }
+      }
+    },
+    {
+      "time": 1788040391.2685168,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18498646016
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 6527893504
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17178624
+        }
+      }
+    },
+    {
+      "time": 1788040392.3165832,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 19674161152
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 6527893504
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040393.3661966,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 19674161152
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 6527893504
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040394.4142,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 19674161152
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 6527893504
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040395.4620225,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 19674189824
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 6527893504
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040396.6088135,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 19674189824
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 6527893504
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040397.6586928,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592059392
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 3435212800
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040398.7066357,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592059392
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 17899147264
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040399.7559714,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592059392
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040400.8039334,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592059392
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040401.8530412,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592059392
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040402.9031334,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592059392
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040403.9519744,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18589966336
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040405.0010183,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18589966336
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040406.049386,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592055296
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040407.0973918,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592055296
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040408.1450791,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592059392
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040409.1935976,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18598350848
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040410.2414706,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592063488
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040411.2895808,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592059392
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040412.3373718,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592063488
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040413.3854291,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592063488
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040414.43435,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592063488
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040415.4828408,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592059392
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040416.5306392,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592063488
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040417.5794826,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592063488
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040418.629928,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592063488
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040419.6782866,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592063488
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040420.7261727,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592063488
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040421.7752082,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592055296
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040422.823921,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592059392
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040423.8721879,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592059392
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040424.920186,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592059392
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040425.9684434,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18596253696
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040427.0184872,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592063488
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040428.066872,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592063488
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040429.1161861,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18596253696
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040430.1646616,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18594156544
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040431.2131176,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18594160640
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040432.261813,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592063488
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040433.3099806,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592063488
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040434.3581145,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592063488
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040435.406762,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592063488
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040436.4554083,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592063488
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040437.5032911,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592063488
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040438.5509524,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592063488
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040439.598932,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592063488
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040440.6496024,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592059392
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040441.6976798,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18598346752
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040442.7464614,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592059392
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040443.794624,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592055296
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040444.8429034,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592059392
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040445.8918562,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592059392
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040446.939121,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18596253696
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040447.9878497,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18598350848
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040449.0359676,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18596249600
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040450.084091,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18594152448
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040451.1337914,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18594156544
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040452.181995,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18598350848
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040453.2308683,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18596253696
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040454.2793295,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18594156544
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040455.3280675,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18594156544
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040456.3770437,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592059392
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040457.426734,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592059392
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040458.474866,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592063488
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040459.5232005,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592067584
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040460.5710974,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592067584
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040461.6193812,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18596253696
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040462.6676395,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592055296
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040463.714971,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592055296
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040464.7629585,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18596249600
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040465.8111537,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592059392
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040466.8589594,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592059392
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040467.9088972,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592059392
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040468.9569986,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592059392
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040470.0090535,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592059392
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040471.0589762,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592059392
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040472.108612,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592059392
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040473.1585262,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592059392
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040474.209778,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592059392
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040475.257644,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592059392
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040476.3058643,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592059392
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040477.354157,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18596253696
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040478.4028134,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592063488
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040479.4506862,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592063488
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040480.4990501,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592063488
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040481.5477183,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592030720
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040482.5958312,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592030720
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040483.6455958,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592030720
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040484.6953487,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592030720
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040485.743226,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592030720
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040486.7910314,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592030720
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040487.839281,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592030720
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040488.889744,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592030720
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040489.9386754,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18589933568
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040490.9890797,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18589937664
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040492.037368,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18596220928
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040493.08649,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592022528
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040494.13598,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592026624
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040495.1866717,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592026624
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040496.2383444,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592026624
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 27688812544
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040497.2914543,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592026624
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 1789399040
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040498.3394105,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592026624
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 5937537024
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040499.387868,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18598309888
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 7158075392
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040500.4361095,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18598313984
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 7158075392
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040501.4864347,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592022528
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 7265034240
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040502.5347846,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18598318080
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 7265034240
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040503.5836844,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18596225024
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 7265173504
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040504.6316452,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18596220928
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 7265173504
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040505.6796203,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592030720
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 7265234944
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040506.7276776,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592030720
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 7265234944
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040507.7752962,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592022528
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 7265234944
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040508.8230853,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592026624
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 7265173504
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040509.8711486,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592026624
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 7265173504
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040510.9190278,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592026624
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 7265234944
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040511.9671094,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592026624
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 7265234944
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040513.01683,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592026624
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 7265173504
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040514.0648863,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592026624
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 7265173504
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040515.116441,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592026624
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 7265173504
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040516.1638587,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592026624
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 7266619392
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040517.2174294,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18588561408
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 1742540800
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040518.2681985,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18592788480
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 1742540800
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040519.3181076,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 18593513472
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 1742540800
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040520.3667285,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 1864585216
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 1742540800
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    },
+    {
+      "time": 1788040521.3754618,
+      "devices": {
+        "card0": {
+          "total": 21458059264,
+          "used": 1870868480
+        },
+        "card1": {
+          "total": 34208743424,
+          "used": 1742540800
+        },
+        "card2": {
+          "total": 2147483648,
+          "used": 17182720
+        }
+      }
+    }
+  ]
+}

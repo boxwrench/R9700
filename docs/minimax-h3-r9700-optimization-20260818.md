@@ -173,3 +173,18 @@ Cross-family staging cost was about 5.7–5.9 s; intra-H3 checkpoint swaps about
 The 2026-08-12 RX 7900 XT dual-GPU Qwen residency experiment remains valid as a historical experiment, especially for its host-RAM result and smart-memory failure mode, but it is no longer the recommended next optimization. The selected single-R9700 explicit-offload path is simpler and directly addresses the measured sampler residency penalty.
 
 See [`archive/dual-gpu-residency-20260812.md`](archive/dual-gpu-residency-20260812.md).
+
+## 8. R2V reference-size boundary — 2026-08-29
+
+A follow-up campaign tested the previously failing 960×544 / 124-frame Turbo Ref2VA workload with one high-resolution image reference.
+
+| configuration | reliability | warm wall median | warm sampler median |
+|---|---:|---:|---:|
+| single R9700, `ref_image_size=match`, Turbo | 4/4 pass | 120.099 s | 95.753 s |
+| matched dual, Qwen on RX 7900 XT | 4/4 pass | 120.101 s | 95.870 s |
+
+The original `max` run failed in the Turbo LoRA nested `F.linear` path while requesting 3.30 GiB with 2.97 GiB free. Changing only the reference sizing policy to `match` reduced the controlled graph's relevant activation element count by 52.6% and made the full output workload stable. No spatial or frame reduction was required.
+
+The matched dual run freed exactly 12 MiB of R9700 process allocation at sampler entry and was effectively identical in warm wall time. This confirms the existing operational choice: use one R9700, explicitly offload Qwen before sampling, and use `ref_image_size=match` for reference-heavy R2V unless an identity-fidelity test justifies the extra cost of `max`.
+
+Full cold/warm runs, inside-Comfy allocator captures, device-wide ROCm telemetry, workflows, harness, known OOM evidence, and the abandoned historical-dual attempt are preserved in [`data/runs/2026-08-29/minimax-h3-r2v/`](../data/runs/2026-08-29/minimax-h3-r2v/README.md).

@@ -1,0 +1,22 @@
+Known baseline failure preserved from `journalctl --user -u comfyui-h3.service`, 2026-08-29 around 11:35 local.
+
+Workload evidence:
+- 960x544 / 124 frames
+- `ref_image_size=max`
+- LoRA: `minimax_h3_turbo_v4_step600_ema.safetensors`
+- five-step Turbo schedule (six sigmas)
+- 158 bypass adapters; 50 int8 fc2 merges; 51 adaln injections
+
+Failure:
+- HIP out of memory
+- tried to allocate 3.30 GiB
+- 2.97 GiB free
+- PyTorch allocated 25.62 GiB
+- reported peak 29131 MiB
+- failing activation shape ended in 3852544 elements
+
+Direct stack evidence:
+`/ai/comfyui/custom_nodes/ComfyUI-MiniMax-H3-Turbo/__init__.py:305`
+inside `bypass_forward` at `F.linear(F.linear(x, down), up)`.
+
+Interpretation: one large Turbo LoRA linear temporary could not land. This record does not attribute the failure generically to O(N^2) attention.

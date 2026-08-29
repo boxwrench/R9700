@@ -1,0 +1,14 @@
+phase,run_id,service,workflow,res,frames,ref_size,turbo,ref_type,expected_goal,cold_warm,notes
+0,BASE,single :8190,r2v-r9700-baseline.json,960x544,124,max,turbo,image-ref,reproduce OOM,cold,canonical failing workload - keep for 1 image + 1 video reference
+0,BASE-V,single :8190,r2v-r9700-baseline.json,960x544,124,max,turbo,video-ref 5s,reproduce OOM,cold,heavier reference case 2-15s range
+1,S1,single :8190,r2v-r9700-match.json,960x544,124,match,turbo,image-ref,test persistent token reduction,cold+3warm,only ref_image_size changes max->match
+1,S1-V,single :8190,r2v-r9700-match.json,960x544,124,match,turbo,video-ref,repeat with video ref,cold+3warm,
+1,S2,single :8190,r2v-r9700-native.json,960x544,124,match,native/image-ref,test Turbo transient removal,cold+3warm,remove Turbo LoRA only - ideally keep steps/attention same else use Native/High as proxy
+1,S2a,single :8190,r2v-r9700-native.json,960x544,124,match,turboOFF but sage,video-ref,repeat,cold+3warm,
+1,S3,single :8190,r2v-r9700-match-864x480.json,864x480,124,match,turbo,image-ref,spatial ladder step 1,cold+3warm,first modest reduction - close to fit
+1,S3b,single :8190,r2v-r9700-match-864x480.json,864x480,96,match,turbo,image-ref,ladder step 2,cold+3warm,if S3 fails try fewer frames
+1,S3c,single :8190,r2v-r9700-match-608x352.json,608x352,124,match,turbo,image-ref,ladder step 3,cold+warm,fallback tiny
+2,D0,dual :8191,r2v-r9700-dualclip.json,864x480,124,match,turbo,image-ref,dual sanity,cold+3warm,UNET cuda:0 R9700 + CLIPLoaderMultiGPU cuda:1 7900XT - copy known-good dual service visibility
+2,D1,dual :8191,r2v-r9700-dualclip.json,960x544,124,match,turbo,image-ref,dual real target,cold+3warm,measure sampler-entry VRAM vs single
+2,D2,dual :8191,r2v-r9700-dualclip-native.json,960x544,124,match,native,image-ref,dual without Turbo,cold+3warm,if D1 fails
+2,D1-V,dual :8191,r2v-r9700-dualclip.json,960x544,124,match,turbo,video-ref,dual video ref,cold+3warm,heavier reference

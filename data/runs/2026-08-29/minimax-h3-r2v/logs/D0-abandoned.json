@@ -1,0 +1,33 @@
+{
+  "run_id": "D0-historical-dual-abandoned",
+  "date": "2026-08-29",
+  "classification": "ABANDONED_BEFORE_SAMPLER_ENTRY",
+  "result": "not_a_render_failure",
+  "purpose": "reproduce historical known-good dual topology only",
+  "device_gate": {
+    "passed": true,
+    "cuda:0": "AMD Radeon AI PRO R9700 / gfx1201",
+    "cuda:1": "Radeon RX 7900 XT / gfx1100"
+  },
+  "runtime": {
+    "comfyui_commit": "c2bcbecd82ec5ae66594340b395c24ef0217b238",
+    "multigpu_commit": "b51c99a",
+    "turbo_commit": "55fee864",
+    "H3_FLEX_ATTENTION": "off",
+    "disable_smart_memory": false
+  },
+  "observed": {
+    "encoder_target": "cuda:1",
+    "encoder_loaded_mib": 14960.20,
+    "rx7900_device_used_approx_gib": 18.5,
+    "sampler_probe_fired": false
+  },
+  "abandonment": {
+    "rule": "abandon plans exceeding comparable single-GPU wall time by 20 percent",
+    "single_cold_wall_seconds": 168.124,
+    "threshold_seconds": 201.749,
+    "reason": "Historical cold loading exceeded the threshold before sampler entry. The exact interrupted elapsed time was not retained, so no value is invented."
+  },
+  "causal_use": false,
+  "notes": "Older revisions and different attention/smart-memory settings already made this unsuitable for causal comparison. The matched current-runtime lane was used instead."
+}
