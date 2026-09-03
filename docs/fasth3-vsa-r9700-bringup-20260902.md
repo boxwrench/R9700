@@ -209,6 +209,93 @@ Launcher flags mirror the golden H3 launcher, including the load-bearing
 `--disable-mmap`, on port 8191 so the production service on 8190 is never
 contended.
 
+## 8. Repetition protocol — medians over three warm runs per lane
+
+864x480/124f, seed varied per repetition because ComfyUI serves an identical
+graph from cache in ~1 ms. Median (min-max) of three warm runs.
+
+| Lane | Sampling | s/forward | Warm wall | Peak VRAM |
+|---|---:|---:|---:|---:|
+| H3 Turbo v4 FP8 | 48 s | 12.18 (12.17-12.19) | 71.48 s (71.38-71.50) | 24.82 GiB |
+| FastH3 dense | 34 s (34-35) | 8.69 (8.68-8.97) | 71.02 s (70.83-72.09) | 26.58 GiB |
+| FastH3 VSA 0.30 | 30 s | 7.74 (7.73-7.74) | 56.08 s (56.06-56.18) | 27.84 GiB |
+| FastH3 VSA 0.20 | 28 s | 7.15 (7.14-7.15) | 53.78 s (53.74-56.18) | 27.84 GiB |
+| **FastH3 VSA 0.10** | **26 s** | **6.55 (6.54-6.55)** | **50.94 s (50.87-51.00)** | 27.82 GiB |
+
+Variability is negligible: per-forward spread is under 0.5% within every lane
+except FastH3 dense, whose third run drifted to 8.97 s. `p95` is not reported —
+three observations cannot support it.
+
+Median speedups on per-forward time:
+
+- VSA 0.10 vs Turbo v4: **1.86x**
+- VSA 0.10 vs FastH3 dense: **1.33x**
+- FastH3 dense vs Turbo v4: 1.40x
+
+End-to-end warm wall, VSA 0.10 vs Turbo v4: 50.94 s vs 71.48 s, **28.7% less
+wall time**.
+
+## 9. VRAM repeatability, and the image-reference workload
+
+**Peak VRAM is invariant to `topk_ratio`.** Nine warm runs, three per ratio:
+
+| Ratio | Peak VRAM (3 runs) |
+|---:|---|
+| 0.10 | 27.82 / 27.82 / 27.82 GiB |
+| 0.20 | 27.84 / 27.84 / 27.84 GiB |
+| 0.30 | 27.84 / 27.84 / 27.84 GiB |
+
+Stable to the hundredth of a GiB and flat across a 5x change in selected blocks.
+This empirically confirms that **VSA is a speed optimization, not a memory
+optimization** — sparsity removes attention compute, not activation footprint.
+
+An earlier single-run figure of 29.26 GiB at ratio 0.10 was a **measurement
+artifact**: that run followed a dense-lane warm-up whose allocation was still
+resident. Do not treat single-run `rocm-smi` peaks as steady state.
+
+### Ref2VA image-reference workload — fits comfortably
+
+First image-reference configuration, VSA 0.20, 864x480/124f, one reference image,
+`ref_image_size=match`, on `minimax_h3_ref2va_pruned_int8_convrot`. Three warm
+runs:
+
+| Metric | T2VA (FL2VA base) | Ref2VA, one ref image |
+|---|---:|---:|
+| Tokens | 15,444 | 16,260 |
+| Blocks selected @0.20 | 49/242 | 51/255 |
+| Sampling | 28 s | 30 s |
+| s/forward | 7.15 | 7.56 |
+| Warm wall | 53.78 s | 57.03 s |
+| Peak VRAM | 27.84 GiB | **28.15 GiB** |
+| Headroom of 31.86 GiB | 4.02 GiB | **3.71 GiB** |
+
+The reference image costs **+816 tokens, +0.31 GiB and +0.41 s per forward**.
+It fits with room to spare; **no memory optimization is warranted for this
+workload.** The cold first run peaked at 29.65 GiB including the model-load
+transient, which is still inside budget.
+
+`ref_image_size=match` was used. `max` uses a 2048px short edge and, per the
+node tooltip, reference tokens ride through every sampling step — the earlier
+R9700 finding that `max` OOMed at 960x544/124f under Turbo still stands as the
+reason to default to `match`. `max` was not retested here.
+
+Output validated: 864x480, 124 frames, 24 fps, 5.167 s, H.264 + AAC stereo
+32 kHz, mean volume -27.1 dB, clean decode.
+
+**Caveat, unresolved:** the FastH3 LoRA and gates were converted for the **FL2VA**
+base and were applied here to a **ref2va** base. They bound without error — all
+50 blocks patched, gates loaded, VSA active at 51/255 — because the LoRA targets
+`blocks.N.attn.*` and `mlp.*`, which are identical across variants. The upstream
+bridge states that Ref2VA "would need matching FastVideo LoRAs (not yet
+released)". Timing and memory figures above are therefore trustworthy;
+**identity fidelity is not yet validated** and awaits the operator's visual gate.
+
+API note: the Ref2VA reference image is wired with the dotted autogrow key
+`ref_images.ref_image_0`, not `ref_image_0`. The latter raises
+`TypeError: MiniMaxH3ReferenceToVideo.execute() got an unexpected keyword
+argument`. The production `h3_r2v.json` predates the current node signature: it
+uses singular `ref_image` and lacks `audio_vae` and `ref_image_size`.
+
 ## Engineering record
 
 ```text

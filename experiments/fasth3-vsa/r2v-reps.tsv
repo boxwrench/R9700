@@ -1,0 +1,4 @@
+lane	rep	seed	sampling_s	s_per_it	wall_s	peak_vram_gib	headroom_gib
+r2v_vsa020	1	8112051	30	7.54	57.026	28.15	3.71
+r2v_vsa020	2	8112052	30	7.57	59.160	28.15	3.71
+r2v_vsa020	3	8112053	30	7.58	56.361	28.15	3.71
