@@ -18,12 +18,14 @@ on gfx1201, with the transformer fully resident and no denoiser offload.
 
 | Lane | Sampling | s/forward | Warm wall | Peak VRAM |
 |---|---:|---:|---:|---:|
-| H3 Turbo v4 FP8 (current production model path) | 48 s | 12.06 | 74.28 s | 26.18 GiB |
-| FastH3 four-forward, dense attention | 34 s | 8.59 | 72.02 s | 26.58 GiB |
-| **FastH3 four-forward + VSA @ topk 0.10** | **27 s** | **6.69** | **60.21 s** | 29.26 GiB |
+| H3 Turbo v4 FP8 (current production model path) | 48 s | 12.18 | 71.48 s | 24.82 GiB |
+| FastH3 four-forward, dense attention | 34 s | 8.69 | 71.02 s | 26.58 GiB |
+| **FastH3 four-forward + VSA @ topk 0.10** | **26 s** | **6.55** | **50.94 s** | **27.82 GiB** |
 
-Sampling is **1.78x faster than Turbo v4**; VSA contributes **1.27x** of that on
-top of the four-step schedule. Both effects are real and separable.
+Sampling is **1.86x faster than Turbo v4**; VSA contributes **1.33x** of that on
+top of the four-step schedule. Both effects are real and separable. These are
+medians of three warm runs each (section 8); the single-run figures this record
+originally carried have been superseded.
 
 Workload: 864x480, 124 frames, 24 fps, seed 8112026, 4 steps, `euler`/`simple`,
 CFG-free guider, the standard brass-robot prompt, FP8 Qwen3-VL encoder held
@@ -110,14 +112,17 @@ min_tokens`. Any FastH3/VSA run must assert on the `[H3-VSA] ACTIVE` line;
 
 | Lane | topk | Blocks selected | Sampling | s/forward | Warm wall | Peak VRAM |
 |---|---:|---:|---:|---:|---:|---:|
-| VSA | 0.10 | 25/242 (10.3%) | 27 s | 6.69 | 60.21 s | 29.26 GiB |
+| VSA | 0.10 | 25/242 (10.3%) | 27 s | 6.69 | 60.21 s | (see note) |
 | VSA | 0.20 | 49/242 (20.2%) | 28 s | 7.10 | 54.25 s | 27.82 GiB |
 | VSA | 0.30 | 73/242 (30.2%) | 30 s | 7.68 | 55.64 s | 27.82 GiB |
 | VSA | 0.50 | 121/242 (50.0%) | 35 s | 8.85 | 60.39 s | 27.82 GiB |
 | VSA | 1.00 | 242/242 (100%) | 47 s | 11.77 | 72.19 s | 27.82 GiB |
 | FastH3 dense | — | — | 34 s | 8.68 | 72.02 s | 26.58 GiB |
 
-Sampling scales smoothly with selected blocks. Warm wall time does not, because
+The 0.10 row's VRAM figure is withheld here: that single run was contaminated by
+a preceding dense-lane warm-up. Section 9 supersedes it with repeated
+measurements. Sampling scales smoothly with selected blocks. Warm wall time does
+not, because
 model load, conditioning and decode dominate; the 0.10 wall figure above came
 from a differently-warmed server than the 0.20-1.00 rows and should not be read
 as a 0.10-vs-0.20 regression. Sampling seconds are the trustworthy column.
@@ -182,8 +187,9 @@ No GPU reset, VM fault, ring timeout or OOM occurred.
 ## 6. Residency
 
 The transformer stayed resident for all four forwards. No denoiser offload at any
-point. Peak 29.26 GiB of 31.86 GiB at topk 0.10 — roughly 2.6 GiB headroom, about
-3 GiB tighter than Turbo v4's 26.18 GiB. Gates are held CPU-pinned and streamed
+point. Steady-state peak is **27.82 GiB of 31.86 GiB** at topk 0.10 — about
+**4.0 GiB headroom**, roughly 3 GiB above Turbo v4's 24.82 GiB. (An earlier
+single-run 29.26 GiB figure was an allocator/lifecycle artifact; see section 9.) Gates are held CPU-pinned and streamed
 per block per step (~73 MiB x 50 blocks = ~3.6 GiB not held resident), which is
 part of why headroom survives.
 
@@ -249,9 +255,11 @@ Stable to the hundredth of a GiB and flat across a 5x change in selected blocks.
 This empirically confirms that **VSA is a speed optimization, not a memory
 optimization** — sparsity removes attention compute, not activation footprint.
 
-An earlier single-run figure of 29.26 GiB at ratio 0.10 was a **measurement
-artifact**: that run followed a dense-lane warm-up whose allocation was still
-resident. Do not treat single-run `rocm-smi` peaks as steady state.
+An earlier single-run figure of 29.26 GiB at ratio 0.10 was an
+**allocator/lifecycle artifact**, not a real working-set difference: that run
+followed a dense-lane warm-up whose allocation was still resident. True VSA
+steady state is **~27.82 GiB and is effectively independent of `topk_ratio`**.
+Do not treat single-run `rocm-smi` peaks as steady state.
 
 ### Ref2VA image-reference workload — fits comfortably
 
@@ -296,6 +304,34 @@ API note: the Ref2VA reference image is wired with the dotted autogrow key
 argument`. The production `h3_r2v.json` predates the current node signature: it
 uses singular `ref_image` and lacks `audio_vae` and `ref_image_size`.
 
+## 10. Memory optimization — DEFERRED, do not implement
+
+**Decision (2026-09-02): no invasive memory optimization.** The primary practical
+target — one Ref2VA image at `ref_image_size=match`, 864x480/124f — fits
+comfortably at **28.15 GiB peak with ~3.71 GiB headroom**, and T2VA sits at
+27.82-27.84 GiB with ~4.0 GiB headroom. There is no memory problem to solve, so
+solving one would add risk to a working configuration for no measured benefit.
+
+The following ideas were identified while characterizing the workload and are
+**preserved as future candidates only**. Do not implement any of them unless it
+is independently useful on its own merits, or a larger workload actually
+exhausts headroom:
+
+| Candidate | Idea | Trigger to reconsider |
+|---|---|---|
+| Early release of reference/embedding construction tensors | Free ref-image and conditioning construction buffers as soon as the conditioning stage completes, rather than holding them through sampling | Multi-reference Ref2VA, or `ref_image_size=max` |
+| MLP / FinalLayer chunking | Process the FFN and final projection in sequence chunks to cap peak activation | Higher resolution or longer clips |
+| Remove VSA coarse-output `repeat()` materialization | The compress branch expands per-block output back to full sequence length via `repeat()`, materializing a full-size tensor that could be fused or broadcast instead | Longer sequences where the coarse tensor becomes a material fraction of peak |
+
+Any of these must be justified by a measurement, benchmarked before and after,
+and validated against the visual quality gate — not adopted because it sounds
+like a saving.
+
+Two workloads that are *not* yet characterized and could change this decision:
+`ref_image_size=max` (reference tokens ride through every sampling step; the
+prior R9700 finding is that `max` OOMed at 960x544/124f under Turbo), and
+multi-reference Ref2VA (the node accepts up to 9 images).
+
 ## Engineering record
 
 ```text
@@ -308,22 +344,27 @@ CHANGE:     Rejected the port. Used the ComfyUI bridge so quantized weights stay
             in ComfyUI and only the Triton sparse kernel comes from FastVideo.
 RESULT:     VSA correct on gfx1201 (rel L2 ~5e-3 vs dense at full selection).
             Sampling 48 s -> 34 s (four-step) -> 27 s (VSA 0.10). Resident,
-            peak 29.26 GiB, no denoiser offload. No gfx1201 code change needed.
+            steady-state peak 27.82 GiB, no denoiser offload. No gfx1201 change.
             VSA is ~2x slower below ~2.7k tokens.
 DECISION:   EXPERIMENTAL. Bring-up succeeded. Operator quality gate PASSED for
             every 864x480/124f lane and every sparsity ratio tested; the only
             rejection was VSA forced below its token guard. topk 0.10 selected
             as the experimental default: fastest tested and the trained policy.
             Production unchanged pending repetitions.
-NEXT:       >=3 warm repetitions per lane (0.10 / FastH3 dense / Turbo v4) for
-            medians and variability; then profile the 27 s sampler before any
-            kernel work.
+NEXT:       Repetitions COMPLETE (section 8). VRAM repeatability COMPLETE and
+            topk-invariant (section 9). Ref2VA image-reference workload fits with
+            ~3.71 GiB headroom, so memory optimization is DEFERRED (section 10).
+            Open: operator identity-fidelity gate on the Ref2VA output;
+            ref_image_size=max and multi-reference characterization; then
+            profile the sampler before any kernel work.
 ```
 
 ## Not yet done
 
-- Repetitions: every number here is a single run; no medians or variance
-- Cold-lane triples per the three-run reference protocol
+- Operator identity-fidelity gate on the Ref2VA output (FL2VA-trained LoRA on a
+  ref2va base — binds cleanly, fidelity unvalidated)
+- `ref_image_size=max` and multi-reference Ref2VA characterization
+- Cold-lane triples per the three-run reference protocol (warm triples are done)
 - Sampler profiling — where the remaining 27 s goes
 - Exact gfx1201 sparse/dense crossover threshold
 - No kernel, launch-parameter, gate-caching or fusion work attempted, by design

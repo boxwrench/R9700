@@ -48,6 +48,21 @@ Generated media: `/ai/artifacts/runs/fasth3-vsa/`.
    exposes that namespace; check for actual CUDA/PTX/CuTe kernels or compiled
    `_C` extensions instead.
 
+## Memory optimization is DEFERRED — do not implement
+
+Frozen 2026-09-02. Ref2VA at `ref_image_size=match`, 864x480/124f peaks at
+28.15 GiB with ~3.71 GiB headroom; T2VA at 27.82-27.84 GiB. Nothing needs
+optimizing. Peak VRAM is independent of `topk_ratio`.
+
+Preserved as **future candidates only** — implement only if independently
+useful, or if a larger workload actually exhausts headroom:
+
+1. Early release of reference/embedding construction tensors.
+2. MLP / FinalLayer chunking.
+3. Removal of the VSA coarse-output `repeat()` materialization.
+
+Reconsider when characterizing `ref_image_size=max` or multi-reference Ref2VA.
+
 ## Reproduce
 
 ```bash
