@@ -1,0 +1,7 @@
+lane	frames	temporal_delta
+dense	124	0.852
+vsa-topk0.10	124	2.328
+vsa-topk0.20	124	2.899
+vsa-topk0.30	124	2.680
+vsa-topk0.50	124	2.724
+vsa-topk1.00	124	2.675

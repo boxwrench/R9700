@@ -1,0 +1,214 @@
+# FastH3 four-forward + FastVideo Video Sparse Attention on R9700 / gfx1201 — 2026-09-02
+
+**Status: EXPERIMENTAL.** Production H3 remains Turbo v4 FP8 with pre-sampler Qwen
+offload. Nothing in `production/` changed. This record documents a successful
+bring-up and a characterized quality/performance frontier, not a production
+selection.
+
+- AMD Radeon AI PRO R9700, `gfx1201`, 32 GiB (31.86 GiB reported), 32 CU
+- Ubuntu 24.04.4 LTS, kernel `7.0.0-28-generic`, Mesa 25.2.8
+- ROCm 7.2.1, HIP `7.2.53211-e1a6bc5663`
+- PyTorch `2.9.1+rocm7.2.1.gitff65f5bc`, Triton `3.5.1+rocm7.2.1.gita272dfa8`
+- ComfyUI `7cee3ceb1a35503172e0dfb8dbdbdedee2aba8aa` (0.33.2), isolated copy on port 8191
+
+## Headline result
+
+FastH3's four-forward distillation **and** FastVideo's Video Sparse Attention run
+on gfx1201, with the transformer fully resident and no denoiser offload.
+
+| Lane | Sampling | s/forward | Warm wall | Peak VRAM |
+|---|---:|---:|---:|---:|
+| H3 Turbo v4 FP8 (current production model path) | 48 s | 12.06 | 74.28 s | 26.18 GiB |
+| FastH3 four-forward, dense attention | 34 s | 8.59 | 72.02 s | 26.58 GiB |
+| **FastH3 four-forward + VSA @ topk 0.10** | **27 s** | **6.69** | **60.21 s** | 29.26 GiB |
+
+Sampling is **1.78x faster than Turbo v4**; VSA contributes **1.27x** of that on
+top of the four-step schedule. Both effects are real and separable.
+
+Workload: 864x480, 124 frames, 24 fps, seed 8112026, 4 steps, `euler`/`simple`,
+CFG-free guider, the standard brass-robot prompt, FP8 Qwen3-VL encoder held
+constant across every lane.
+
+## Architecture — no FastVideo quantized loader was required
+
+The initial assumption was that a ConvRot INT8 loader would have to be ported
+into FastVideo. That was wrong, and the wrong branch was expensive. The working
+decomposition keeps each stack doing what it already does:
+
+```text
+pruned INT8 ConvRot H3 base        (ComfyUI quant path, already working here)
+  -> FastH3 four-step VSA LoRA     (fasth3_vsa_4-steps-v5.safetensors)
+  -> FastH3 trained gates          (fasth3_vsa_gate.safetensors, 50 blocks)
+  -> vsa.video_sparse_attn         (FastVideo Triton kernel)
+  -> ComfyUI                       (barelymining/ComfyUI-MiniMax-H3-FastVideo)
+```
+
+Quantized **weights** stay ComfyUI's responsibility; only the sparse **kernel**
+comes from FastVideo. Nothing needed porting.
+
+Do not confuse the two sparse-attention paths. ComfyUI-side Sol-Attention
+(`ComfyUI-sol-attn`) is vendored NVIDIA source dispatching SM86/89/90/100/120/121
+and is **not** usable here. The path that works on AMD is FastVideo's Triton VSA.
+
+## 1. FastVideo's Triton VSA kernel is correct on gfx1201
+
+Standalone probe, no ComfyUI and no H3 weights
+(`experiments/fasth3-vsa/probe_vsa_gfx1201.py`):
+
+- `vsa/__init__.py` branches on `torch.cuda.get_device_capability(0)`; gfx1201
+  reports `(12, 0)`, so the `major == 9 and minor == 0` H100 branch is skipped
+  and the Triton path is selected. `vsa_cuda` is never imported and
+  `block_sparse_fwd is None`.
+- **Correctness, not just absence of crash:** at `topk == n_blocks` VSA is
+  mathematically required to equal dense attention. Measured relative L2 vs a
+  dense reference: `4.775e-03` without gate, `5.419e-03` with gate — bf16
+  rounding, not a broken kernel.
+- Executed clean at H3-representative shapes (56 heads, head dim 128, bf16) for
+  4096 / 8192 / 16384 tokens at topk ratio 0.10. Peak 3.05 GiB.
+
+The `vsa` PyPI package builds a Hopper `-arch=sm_90a` extension and fails on
+non-Hopper cards. Installing the Python sources only (`vsa==0.0.3` sdist,
+`vsa/` directory onto `sys.path`, plus `pytest`) activates the Triton fallback.
+No compilation, no local patch.
+
+**The RDNA `num_stages` workaround was not needed.** That fix applies to a
+different sparse-attention kernel. This kernel autotuned and ran clean on
+Triton 3.5.1 (`BLOCK_M`/`BLOCK_N` fixed at 64; `num_stages` 2..7 x `num_warps`
+4,8). No gfx1201-specific change was required anywhere in this bring-up.
+
+## 2. VSA is workload-dependent — sparse is slower on small workloads
+
+| Workload | Tokens | Blocks | Dense sampling | VSA @0.10 sampling |
+|---|---:|---:|---:|---:|
+| 608x352 / 39f | 2,683 | 42 | 4 s | **8 s** |
+| 864x480 / 124f | 15,444 | 242 | 34 s | **27 s** |
+
+At 2,683 tokens VSA is about **2x slower** than dense: selection, the compress
+branch and per-block gate streaming cost more than the attention they save. At
+15,444 tokens VSA wins clearly.
+
+The bridge node's `min_tokens=4096` guard is therefore **directionally
+justified**. The exact gfx1201 crossover has not been measured and 4096 should
+not be inherited as a tuned value.
+
+This nearly produced a false negative: the first 608x352/39f run emitted a valid
+video and reported success while logging `[H3-VSA] dense fallback: below
+min_tokens`. Any FastH3/VSA run must assert on the `[H3-VSA] ACTIVE` line;
+`run_workflow.py` fails the run when it is absent or a fallback line appears.
+
+## 3. Sparsity sweep
+
+864x480/124f, seed 8112026, everything constant except `topk_ratio`. Warm runs.
+
+| Lane | topk | Blocks selected | Sampling | s/forward | Warm wall | Peak VRAM |
+|---|---:|---:|---:|---:|---:|---:|
+| VSA | 0.10 | 25/242 (10.3%) | 27 s | 6.69 | 60.21 s | 29.26 GiB |
+| VSA | 0.20 | 49/242 (20.2%) | 28 s | 7.10 | 54.25 s | 27.82 GiB |
+| VSA | 0.30 | 73/242 (30.2%) | 30 s | 7.68 | 55.64 s | 27.82 GiB |
+| VSA | 0.50 | 121/242 (50.0%) | 35 s | 8.85 | 60.39 s | 27.82 GiB |
+| VSA | 1.00 | 242/242 (100%) | 47 s | 11.77 | 72.19 s | 27.82 GiB |
+| FastH3 dense | — | — | 34 s | 8.68 | 72.02 s | 26.58 GiB |
+
+Sampling scales smoothly with selected blocks. Warm wall time does not, because
+model load, conditioning and decode dominate; the 0.10 wall figure above came
+from a differently-warmed server than the 0.20-1.00 rows and should not be read
+as a 0.10-vs-0.20 regression. Sampling seconds are the trustworthy column.
+
+**VSA @1.00 is not the dense lane.** 47 s vs 34 s sampling for the same four
+forwards. VSA at full selection still pays for block-mean compression, scoring,
+top-k and the `out_c * gate + out_s` combination. Keep the lanes separate.
+
+## 4. Approximation diagnostics
+
+Diagnostic only. Aesthetic judgement is the operator's; these numbers do not
+rank videos.
+
+Against the FastH3 dense lane, SSIM stays near 0.50-0.56 and does **not** rise
+toward 1.0 as topk approaches 1.00 — because the VSA path is a different
+computation, not a sparsified dense one. Dense is therefore the wrong reference
+for isolating sparsity error.
+
+Against VSA @1.00, which shares the code path, the curve behaves as expected:
+
+| topk | SSIM vs VSA@1.00 | PSNR vs VSA@1.00 |
+|---:|---:|---:|
+| 0.10 | 0.524 | 14.81 dB |
+| 0.20 | 0.522 | 15.98 dB |
+| 0.30 | 0.576 | 17.70 dB |
+| 0.50 | 0.612 | 18.84 dB |
+
+Temporal delta (mean absolute frame-to-frame luma change, 216x120 grayscale):
+dense 0.852; VSA lanes 2.33 / 2.90 / 2.68 / 2.72 / 2.68 for 0.10 / 0.20 / 0.30 /
+0.50 / 1.00. Higher may indicate more motion or more flicker; the metric does
+not distinguish them.
+
+Matched contact sheets (identical timestamps, configurations adjacent):
+[`assets/fasth3-vsa/ABC-864x480-124f.png`](assets/fasth3-vsa/ABC-864x480-124f.png)
+and [`assets/fasth3-vsa/sweep-864x480-124f.png`](assets/fasth3-vsa/sweep-864x480-124f.png).
+
+## 5. Validation
+
+All seven outputs passed: exact geometry, 124 frames at 24 fps, 5.167 s duration
+(39 frames / 1.625 s for the small lane), H.264 `yuv420p`, AAC stereo 32 kHz with
+matching audio duration, non-silent audio (mean volume -17.4 to -45.9 dB), and a
+clean full decode to null with no errors. SHA-256 of every artifact is recorded.
+No GPU reset, VM fault, ring timeout or OOM occurred.
+
+## 6. Residency
+
+The transformer stayed resident for all four forwards. No denoiser offload at any
+point. Peak 29.26 GiB of 31.86 GiB at topk 0.10 — roughly 2.6 GiB headroom, about
+3 GiB tighter than Turbo v4's 26.18 GiB. Gates are held CPU-pinned and streamed
+per block per step (~73 MiB x 50 blocks = ~3.6 GiB not held resident), which is
+part of why headroom survives.
+
+Text encoder and VAEs offload between stages, which is the accepted pattern here
+and is independently faster on this system.
+
+## 7. Provenance
+
+- Base: `minimax_h3_fl2va_pruned_int8_convrot.safetensors` (20.97 GB),
+  `e889202c41dafb67b10d67b97f0d8541508036a6090af23425a5c2615d03c47a`
+- LoRA: `fasth3_vsa_4-steps-v5.safetensors` (2.20 GB),
+  `70831f37ad1431f0686c8976d3ec949a4359ae67316d654b453d8809517bb268`
+- Gate: `fasth3_vsa_gate.safetensors` (3.85 GB),
+  `bf95408e335c4b0d6a1a44946a428a3e12849e6eab2de9566ecedae4a0043420`
+- Bridge node `barelymining/ComfyUI-MiniMax-H3-FastVideo` `be8f1ef72e3dc430c005e10923c2a0863aa6a9e8` (2026-08-30)
+- FastVideo reference checkout `0bd19a976b2e88ccd0d10b687b238bc1fa28c52a`
+- `vsa==0.0.3`, Python sources only, Triton path
+- Full hash list: [`../experiments/fasth3-vsa/asset-sha256.txt`](../experiments/fasth3-vsa/asset-sha256.txt)
+- Stack capture: [`../experiments/fasth3-vsa/stack.txt`](../experiments/fasth3-vsa/stack.txt)
+- Media: `/ai/artifacts/runs/fasth3-vsa/`
+
+Launcher flags mirror the golden H3 launcher, including the load-bearing
+`--disable-mmap`, on port 8191 so the production service on 8190 is never
+contended.
+
+## Engineering record
+
+```text
+TASK:       Determine whether FastH3 four-forward + FastVideo VSA can run on
+            gfx1201 with the transformer resident, and whether it beats the
+            selected H3 Turbo v4 model path.
+HYPOTHESIS: A ConvRot INT8 loader must be ported into FastVideo first.
+CONTROL:    H3 Turbo v4 FP8, same harness, same encoder, same prompt/seed/geometry.
+CHANGE:     Rejected the port. Used the ComfyUI bridge so quantized weights stay
+            in ComfyUI and only the Triton sparse kernel comes from FastVideo.
+RESULT:     VSA correct on gfx1201 (rel L2 ~5e-3 vs dense at full selection).
+            Sampling 48 s -> 34 s (four-step) -> 27 s (VSA 0.10). Resident,
+            peak 29.26 GiB, no denoiser offload. No gfx1201 code change needed.
+            VSA is ~2x slower below ~2.7k tokens.
+DECISION:   EXPERIMENTAL. Bring-up succeeded. Production unchanged pending the
+            operator's visual quality gate on the contact sheets.
+NEXT:       Operator quality gate; then >=3 warm repetitions for medians on the
+            chosen ratios; then profile the 27 s sampler before any kernel work.
+```
+
+## Not yet done
+
+- Operator visual quality gate (the deciding criterion)
+- Repetitions: every number here is a single run; no medians or variance
+- Cold-lane triples per the three-run reference protocol
+- Sampler profiling — where the remaining 27 s goes
+- Exact gfx1201 sparse/dense crossover threshold
+- No kernel, launch-parameter, gate-caching or fusion work attempted, by design
