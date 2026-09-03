@@ -1,9 +1,10 @@
 # FastH3 four-forward + FastVideo Video Sparse Attention on R9700 / gfx1201 — 2026-09-02
 
-**Status: EXPERIMENTAL.** Production H3 remains Turbo v4 FP8 with pre-sampler Qwen
-offload. Nothing in `production/` changed. This record documents a successful
-bring-up and a characterized quality/performance frontier, not a production
-selection.
+**Status: EXPERIMENTAL, FROZEN 2026-09-02.** Production H3 in `production/`
+remains Turbo v4 FP8 with pre-sampler Qwen offload and is unchanged. This record
+documents a completed bring-up, a characterized quality/performance frontier, and
+a closed memory pass. The operator has accepted the configuration for use.
+Experimentation is closed; see section 11.
 
 - AMD Radeon AI PRO R9700, `gfx1201`, 32 GiB (31.86 GiB reported), 32 CU
 - Ubuntu 24.04.4 LTS, kernel `7.0.0-28-generic`, Mesa 25.2.8
@@ -331,6 +332,88 @@ Two workloads that are *not* yet characterized and could change this decision:
 `ref_image_size=max` (reference tokens ride through every sampling step; the
 prior R9700 finding is that `max` OOMed at 960x544/124f under Turbo), and
 multi-reference Ref2VA (the node accepts up to 9 images).
+
+## 11. Final bounded memory pass — 2026-09-02 (CLOSED)
+
+One bounded pass, then experimentation stopped. Measured with torch's own
+counters (`max_memory_allocated` / `max_memory_reserved`) via a probe route, not
+`rocm-smi`; these are a different basis from the device-wide figures in sections
+9 and 10 and are not directly comparable to them.
+
+### Accepted: VSA broadcast combine (`patches/vsa-broadcast-combine.patch`)
+
+The 64-token VSA path expanded its block-level coarse output with `repeat()` into
+a full `[B,H,S,D]` tensor, then allocated two more full-size tensors for the
+gate product and the sum. Replaced with a `[B,H,n_blocks,1,D]` broadcast that
+accumulates into the sparse result via `addcmul_` under `no_grad`, mirroring the
+128/256-block paths. The fp32 block means also switched from `.float().sum()` to
+`.sum(dtype=torch.float32)`, which accumulates identically without materializing
+an fp32 copy of q/k/v.
+
+| Workload | s/forward | Peak allocated | Peak reserved |
+|---|---:|---:|---:|
+| Ref2VA @0.20 before | 7.55 | 25.885 GiB | 27.301 GiB |
+| Ref2VA @0.20 after | **7.23** | **25.473 GiB** | **26.863 GiB** |
+| T2VA @0.20 before | 7.14 | 25.748 GiB | 27.100 GiB |
+| T2VA @0.20 after | **6.84** | **25.358 GiB** | **26.686 GiB** |
+
+**-0.41 GiB allocated, -0.44 GiB reserved, and 4.2% faster** — no speed tradeoff
+to weigh. Equivalence verified against the pre-patch implementation
+(`verify_vsa_patch.py`): bit-exact without a gate; with a gate, within one bf16
+ULP (max abs 9.77e-4, rel L2 ~1e-3) because `addcmul_` fuses the multiply-add.
+Top-k routing identical in every case. VSA active, zero fallbacks.
+
+Structured to upstream to FastVideo unchanged.
+
+### Kept but delivers nothing measurable: early release (`patches/h3-early-release-conditioning.patch`)
+
+Drops the embedding and reference/conditioning construction tensors
+(`video_embed`, `audio_embed`, `all_video_rows`, `cond_*_rows`, `text_states`,
+update masks) as soon as `h` is packed, instead of holding them across the
+50-block loop. Nothing is recomputed and nothing moves between CPU and GPU.
+
+**Measured effect: zero.** 25.473 / 26.863 GiB before and after, identical to
+three decimals on both workloads. Retained as lifetime hygiene per operator
+instruction, but it buys no headroom and must be re-applied after every ComfyUI
+update. It can be dropped with no loss.
+
+### Skipped: MLP / FinalLayer chunking
+
+Not attempted. Two independent reasons:
+
+1. **No existing implementation to incorporate.** No H3-Optimizations chunking
+   exists in this ComfyUI; it would have to be written from scratch, which is the
+   "integration is becoming complicated, stop" condition.
+2. **A hard floor caps the possible gain below the acceptance bar.** A memory
+   trajectory through a full Ref2VA run shows two separate phases each reaching
+   ~25 GiB:
+
+```text
+t=3.5 s    25.010 GiB   text-encoder phase (Qwen3-VL FP8 is a 25 GB encoder)
+t=20.7 s    0.149 GiB   encoder offloaded
+t=34-63 s  23.3-25.0 GiB DiT resident (20 GB) + sampling activations
+t=66-84 s   5.1 GiB     VAE decode
+```
+
+The text-encoder phase sets a floor at **25.01 GiB**. Shaving DiT activations can
+therefore recover at most ~0.45 GiB before peak becomes encoder-bound — below the
+0.5 GiB bar set for this candidate. Any future memory work should target the
+encoder phase first, not the block loop.
+
+This also explains the null result above: freeing ~0.2 GiB of embedding tensors
+cannot move a peak that is set by a different high-water mark.
+
+### Final frozen configuration
+
+Ref2VA, `ref_image_size=match`, 864x480/124f, VSA topk 0.20, patched:
+**7.19-7.23 s per forward, 28 s sampling, ~53.6 s warm wall, 25.473 GiB peak
+allocated, 26.863 GiB peak reserved.** Output validated: 864x480, 124 frames,
+24 fps, 5.167 s, H.264 + AAC stereo, mean volume -22.3 dB, clean decode.
+
+**Experimentation is closed.** Not attempted, by explicit scope: streamed QKV,
+CPU offload, transformer offload, new sparse kernels, top-k tuning, min-token
+tuning, larger-reference optimization, further quality metrics, further
+benchmark matrices.
 
 ## Engineering record
 

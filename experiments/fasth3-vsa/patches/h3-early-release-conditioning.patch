@@ -1,0 +1,19 @@
+--- /ai/comfyui/comfy/ldm/minimax/model.py	2026-08-18 12:20:05.837032006 -0700
++++ /ai/lab/experiments/fasth3-vsa/ComfyUI/comfy/ldm/minimax/model.py	2026-09-02 22:34:26.353517800 -0700
+@@ -607,6 +607,16 @@
+                 h[a:b] = audio_embed[aoff:aoff + n]
+                 aoff += n
+ 
++        # `h` now holds everything block 0 needs. Without this, the embedding and
++        # reference/conditioning construction tensors stay referenced by this frame
++        # for the whole block loop and inflate peak allocation. Dropping the names
++        # here frees them before the first block allocates its activations. Nothing
++        # below recomputes them and nothing moves between CPU and GPU.
++        del video_rows, audio_rows, cond_video_rows, cond_audio_rows
++        del all_video_rows, all_audio_rows
++        del video_embed, audio_embed, text_states
++        del img_update, audio_update
++
+         t_vals = torch.tensor(unique_t, dtype=torch.float32, device=device)
+         if self.use_adaln_curves:
+             # adaln projections consume interpolated coordinates of the time-embedding curve

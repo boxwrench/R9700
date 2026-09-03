@@ -1,0 +1,67 @@
+--- /ai/lab/experiments/fasth3-vsa/vsa_init_ORIGINAL.py	2026-09-02 22:20:09.105494043 -0700
++++ /ai/environments/fasth3-vsa/lib/python3.12/site-packages/vsa/__init__.py	2026-09-02 22:26:51.509149288 -0700
+@@ -50,31 +50,49 @@
+     assert block_elements == 64
+     assert q.shape[2] % block_elements == 0
+     batch_size, num_heads, seq_len, head_dim = q.shape
+-    # compress attn
+-    q_compress = (q.view(batch_size, num_heads, seq_len // block_elements,
+-                        block_elements, head_dim).float().sum(dim=3) / variable_block_sizes.view(1, 1, -1, 1)).to(q.dtype)
+-    k_compress = (k.view(batch_size, num_heads, seq_len // block_elements,
+-                        block_elements, head_dim).float().sum(dim=3) / variable_block_sizes.view(1, 1, -1, 1)).to(k.dtype)
+-    v_compress = (v.view(batch_size, num_heads, seq_len // block_elements,
+-                        block_elements, head_dim).float().sum(dim=3) / variable_block_sizes.view(1, 1, -1, 1)).to(v.dtype)
++    n_blocks = seq_len // block_elements
++    blocked = (batch_size, num_heads, n_blocks, block_elements, head_dim)
++
++    # compress attn.
++    # sum(dtype=float32) accumulates in fp32 exactly as .float().sum() did, but
++    # without materializing an fp32 copy of the full [B,H,S,D] tensor first.
++    q_compress = (q.view(*blocked).sum(dim=3, dtype=torch.float32) / variable_block_sizes.view(1, 1, -1, 1)).to(q.dtype)
++    k_compress = (k.view(*blocked).sum(dim=3, dtype=torch.float32) / variable_block_sizes.view(1, 1, -1, 1)).to(k.dtype)
++    v_compress = (v.view(*blocked).sum(dim=3, dtype=torch.float32) / variable_block_sizes.view(1, 1, -1, 1)).to(v.dtype)
+ 
+     output_compress, block_attn_score = torch_attention(q_compress, k_compress,
+                                                         v_compress)
+ 
+-    output_compress = output_compress.view(batch_size, num_heads,
+-                                           seq_len // block_elements, 1,
++    # Keep the coarse output block-shaped: [B,H,n_blocks,1,D] broadcasts along
++    # the block axis, so the per-block value never has to be materialized into a
++    # full [B,H,S,D] tensor via repeat(). Mirrors the 128/256-block paths.
++    output_compress = output_compress.view(batch_size, num_heads, n_blocks, 1,
+                                            head_dim)
+-    output_compress = output_compress.repeat(1, 1, 1, block_elements,
+-                                             1).view(batch_size, num_heads,
+-                                                     seq_len, head_dim)
+ 
+     topK_indices = torch.topk(block_attn_score, topk, dim=-1).indices
+     block_mask = torch.zeros_like(block_attn_score, dtype=torch.bool).scatter_(-1, topK_indices, True)
+     output_select, _ = block_sparse_attn(q, k, v, block_mask, variable_block_sizes)
+ 
+     if compress_attn_weight is not None:
+-        final_output = output_compress * compress_attn_weight + output_select
++        weight = compress_attn_weight
++        weight = weight.view(*blocked) if weight.is_contiguous() else weight.reshape(*blocked)
++
++    if torch.is_grad_enabled():
++        # Autograd-safe: still broadcast rather than repeat(), but out-of-place.
++        if compress_attn_weight is not None:
++            final_output = output_compress * weight + output_select.view(*blocked)
++        else:
++            final_output = output_compress + output_select.view(*blocked)
++        return final_output.view(batch_size, num_heads, seq_len, head_dim)
++
++    # Inference: accumulate into the sparse result instead of allocating another
++    # full-size tensor for the product and the sum.
++    if not output_select.is_contiguous():
++        output_select = output_select.contiguous()
++    out_blocked = output_select.view(*blocked)
++    if compress_attn_weight is not None:
++        out_blocked.addcmul_(output_compress, weight)
+     else:
+-        final_output = output_compress + output_select
+-    return final_output
++        out_blocked.add_(output_compress)
++    return output_select
+ 
