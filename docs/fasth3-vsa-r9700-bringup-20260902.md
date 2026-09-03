@@ -87,9 +87,17 @@ At 2,683 tokens VSA is about **2x slower** than dense: selection, the compress
 branch and per-block gate streaming cost more than the attention they save. At
 15,444 tokens VSA wins clearly.
 
-The bridge node's `min_tokens=4096` guard is therefore **directionally
-justified**. The exact gfx1201 crossover has not been measured and 4096 should
-not be inherited as a tuned value.
+**It is also a quality failure, not only a speed failure.** The forced small-workload
+run (`min_tokens` lowered to 256 so VSA would engage at 2,683 tokens, giving
+topk 5/42) was **rejected at the operator's visual quality gate**. Every
+864x480/124f VSA output passed the same gate. With only 42 blocks to choose from,
+a 10% top-k keeps 5 blocks, and the approximation visibly breaks down.
+
+The bridge node's `min_tokens=4096` guard is therefore justified on **two**
+independent grounds — throughput and output quality — and should be treated as a
+correctness-relevant guard, not a tuning knob. The exact gfx1201 crossover has
+not been measured and 4096 should not be inherited as a tuned value; whatever
+replaces it must be validated visually, not only on sampling time.
 
 This nearly produced a false negative: the first 608x352/39f run emitted a valid
 video and reported success while logging `[H3-VSA] dense fallback: below
@@ -141,6 +149,23 @@ Temporal delta (mean absolute frame-to-frame luma change, 216x120 grayscale):
 dense 0.852; VSA lanes 2.33 / 2.90 / 2.68 / 2.72 / 2.68 for 0.10 / 0.20 / 0.30 /
 0.50 / 1.00. Higher may indicate more motion or more flicker; the metric does
 not distinguish them.
+
+### Operator visual quality gate — 2026-09-02
+
+| Set | Verdict |
+|---|---|
+| A Turbo v4, B FastH3 dense, C FastH3 VSA @0.10 (864x480/124f) | **PASS** — all acceptable |
+| Sweep: dense, 0.10, 0.20, 0.30, 0.50, 1.00 (864x480/124f) | **PASS** — all acceptable |
+| VSA forced below `min_tokens` (608x352/39f, 2,683 tokens, topk 5/42) | **REJECTED** |
+
+Quality is acceptable across the entire tested sparsity range at 864x480/124f,
+including the trained 0.10 policy. No ratio was judged better than another, so
+there is no quality argument for paying for a denser setting: **topk 0.10 is both
+the fastest tested configuration and the sparsity the LoRA was distilled at**
+(`vsa_sparsity=0.9`).
+
+The only rejected output is the one where VSA was forced to run below its token
+guard.
 
 Matched contact sheets (identical timestamps, configurations adjacent):
 [`assets/fasth3-vsa/ABC-864x480-124f.png`](assets/fasth3-vsa/ABC-864x480-124f.png)
@@ -198,15 +223,18 @@ RESULT:     VSA correct on gfx1201 (rel L2 ~5e-3 vs dense at full selection).
             Sampling 48 s -> 34 s (four-step) -> 27 s (VSA 0.10). Resident,
             peak 29.26 GiB, no denoiser offload. No gfx1201 code change needed.
             VSA is ~2x slower below ~2.7k tokens.
-DECISION:   EXPERIMENTAL. Bring-up succeeded. Production unchanged pending the
-            operator's visual quality gate on the contact sheets.
-NEXT:       Operator quality gate; then >=3 warm repetitions for medians on the
-            chosen ratios; then profile the 27 s sampler before any kernel work.
+DECISION:   EXPERIMENTAL. Bring-up succeeded. Operator quality gate PASSED for
+            every 864x480/124f lane and every sparsity ratio tested; the only
+            rejection was VSA forced below its token guard. topk 0.10 selected
+            as the experimental default: fastest tested and the trained policy.
+            Production unchanged pending repetitions.
+NEXT:       >=3 warm repetitions per lane (0.10 / FastH3 dense / Turbo v4) for
+            medians and variability; then profile the 27 s sampler before any
+            kernel work.
 ```
 
 ## Not yet done
 
-- Operator visual quality gate (the deciding criterion)
 - Repetitions: every number here is a single run; no medians or variance
 - Cold-lane triples per the three-run reference protocol
 - Sampler profiling — where the remaining 27 s goes
