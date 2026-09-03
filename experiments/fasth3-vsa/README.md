@@ -3,10 +3,21 @@
 Reproduction material for
 [`docs/fasth3-vsa-r9700-bringup-20260902.md`](../../docs/fasth3-vsa-r9700-bringup-20260902.md).
 
-**Status: EXPERIMENTAL.** Production H3 is unchanged and remains Turbo v4 FP8
-with pre-sampler Qwen offload. Everything here ran in an isolated ComfyUI copy
-and venv on port 8191; `/ai/comfyui` and `/ai/environments/comfyui-h3` were not
-modified.
+**Status: ACCEPTED 2026-09-02 — in normal use, not an active experiment.**
+Optimization and benchmarking are closed. Production H3 is unchanged and remains
+Turbo v4 FP8 with pre-sampler Qwen offload. Everything here ran in an isolated
+ComfyUI copy and venv on port 8191; `/ai/comfyui` and
+`/ai/environments/comfyui-h3` were not modified.
+
+Accepted working configuration: `workflows/r2v-vsa020-864x480-124f.json` —
+Ref2VA, `ref_image_size=match`, VSA topk 0.20, 864x480/124f, 4 steps.
+
+### Patches
+
+| Patch | Standing |
+|---|---|
+| `patches/vsa-broadcast-combine.patch` | **Required.** -0.41 GiB allocated, 4.2% faster, verified equivalent. Retained as the upstream candidate for FastVideo. Re-apply and re-run `verify_vsa_patch.py` after any ComfyUI or `vsa` update. |
+| `patches/h3-early-release-conditioning.patch` | **Informational only.** Measured zero effect. Not part of the accepted configuration; do not carry it forward on its own account. |
 
 ## Contents
 

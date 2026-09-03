@@ -1,10 +1,12 @@
 # FastH3 four-forward + FastVideo Video Sparse Attention on R9700 / gfx1201 — 2026-09-02
 
-**Status: EXPERIMENTAL, FROZEN 2026-09-02.** Production H3 in `production/`
-remains Turbo v4 FP8 with pre-sampler Qwen offload and is unchanged. This record
-documents a completed bring-up, a characterized quality/performance frontier, and
-a closed memory pass. The operator has accepted the configuration for use.
-Experimentation is closed; see section 11.
+**Status: ACCEPTED 2026-09-02.** Bring-up is complete and the configuration is
+accepted for normal use. Optimization and benchmarking are closed — this is no
+longer an active experiment.
+
+Production H3 in `production/` remains Turbo v4 FP8 with pre-sampler Qwen offload
+and is unchanged; ACCEPTED here means accepted for use, not promoted through the
+update gate. The frozen experiment and the VSA patch are preserved as-is.
 
 - AMD Radeon AI PRO R9700, `gfx1201`, 32 GiB (31.86 GiB reported), 32 CU
 - Ubuntu 24.04.4 LTS, kernel `7.0.0-28-generic`, Mesa 25.2.8
@@ -373,9 +375,12 @@ update masks) as soon as `h` is packed, instead of holding them across the
 50-block loop. Nothing is recomputed and nothing moves between CPU and GPU.
 
 **Measured effect: zero.** 25.473 / 26.863 GiB before and after, identical to
-three decimals on both workloads. Retained as lifetime hygiene per operator
-instruction, but it buys no headroom and must be re-applied after every ComfyUI
-update. It can be dropped with no loss.
+three decimals on both workloads.
+
+**Informational only.** The patch is retained as a record of what was tried and
+what it was worth, not as part of the accepted configuration. It buys no headroom
+and would need re-applying after every ComfyUI update. Do not treat it as
+required, and do not carry it forward on its own account.
 
 ### Skipped: MLP / FinalLayer chunking
 
@@ -410,7 +415,8 @@ Ref2VA, `ref_image_size=match`, 864x480/124f, VSA topk 0.20, patched:
 allocated, 26.863 GiB peak reserved.** Output validated: 864x480, 124 frames,
 24 fps, 5.167 s, H.264 + AAC stereo, mean volume -22.3 dB, clean decode.
 
-**Experimentation is closed.** Not attempted, by explicit scope: streamed QKV,
+**Experimentation is closed. The next phase is normal use.** Not attempted, by
+explicit scope: streamed QKV,
 CPU offload, transformer offload, new sparse kernels, top-k tuning, min-token
 tuning, larger-reference optimization, further quality metrics, further
 benchmark matrices.
@@ -429,22 +435,29 @@ RESULT:     VSA correct on gfx1201 (rel L2 ~5e-3 vs dense at full selection).
             Sampling 48 s -> 34 s (four-step) -> 27 s (VSA 0.10). Resident,
             steady-state peak 27.82 GiB, no denoiser offload. No gfx1201 change.
             VSA is ~2x slower below ~2.7k tokens.
-DECISION:   EXPERIMENTAL. Bring-up succeeded. Operator quality gate PASSED for
-            every 864x480/124f lane and every sparsity ratio tested; the only
-            rejection was VSA forced below its token guard. topk 0.10 selected
-            as the experimental default: fastest tested and the trained policy.
-            Production unchanged pending repetitions.
-NEXT:       Repetitions COMPLETE (section 8). VRAM repeatability COMPLETE and
-            topk-invariant (section 9). Ref2VA image-reference workload fits with
-            ~3.71 GiB headroom, so memory optimization is DEFERRED (section 10).
-            Open: operator identity-fidelity gate on the Ref2VA output;
-            ref_image_size=max and multi-reference characterization; then
-            profile the sampler before any kernel work.
+DECISION:   ACCEPTED. Bring-up complete and accepted for normal use. Operator
+            quality gate PASSED for every 864x480/124f lane and every sparsity
+            ratio tested; the only rejection was VSA forced below its token
+            guard. Ref2VA @ topk 0.20, ref_image_size=match is the accepted
+            working configuration; topk 0.10 remains the fastest T2VA setting
+            and the trained policy. Production manifest unchanged.
+NEXT:       Normal use. No further optimization or benchmarking. The VSA
+            broadcast-combine patch is retained as an upstream candidate for
+            FastVideo; the early-release patch is informational only. Re-apply
+            and re-verify the VSA patch after any ComfyUI or vsa update.
 ```
 
-## Not yet done
+## Closed scope
 
-- Operator identity-fidelity gate on the Ref2VA output (FL2VA-trained LoRA on a
+Bring-up is complete and accepted; the items below were deliberately not pursued
+and are not outstanding work. Revisit only if a genuinely new requirement
+appears, and treat any of them as a fresh, separately-scoped task:
+
+- cold-lane triples per the three-run reference protocol (warm triples are done)
+- `ref_image_size=max` and multi-reference Ref2VA characterization
+- sampler profiling and any kernel, launch-parameter or fusion work
+- the exact gfx1201 sparse/dense crossover threshold behind `min_tokens`
+- the deferred memory candidates in section 10
   ref2va base — binds cleanly, fidelity unvalidated)
 - `ref_image_size=max` and multi-reference Ref2VA characterization
 - Cold-lane triples per the three-run reference protocol (warm triples are done)
