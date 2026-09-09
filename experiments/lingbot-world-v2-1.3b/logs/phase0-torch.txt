@@ -1,0 +1,10 @@
+python 3.12.3 (main, Jul 15 2026, 23:46:41) [GCC 13.3.0]
+torch 2.9.1+rocm7.2.1.gitff65f5bc hip 7.2.53211-e1a6bc5663 cuda-attr None
+torchvision 0.24.0+rocm7.2.1.gitb919bd0c
+available True count 1
+  dev0 AMD Radeon AI PRO R9700 gfx1201 CU=32 mem=31.86GiB
+bf16_supported True
+bf16 matmul ok torch.bfloat16 True
+sdpa backends n/a
+env HIP_VISIBLE_DEVICES = 1
+env LD_LIBRARY_PATH = /opt/rocm-7.2.1/lib

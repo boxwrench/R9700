@@ -1,0 +1,54 @@
+# Phase 0 provenance — captured 2026-09-09T11:33:59-07:00
+
+## Host
+Linux Nautilus 7.0.0-28-generic #28~24.04.1-Ubuntu SMP PREEMPT_DYNAMIC Wed Jul  1 15:50:57 UTC 2 x86_64 x86_64 x86_64 GNU/Linux
+PRETTY_NAME="Ubuntu 24.04.4 LTS"
+
+## ROCm
+7.2.1
+ROCM_PATH candidates:
+/opt/rocm
+/opt/rocm-7.2.1
+
+## rocm-smi
+
+
+========================================== ROCm System Management Interface ==========================================
+==================================================== Concise Info ====================================================
+Device  Node  IDs              Temp    Power  Partitions          SCLK    MCLK     Fan     Perf  PwrCap  VRAM%  GPU%  
+[3m              (DID,     GUID)  (Edge)  (Avg)  (Mem, Compute, ID)                                                      [0m
+======================================================================================================================
+0       1     0x744c,   23276  43.0°C  15.0W  N/A, N/A, 0         173Mhz  96Mhz    22.75%  auto  257.0W  10%    7%    
+1       2     0x7551,   2277   39.0°C  17.0W  N/A, N/A, 0         41Mhz   96Mhz    20.0%   auto  300.0W  5%     3%    
+2       3     0x13c0,   22365  45.0°C  0.01W  N/A, N/A, 0         N/A     1800Mhz  0%      auto  N/A     2%     0%    
+======================================================================================================================
+================================================ End of ROCm SMI Log =================================================
+
+## rocminfo (agents)
+Agent 1                  
+  Name:                    AMD Ryzen 7 9800X3D 8-Core Processor
+  Uuid:                    CPU-XX                             
+  Marketing Name:          AMD Ryzen 7 9800X3D 8-Core Processor
+  Compute Unit:            16                                 
+Agent 2                  
+  Name:                    gfx1100                            
+  Uuid:                    GPU-bf7e76d952231e5a               
+  Marketing Name:          Radeon RX 7900 XT                  
+  Compute Unit:            84                                 
+      Name:                    amdgcn-amd-amdhsa--gfx1100         
+      Name:                    amdgcn-amd-amdhsa--gfx11-generic   
+Agent 3                  
+  Name:                    gfx1201                            
+  Uuid:                    GPU-2eb39d7393ac0942               
+  Marketing Name:          AMD Radeon AI PRO R9700            
+  Compute Unit:            64                                 
+      Name:                    amdgcn-amd-amdhsa--gfx1201         
+      Name:                    amdgcn-amd-amdhsa--gfx12-generic   
+Agent 4                  
+  Name:                    gfx1036                            
+  Uuid:                    GPU-XX                             
+  Marketing Name:          AMD Radeon Graphics                
+  Compute Unit:            2                                  
+      Name:                    amdgcn-amd-amdhsa--gfx1036         
+      Name:                    amdgcn-amd-amdhsa--gfx10-3-generic 
+

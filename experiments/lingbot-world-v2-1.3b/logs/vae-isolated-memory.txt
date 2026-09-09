@@ -1,0 +1,7 @@
+vae weights 0.473 GiB
+13 encode ok (16, 4, 60, 104) 242.88s peak alloc 11.94 GiB
+13 decode ok (3, 13, 480, 832) 210.30s peak alloc 13.28 GiB
+29 encode ok (16, 8, 60, 104) 155.35s peak alloc 12.01 GiB
+29 decode ok (3, 29, 480, 832) 256.02s peak alloc 13.43 GiB
+
+[exited with code 0]

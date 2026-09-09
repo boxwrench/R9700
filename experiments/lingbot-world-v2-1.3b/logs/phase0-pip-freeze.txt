@@ -1,0 +1,49 @@
+accelerate==1.15.0
+anyio==4.15.1
+certifi==2026.7.22
+charset-normalizer==3.5.1
+diffusers==0.39.0
+easydict==1.13
+einops==0.8.2
+filelock==3.32.6
+fsspec==2026.7.0
+ftfy==6.3.1
+h11==0.16.0
+hf-xet==1.6.0
+httpcore==1.0.9
+httpx==0.28.1
+huggingface_hub==0.36.2
+idna==3.19
+ImageIO==2.37.4
+imageio-ffmpeg==0.6.0
+importlib_metadata==9.0.1
+Jinja2==3.1.6
+MarkupSafe==3.0.3
+mpmath==1.3.0
+networkx==3.6.1
+numpy==1.26.4
+opencv-python==4.11.0.86
+packaging==26.3
+pillow==12.3.0
+protobuf==7.36.1
+psutil==7.2.2
+PyYAML==6.0.3
+regex==2026.9.3
+requests==2.34.2
+safetensors==0.8.0
+scipy==1.17.1
+sentencepiece==0.2.2
+setuptools==84.0.0
+sympy==1.14.0
+tokenizers==0.21.4
+torch @ file:///ai/cache/amd-wheels/rocm-7.2.1/torch-2.9.1%2Brocm7.2.1.lw.gitff65f5bc-cp312-cp312-linux_x86_64.whl#sha256=fb45ace0a27e9f0d0e3c4c6efd8932162743f8376f2aa4752a4d31ef5a1bd3d7
+torchaudio @ file:///ai/cache/amd-wheels/rocm-7.2.1/torchaudio-2.9.0%2Brocm7.2.1.gite3c6ee2b-cp312-cp312-linux_x86_64.whl#sha256=023d1ce5d847b2a0fbebacf52d35b4c7a233ca07b3dbd0f1cbde84362cbcf33d
+torchvision @ file:///ai/cache/amd-wheels/rocm-7.2.1/torchvision-0.24.0%2Brocm7.2.1.gitb919bd0c-cp312-cp312-linux_x86_64.whl#sha256=d5fca8cda173235a3b7434baeebe04c3ebffec3c6fc191e79aa8aa300633f2c9
+tqdm==4.70.0
+transformers==4.51.3
+triton @ file:///ai/cache/amd-wheels/rocm-7.2.1/triton-3.5.1%2Brocm7.2.1.gita272dfa8-cp312-cp312-linux_x86_64.whl#sha256=07787af1d28c273852f897bfeaa7bca29f2fa4a13ca0f28f535832b240ce7016
+typing_extensions==4.16.0
+urllib3==2.7.0
+wcwidth==0.8.3
+wheel==0.48.0
+zipp==4.1.0

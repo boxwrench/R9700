@@ -1,0 +1,341 @@
+From 87c6cda9410dd19a54ad5363353fbd8602e0bcaa Mon Sep 17 00:00:00 2001
+From: boxwrench <westsunset@gmail.com>
+Date: Wed, 9 Sep 2026 11:35:23 -0700
+Subject: [PATCH] ROCm/gfx1201 compatibility + 1.3B causal-fast config
+
+- attention: add _sdpa_attention, a semantically-equivalent PyTorch SDPA
+  replacement for flash_attn_varlen_func (padding/window/causal masks,
+  GQA expansion, q_scale/softmax_scale), and route flash_attention() and
+  attention() through it when neither FlashAttention 2 nor 3 is importable.
+  FlashAttention has no CUDA-free build; AMD needs this path.
+  SDPA's is_causal aligns top-left while FA aligns bottom-right, so the
+  fast path is only taken when Lq == Lk.
+- attention: drop the q.device.type == 'cuda' assert (redundant on ROCm,
+  where HIP tensors already report 'cuda', and it blocks CPU unit tests).
+- configs: add i2v-1.3B, derived from the published 1.3b-causal-fast
+  safetensors headers. Upstream ships no config for this variant.
+- image2video/generate: allow an empty *_checkpoint to mean 'shards at the
+  repository root', which is how the 1.3B release is laid out.
+---
+ generate.py                 |  10 ++-
+ wan/configs/__init__.py     |   5 +-
+ wan/configs/wan_i2v_1_3B.py |  48 ++++++++++++
+ wan/image2video.py          |   9 ++-
+ wan/modules/attention.py    | 147 ++++++++++++++++++++++++++++--------
+ 5 files changed, 182 insertions(+), 37 deletions(-)
+ create mode 100644 wan/configs/wan_i2v_1_3B.py
+
+diff --git a/generate.py b/generate.py
+index 0a99dfe..7df70aa 100644
+--- a/generate.py
++++ b/generate.py
+@@ -19,7 +19,15 @@ from wan.distributed.util import init_distributed_group
+ from wan.utils.utils import save_video, str2bool
+ 
+ 
++_I2V_EXAMPLE = {
++    "prompt":
++        "A sweeping cinematic journey along the Great Wall of China, winding through golden autumn hills under a brilliant blue sky — stone pathways stretch into the distance, watchtowers stand sentinel, and vibrant foliage blankets the mountainsides as the camera glides smoothly forward, capturing the grandeur and timeless majesty of this ancient wonder.",
++    "image":
++        "examples/04/image.jpg",
++}
++
+ EXAMPLE_PROMPT = {
++    "i2v-1.3B": _I2V_EXAMPLE,
+     "i2v-A14B": {
+         "prompt":
+             "A sweeping cinematic journey along the Great Wall of China, winding through golden autumn hills under a brilliant blue sky — stone pathways stretch into the distance, watchtowers stand sentinel, and vibrant foliage blankets the mountainsides as the camera glides smoothly forward, capturing the grandeur and timeless majesty of this ancient wonder.",
+@@ -40,7 +48,7 @@ def _validate_args(args):
+     if args.image is None and "image" in EXAMPLE_PROMPT[args.task]:
+         args.image = EXAMPLE_PROMPT[args.task]["image"]
+ 
+-    if args.task == "i2v-A14B":
++    if args.task.startswith("i2v"):
+         assert args.image is not None, "Please specify the image path for i2v."
+ 
+     cfg = WAN_CONFIGS[args.task]
+diff --git a/wan/configs/__init__.py b/wan/configs/__init__.py
+index 2404c21..1ca37ad 100644
+--- a/wan/configs/__init__.py
++++ b/wan/configs/__init__.py
+@@ -4,9 +4,11 @@ import os
+ os.environ['TOKENIZERS_PARALLELISM'] = 'false'
+ 
+ from .wan_i2v_A14B import i2v_A14B
++from .wan_i2v_1_3B import i2v_1_3B
+ 
+ WAN_CONFIGS = {
+     'i2v-A14B': i2v_A14B,
++    'i2v-1.3B': i2v_1_3B,
+ }
+ 
+ SIZE_CONFIGS = {
+@@ -32,5 +34,6 @@ MAX_AREA_CONFIGS = {
+ }
+ 
+ SUPPORTED_SIZES = {
+-    'i2v-A14B': ('720*1280', '1280*720', '480*832', '832*480')
++    'i2v-A14B': ('720*1280', '1280*720', '480*832', '832*480'),
++    'i2v-1.3B': ('720*1280', '1280*720', '480*832', '832*480'),
+ }
+diff --git a/wan/configs/wan_i2v_1_3B.py b/wan/configs/wan_i2v_1_3B.py
+new file mode 100644
+index 0000000..5e20f94
+--- /dev/null
++++ b/wan/configs/wan_i2v_1_3B.py
+@@ -0,0 +1,48 @@
++import torch
++from easydict import EasyDict
++
++from .shared_config import wan_shared_cfg
++
++#------------------------ LingBot-World-V2 I2V 1.3B ------------------------#
++# Derived by inspection of the published checkpoint
++# (robbyant/lingbot-world-v2-1.3b-causal-fast, revision
++# 7e36a5f919f86cb4255cc9bfc30adb44963fbde1). Upstream ships no config for
++# this variant; shapes below come from the safetensors headers:
++#   patch_embedding.weight   [1536, 36, 1, 2, 2]  -> dim 1536, in_dim 36
++#   blocks.*.ffn.0.weight    [8960, 1536]         -> ffn_dim 8960
++#   blocks.{0..29}                                -> num_layers 30
++#   text_embedding.0.weight  [1536, 4096]         -> text_dim 4096
++# num_heads = 12 (head_dim 128) follows the Wan2.1-1.3B backbone this model
++# inherits; it is not recoverable from tensor shapes alone.
++
++i2v_1_3B = EasyDict(__name__='Config: LingBot-World-V2 I2V 1.3B')
++i2v_1_3B.update(wan_shared_cfg)
++
++# text encoder / vae are shared with the 14B release
++i2v_1_3B.t5_checkpoint = 'models_t5_umt5-xxl-enc-bf16.pth'
++i2v_1_3B.t5_tokenizer = 'google/umt5-xxl'
++
++i2v_1_3B.vae_checkpoint = 'Wan2.1_VAE.pth'
++i2v_1_3B.vae_stride = (4, 8, 8)
++
++# transformer
++i2v_1_3B.patch_size = (1, 2, 2)
++i2v_1_3B.dim = 1536
++i2v_1_3B.ffn_dim = 8960
++i2v_1_3B.freq_dim = 256
++i2v_1_3B.num_heads = 12
++i2v_1_3B.num_layers = 30
++i2v_1_3B.window_size = (-1, -1)
++i2v_1_3B.qk_norm = True
++i2v_1_3B.cross_attn_norm = True
++i2v_1_3B.eps = 1e-6
++# The 1.3B release stores its shards at the repository root rather than in
++# a `transformers/` subfolder like the 14B release.
++i2v_1_3B.causal_checkpoint = ''
++i2v_1_3B.fast_checkpoint = ''
++
++# inference — inherited from the 14B causal-fast defaults
++i2v_1_3B.sample_shift = 10.0
++i2v_1_3B.sample_steps = 70
++i2v_1_3B.boundary = 0.947
++i2v_1_3B.sample_guide_scale = (5.0, 5.0)
+diff --git a/wan/image2video.py b/wan/image2video.py
+index f78b07a..421d37f 100644
+--- a/wan/image2video.py
++++ b/wan/image2video.py
+@@ -122,11 +122,16 @@ class WanI2VCausal:
+             vae_pth=os.path.join(checkpoint_dir, config.vae_checkpoint),
+             device=self.device)
+ 
++        # An empty `*_checkpoint` means the shards live at the repository
++        # root (the 1.3B release) rather than in a subfolder (the 14B one).
++        fast_subfolder = config.fast_checkpoint or None
++        causal_subfolder = config.causal_checkpoint or None
++
+         if self.infer_mode == "causal_fast":
+             logging.info(f"Creating WanModelFast from {checkpoint_dir}")
+             self.model = WanModelFast.from_pretrained(
+                 checkpoint_dir,
+-                subfolder=config.fast_checkpoint,
++                subfolder=fast_subfolder,
+                 torch_dtype=torch.bfloat16,
+                 local_attn_size=self.local_attn_size,
+                 sink_size=self.sink_size)
+@@ -134,7 +139,7 @@ class WanI2VCausal:
+             logging.info(f"Creating WanModelCausal from {checkpoint_dir}")
+             self.model = WanModelCausal.from_pretrained(
+                 checkpoint_dir,
+-                subfolder=config.causal_checkpoint,
++                subfolder=causal_subfolder,
+                 torch_dtype=torch.bfloat16)
+ 
+         self.model = self._configure_model(
+diff --git a/wan/modules/attention.py b/wan/modules/attention.py
+index c84d9e5..77bb5ad 100644
+--- a/wan/modules/attention.py
++++ b/wan/modules/attention.py
+@@ -19,6 +19,94 @@ __all__ = [
+     'attention',
+ ]
+ 
++FLASH_ATTN_AVAILABLE = FLASH_ATTN_2_AVAILABLE or FLASH_ATTN_3_AVAILABLE
++
++
++def _sdpa_attention(q, k, v, q_lens=None, k_lens=None, dropout_p=0.,
++                    softmax_scale=None, q_scale=None, causal=False,
++                    window_size=(-1, -1), dtype=torch.bfloat16):
++    """Semantically-equivalent SDPA replacement for flash_attn_varlen_func.
++
++    Inputs use the FlashAttention layout [B, L, N, C]; SDPA wants
++    [B, N, L, C], so we transpose in and out. Masks are materialised only
++    when the caller actually asks for padding / sliding-window behaviour;
++    plain causal is handed to SDPA's ``is_causal`` fast path.
++    """
++    b, lq, nq, _ = q.shape
++    lk, nk = k.shape[1], k.shape[2]
++
++    q = q.to(dtype)
++    k = k.to(dtype)
++    v = v.to(dtype)
++
++    if q_scale is not None:
++        q = q * q_scale
++
++    # [B, L, N, C] -> [B, N, L, C]
++    q = q.transpose(1, 2)
++    k = k.transpose(1, 2)
++    v = v.transpose(1, 2)
++
++    # GQA/MQA: SDPA's enable_gqa is not available on every backend, so
++    # expand K/V heads explicitly. Nq must be divisible by Nk.
++    if nq != nk:
++        assert nq % nk == 0, f'Nq={nq} not divisible by Nk={nk}'
++        rep = nq // nk
++        k = k.repeat_interleave(rep, dim=1)
++        v = v.repeat_interleave(rep, dim=1)
++
++    left, right = window_size
++    need_window = (left != -1 or right != -1)
++    need_pad = (q_lens is not None or k_lens is not None)
++
++    attn_mask = None
++    is_causal = False
++    # SDPA's is_causal aligns the mask top-left; FlashAttention aligns it
++    # bottom-right. They only agree when Lq == Lk, so take the fast path
++    # only then and build an explicit mask otherwise.
++    if not need_window and not need_pad and (not causal or lq == lk):
++        is_causal = bool(causal)
++    else:
++        # Build an additive-free boolean mask [B, 1, Lq, Lk]; True = keep.
++        device = q.device
++        qi = torch.arange(lq, device=device).view(-1, 1)
++        ki = torch.arange(lk, device=device).view(1, -1)
++        # FlashAttention aligns the *ends* of the q and k sequences.
++        offset = lk - lq
++        keep = torch.ones(lq, lk, dtype=torch.bool, device=device)
++        if causal or need_window:
++            if causal or right != -1:
++                r = 0 if (causal and right == -1) else max(right, 0)
++                keep &= (ki - (qi + offset)) <= r
++            if left != -1:
++                keep &= ((qi + offset) - ki) <= left
++        keep = keep.view(1, 1, lq, lk).expand(b, 1, lq, lk).clone()
++        if k_lens is not None:
++            kmask = (torch.arange(lk, device=device).view(1, -1)
++                     < k_lens.to(device).view(-1, 1))
++            keep &= kmask.view(b, 1, 1, lk)
++        if q_lens is not None:
++            qmask = (torch.arange(lq, device=device).view(1, -1)
++                     < q_lens.to(device).view(-1, 1))
++            # Fully-masked rows would produce NaN; keep them self-consistent
++            # by leaving their mask row untouched and zeroing the output.
++            keep |= (~qmask).view(b, 1, lq, 1)
++        attn_mask = keep
++
++    out = torch.nn.functional.scaled_dot_product_attention(
++        q, k, v, attn_mask=attn_mask, is_causal=is_causal,
++        dropout_p=dropout_p, scale=softmax_scale)
++
++    out = out.transpose(1, 2).contiguous()
++
++    if q_lens is not None:
++        qmask = (torch.arange(lq, device=out.device).view(1, -1)
++                 < q_lens.to(out.device).view(-1, 1))
++        out = out * qmask.view(b, lq, 1, 1).to(out.dtype)
++
++    return out
++
++
+ 
+ def flash_attention(
+     q,
+@@ -50,11 +138,21 @@ def flash_attention(
+     """
+     half_dtypes = (torch.float16, torch.bfloat16)
+     assert dtype in half_dtypes
+-    assert q.device.type == 'cuda' and q.size(-1) <= 256
++    assert q.size(-1) <= 256
+ 
+     # params
+     b, lq, lk, out_dtype = q.size(0), q.size(1), k.size(1), q.dtype
+ 
++    # ROCm / AMD: no CUDA FlashAttention. Fall back to PyTorch SDPA, which
++    # runs the same math on the same [B, L, N, C] inputs. See
++    # _sdpa_attention for the mask/window/GQA equivalences.
++    if not FLASH_ATTN_AVAILABLE:
++        return _sdpa_attention(
++            q, k, v,
++            q_lens=q_lens, k_lens=k_lens, dropout_p=dropout_p,
++            softmax_scale=softmax_scale, q_scale=q_scale, causal=causal,
++            window_size=window_size, dtype=dtype).type(out_dtype)
++
+     def half(x):
+         return x if x.dtype in half_dtypes else x.to(dtype)
+ 
+@@ -144,35 +242,18 @@ def attention(
+     dtype=torch.bfloat16,
+     fa_version=None,
+ ):
+-    if FLASH_ATTN_2_AVAILABLE or FLASH_ATTN_3_AVAILABLE:
+-        return flash_attention(
+-            q=q,
+-            k=k,
+-            v=v,
+-            q_lens=q_lens,
+-            k_lens=k_lens,
+-            dropout_p=dropout_p,
+-            softmax_scale=softmax_scale,
+-            q_scale=q_scale,
+-            causal=causal,
+-            window_size=window_size,
+-            deterministic=deterministic,
+-            dtype=dtype,
+-            version=fa_version,
+-        )
+-    else:
+-        if q_lens is not None or k_lens is not None:
+-            warnings.warn(
+-                'Padding mask is disabled when using scaled_dot_product_attention. It can have a significant impact on performance.'
+-            )
+-        attn_mask = None
+-
+-        q = q.transpose(1, 2).to(dtype)
+-        k = k.transpose(1, 2).to(dtype)
+-        v = v.transpose(1, 2).to(dtype)
+-
+-        out = torch.nn.functional.scaled_dot_product_attention(
+-            q, k, v, attn_mask=attn_mask, is_causal=causal, dropout_p=dropout_p)
+-
+-        out = out.transpose(1, 2).contiguous()
+-        return out
++    return flash_attention(
++        q=q,
++        k=k,
++        v=v,
++        q_lens=q_lens,
++        k_lens=k_lens,
++        dropout_p=dropout_p,
++        softmax_scale=softmax_scale,
++        q_scale=q_scale,
++        causal=causal,
++        window_size=window_size,
++        deterministic=deterministic,
++        dtype=dtype,
++        version=fa_version,
++    )
+-- 
+2.43.0
+

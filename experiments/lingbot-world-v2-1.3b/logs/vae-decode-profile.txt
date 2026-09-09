@@ -1,0 +1,30 @@
+decode run 0 351.26s
+decode run 1 110.63s
+decode run 2 110.66s
+[W909 12:29:31.631618521 collection.cpp:1133] Warning: ROCTracer produced duplicate flow start: 1 (function operator())
+-------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                             Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg    # of Calls  
+-------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                  aten::unsqueeze         0.00%     147.380us         0.00%     165.240us       4.590us            36  
+                                 aten::as_strided         0.00%     437.251us         0.00%     437.251us       0.352us          1242  
+                                       aten::view         0.00%     149.290us         0.00%     149.290us       0.754us           198  
+                                        aten::div         0.00%     362.985us         0.00%     541.755us       4.477us           121  
+                                  hipLaunchKernel         0.00%       2.464ms         0.00%       2.464ms       1.501us          1642  
+                                        aten::add         0.00%     415.894us         0.00%     622.296us       3.438us           181  
+                                        aten::pad         0.00%      82.420us         0.00%       2.375ms      18.132us           131  
+                            aten::constant_pad_nd         0.00%     479.523us         0.00%       2.293ms      17.503us           131  
+                                      aten::clone         0.00%     339.241us         0.00%       1.370ms       8.838us           155  
+                              aten::empty_strided         0.00%     173.091us         0.00%     173.091us       1.273us           136  
+                                      aten::copy_         0.00%     383.650us         0.00%       1.065ms       3.846us           277  
+                                   hipMemcpyAsync         0.00%     458.382us         0.00%     458.382us       4.677us            98  
+                                     aten::conv3d         0.00%     184.192us         0.01%       8.268ms      63.112us           131  
+                                aten::convolution         0.00%     221.560us         0.01%       8.936ms      59.180us           151  
+                               aten::_convolution         0.00%     410.910us         0.01%       8.715ms      57.713us           151  
+                         aten::miopen_convolution         0.01%       6.920ms         0.01%       8.266ms      54.740us           151  
+                      hipGetDevicePropertiesR0600         0.00%     147.632us         0.00%     147.632us       0.250us           591  
+                         hipExtModuleLaunchKernel         0.00%     440.843us         0.00%     440.843us       1.722us           256  
+                                    aten::reshape         0.00%     128.740us         0.00%     287.901us       1.418us           203  
+                                    aten::resize_         0.00%      59.660us         0.00%      59.660us       0.395us           151  
+-------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  
+Self CPU time total: 110.614s
+
