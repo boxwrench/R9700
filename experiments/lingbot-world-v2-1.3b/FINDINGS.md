@@ -91,3 +91,95 @@ F.conv3d(x, w); torch.cuda.synchronize()   # ~5.0 s on gfx1201 / ROCm 7.2.1
 Whether the trigger is the padded *shape* (odd spatial extents 482x834, or
 the temporal extent), the tensor *layout*, or the padding content. Sweep in
 progress.
+
+## F7. Root cause: MIOpen silently falls back to a naive kernel above a workspace threshold
+
+MIOpen logging (`MIOPEN_ENABLE_LOGGING=1 MIOPEN_LOG_LEVEL=6`) plus the gfx1201
+user FindDb give the whole story. The two problems differ only in input depth:
+
+```
+96-5-482-834-3x3x3-96-3-480-832-1-0x0x0-1x1x1-1x1x1-0-NCDHW-FP32-F
+  = GemmFwdRest:219.499,12421693440,miopenConvolutionFwdAlgoGEMM;
+    ConvDirectNaiveConvFwd:3539.7,0,miopenConvolutionFwdAlgoDirect
+
+96-6-482-834-3x3x3-96-4-480-832-1-0x0x0-1x1x1-1x1x1-0-NCDHW-FP32-F
+  = ConvDirectNaiveConvFwd:5072.33,0,miopenConvolutionFwdAlgoDirect
+```
+
+At out_T=3 MIOpen has two candidates and picks `GemmFwdRest` (im2col + GEMM,
+219 ms) over `ConvDirectNaiveConvFwd` (3540 ms). At out_T=4 the GEMM entry is
+**absent entirely** — its workspace would be ~15.5 GiB (it is 11.6 GiB at
+out_T=3, and scales with output depth), which exceeds what MIOpen will
+allocate, so the solver is dropped from the candidate list. Only the naive
+direct kernel remains, and it is chosen with no warning, no fallback message
+and no error.
+
+That 15.5 GiB also explains F4: with `cudnn.enabled=False`, ATen's own
+im2col fallback asked for 15.43 GiB and OOMed. Same buffer, different owner.
+
+## F8. The trigger is the output temporal extent, and nothing else
+
+Fresh contiguous input, `[1,96,T,482,834]` x `[96,96,3,3,3]`:
+
+| in T | out T | warm median | effective |
+|---:|---:|---:|---:|
+| 3 | 1 | 0.096 s | 2.06 TFLOP/s |
+| 4 | 2 | 0.169 s | 2.35 TFLOP/s |
+| 5 | 3 | 0.508 s | 1.17 TFLOP/s |
+| 6 | 4 | **5.036 s** | **0.16 TFLOP/s** |
+| 8 | 6 | 7.590 s | 0.16 TFLOP/s |
+| 12 | 10 | 12.621 s | 0.16 TFLOP/s |
+
+Sharp cliff at out_T=4, then linear at the naive kernel's throughput.
+
+Layout is **not** involved — at the slow shape, every provenance gives the
+same time and the same ordinary contiguous strides
+`(231545088, 2411928, 401988, 834, 1)`:
+
+| case | contiguous | warm |
+|---|---|---:|
+| `F.pad` result | True | 5.052 s |
+| fresh contiguous | True | 5.056 s |
+| `padded.contiguous()` | True | 5.053 s |
+| `padded.clone()` | True | 5.054 s |
+| `channels_last_3d` | False | 5.156 s |
+
+This is stop condition **B — shape trigger**. The layout hypothesis is dead.
+
+Spatial extent is irrelevant too: sweeping H over 480-496 and W over 832-864
+at in_T=6 stays at 0.14-0.16 TFLOP/s throughout.
+
+## F9. Intervention: split the convolution along the output temporal axis
+
+Each output frame depends only on its own receptive field, so slicing the
+output temporal axis and concatenating is an exact restructuring of the same
+convolution. It keeps every sub-convolution below the cliff, so MIOpen picks
+`GemmFwdRest` for each.
+
+Isolated, on the dominant shape (5.066 s unsplit):
+
+| split | warm | speedup | max abs err | relative |
+|---|---:|---:|---:|---:|
+| `(2,2)` | 0.312 s | 16.2x | 7.55e-04 | 2.36e-06 |
+| `(1,1,1,1)` | 0.316 s | 16.0x | 7.55e-04 | 2.36e-06 |
+| `(3,1)` | 0.311 s | 16.3x | 7.55e-04 | 2.36e-06 |
+
+Not bit-identical, because `GemmFwdRest` and `ConvDirectNaiveConvFwd`
+accumulate in different orders. 2.4e-06 relative is FP32 round-off, and the
+GEMM path is the better-conditioned of the two.
+
+Implemented in `CausalConv3d.forward` behind
+`WAN_VAE_CONV3D_TEMPORAL_SPLIT` (default 2, `0` disables). Handles stride and
+dilation generally rather than assuming the 3-tap unit-stride case, because
+one VAE `CausalConv3d` uses `stride=(2,1,1)`.
+
+Whole VAE decode, 480x832, FP32, upstream chunking, same latent:
+
+| lane | cold | warm | peak alloc | peak reserved | output |
+|---|---:|---:|---:|---:|---|
+| unsplit (upstream) | 111.61 s | **110.64 s** | 13.22 GiB | 19.44 GiB | mean -0.269880 std 0.069726 |
+| split=2 | 49.38 s | **16.39 s** | 15.22 GiB | 24.09 GiB | mean -0.269880 std 0.069726 |
+
+**6.75x faster warm.** Peak allocation rises because `GemmFwdRest` now
+actually runs and needs its im2col workspace — the naive kernel needed none.
+Smaller split values should trade some of that back; not yet measured.

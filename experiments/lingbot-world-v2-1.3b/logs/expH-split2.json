@@ -1,0 +1,41 @@
+{
+  "lane": "split2",
+  "env": {
+    "HIP_VISIBLE_DEVICES": "1"
+  },
+  "cudnn_enabled": true,
+  "cudnn_benchmark": false,
+  "miopen_immediate": false,
+  "torch": "2.9.1+rocm7.2.1.gitff65f5bc",
+  "hip": "7.2.53211-e1a6bc5663",
+  "gpu": "gfx1201",
+  "runs": [
+    {
+      "index": 0,
+      "seconds": 49.38200024497928,
+      "peak_alloc_gib": 15.224199295043945,
+      "peak_reserved_gib": 16.376953125
+    },
+    {
+      "index": 1,
+      "seconds": 16.390131744992686,
+      "peak_alloc_gib": 15.224145889282227,
+      "peak_reserved_gib": 24.091796875
+    }
+  ],
+  "output": {
+    "shape": [
+      3,
+      13,
+      480,
+      832
+    ],
+    "dtype": "torch.float32",
+    "mean": -0.2698799669742584,
+    "std": 0.06972627341747284,
+    "min": -0.5969323515892029,
+    "max": -0.10458814352750778,
+    "finite": true,
+    "sha256": "f5277970faeaaa5826670494e556de17"
+  }
+}

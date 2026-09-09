@@ -1,0 +1,25 @@
+== temporal cliff: input T sweep, H=482 W=834, fresh contiguous ==
+  inT= 3 outT= 1   0.0963s   2.06 TFLOP/s
+  inT= 4 outT= 2   0.1690s   2.35 TFLOP/s
+  inT= 5 outT= 3   0.5083s   1.17 TFLOP/s
+  inT= 6 outT= 4   5.0363s   0.16 TFLOP/s
+  inT= 7 outT= 5   6.3184s   0.16 TFLOP/s
+  inT= 8 outT= 6   7.5904s   0.16 TFLOP/s
+  inT= 9 outT= 7   8.8577s   0.16 TFLOP/s
+  inT=10 outT= 8  10.0397s   0.16 TFLOP/s
+  inT=11 outT= 9  11.3679s   0.16 TFLOP/s
+  inT=12 outT=10  12.6208s   0.16 TFLOP/s
+
+== layout / provenance controls at the slow shape (inT=6) ==
+  F.pad result           shape=(1, 96, 6, 482, 834) strides=(231545088, 2411928, 401988, 834, 1) offset=0 contig=True ->  5.0524s
+  fresh contiguous       shape=(1, 96, 6, 482, 834) strides=(231545088, 2411928, 401988, 834, 1) offset=0 contig=True ->  5.0562s
+  padded.contiguous()    shape=(1, 96, 6, 482, 834) strides=(231545088, 2411928, 401988, 834, 1) offset=0 contig=True ->  5.0534s
+  padded.clone()         shape=(1, 96, 6, 482, 834) strides=(231545088, 2411928, 401988, 834, 1) offset=0 contig=True ->  5.0544s
+  channels_last_3d       shape=(1, 96, 6, 482, 834) strides=(231545088, 1, 38590848, 80064, 96) offset=0 contig=False ->  5.1564s
+
+== exact temporal decomposition (3-tap kernel, overlap 2) ==
+  single call  5.0655s -> (1, 96, 4, 480, 832)
+  splits=(2, 2)          0.3118s  speedup 16.23x  max_abs_err=7.553e-04 rel=2.359e-06 exact=False
+  splits=(1, 1, 1, 1)    0.3162s  speedup 16.00x  max_abs_err=7.553e-04 rel=2.359e-06 exact=False
+  splits=(3, 1)          0.3113s  speedup 16.25x  max_abs_err=7.553e-04 rel=2.359e-06 exact=False
+  splits=(1, 3)          0.3089s  speedup 16.38x  max_abs_err=7.553e-04 rel=2.359e-06 exact=False
