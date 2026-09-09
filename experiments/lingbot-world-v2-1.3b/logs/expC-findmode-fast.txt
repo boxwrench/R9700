@@ -1,0 +1,13 @@
+[fast] decode 0: 110.65s  peak_alloc 6.65 GiB  peak_reserved 19.44 GiB
+[fast] decode 1: 110.68s  peak_alloc 6.65 GiB  peak_reserved 19.44 GiB
+[fast] decode 2: 110.74s  peak_alloc 6.65 GiB  peak_reserved 19.44 GiB
+[fast] output mean=-0.269880 std=0.069726 sha=9a45019d4b5646636ed72d67377ac013
+[fast] unique Conv3d shapes: 17  conv3d total 329.23s (over 3 decodes)
+   in=[1, 96, 4, 480, 832] w=[96, 96, 3, 3, 3] stride=[1, 1, 1] n=54 first=5.059s repeat=5.058s total=273.11s transient=1.72GiB
+   in=[1, 96, 4, 480, 832] w=[3, 96, 3, 3, 3] stride=[1, 1, 1] n=9 first=3.088s repeat=3.093s total=27.83s transient=1.72GiB
+   in=[1, 192, 4, 240, 416] w=[192, 192, 3, 3, 3] stride=[1, 1, 1] n=54 first=0.310s repeat=0.287s total=15.50s transient=8.43GiB
+   in=[1, 384, 2, 120, 208] w=[384, 384, 3, 3, 3] stride=[1, 1, 1] n=45 first=0.143s repeat=0.137s total=6.15s transient=2.15GiB
+   in=[1, 384, 1, 60, 104] w=[384, 384, 3, 3, 3] stride=[1, 1, 1] n=120 first=0.018s repeat=0.016s total=1.93s transient=0.28GiB
+   in=[1, 96, 1, 480, 832] w=[96, 96, 3, 3, 3] stride=[1, 1, 1] n=18 first=0.086s repeat=0.076s total=1.38s transient=4.43GiB
+   in=[1, 192, 1, 240, 416] w=[192, 192, 3, 3, 3] stride=[1, 1, 1] n=18 first=0.074s repeat=0.067s total=1.22s transient=2.22GiB
+   in=[1, 384, 1, 120, 208] w=[384, 384, 3, 3, 3] stride=[1, 1, 1] n=15 first=0.069s repeat=0.067s total=1.01s transient=1.11GiB

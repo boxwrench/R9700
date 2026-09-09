@@ -1,0 +1,48 @@
+Traceback (most recent call last):
+  File "/ai/github/R9700/experiments/lingbot-world-v2-1.3b/vae_repro.py", line 144, in <module>
+    main()
+  File "/ai/github/R9700/experiments/lingbot-world-v2-1.3b/vae_repro.py", line 89, in main
+    v = vae.decode([z])[0]
+        ^^^^^^^^^^^^^^^
+  File "/ai/repos/lingbot-world-v2/wan/modules/vae2_1.py", line 658, in decode
+    self.model.decode(u.unsqueeze(0),
+  File "/ai/repos/lingbot-world-v2/wan/modules/vae2_1.py", line 560, in decode
+    out_ = self.decoder(
+           ^^^^^^^^^^^^^
+  File "/ai/envs/lingbot-world-v2/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1775, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/ai/envs/lingbot-world-v2/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1786, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/ai/repos/lingbot-world-v2/wan/modules/vae2_1.py", line 450, in forward
+    x = layer(x, feat_cache, feat_idx)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/ai/envs/lingbot-world-v2/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1775, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/ai/envs/lingbot-world-v2/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1786, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/ai/repos/lingbot-world-v2/wan/modules/vae2_1.py", line 214, in forward
+    x = layer(x, feat_cache[idx])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/ai/envs/lingbot-world-v2/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1775, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/ai/envs/lingbot-world-v2/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1786, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/ai/github/R9700/experiments/lingbot-world-v2-1.3b/vae_repro.py", line 39, in inner
+    out = fwd(x, *a, **kw)
+          ^^^^^^^^^^^^^^^^
+  File "/ai/repos/lingbot-world-v2/wan/modules/vae2_1.py", line 35, in forward
+    return super().forward(x)
+           ^^^^^^^^^^^^^^^^^^
+  File "/ai/envs/lingbot-world-v2/lib/python3.12/site-packages/torch/nn/modules/conv.py", line 717, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/ai/envs/lingbot-world-v2/lib/python3.12/site-packages/torch/nn/modules/conv.py", line 712, in _conv_forward
+    return F.conv3d(
+           ^^^^^^^^^
+torch.OutOfMemoryError: HIP out of memory. Tried to allocate 15.43 GiB. GPU 0 has a total capacity of 31.86 GiB of which 5.98 GiB is free. Of the allocated memory 6.99 GiB is allocated by PyTorch, and 16.88 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
