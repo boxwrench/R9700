@@ -28,9 +28,14 @@ class Timer:
         fn = getattr(obj, attr)
 
         def inner(*a, **kw):
+            snap = name in ('t5_encode', 'vae_encode', 'vae_decode')
+            if snap:
+                phase(f'before {name}', reset_peak=True)
             sync(); t0 = time.perf_counter()
             out = fn(*a, **kw)
             sync(); self.add(name, time.perf_counter() - t0)
+            if snap:
+                phase(f'after {name}')
             return out
         setattr(obj, attr, inner)
         return fn
@@ -43,6 +48,26 @@ def mem():
         peak_alloc_gib=torch.cuda.max_memory_allocated() / 2**30,
         peak_reserved_gib=torch.cuda.max_memory_reserved() / 2**30,
     )
+
+
+PHASES = []
+
+
+def phase(name, reset_peak=False):
+    """Record a named VRAM snapshot. `reset_peak` starts a fresh peak window
+    so a phase's own peak is attributable to that phase rather than to the
+    high-water mark of everything before it."""
+    m = mem()
+    m['phase'] = name
+    m['rss_gib'] = rss_gib()
+    PHASES.append(m)
+    print(f'  [mem] {name:24s} alloc {m["alloc_gib"]:6.2f}  '
+          f'reserved {m["reserved_gib"]:6.2f}  peak_alloc {m["peak_alloc_gib"]:6.2f}  '
+          f'peak_reserved {m["peak_reserved_gib"]:6.2f}  rss {m["rss_gib"]:6.2f}',
+          flush=True)
+    if reset_peak:
+        torch.cuda.reset_peak_memory_stats()
+    return m
 
 
 def rss_gib():
@@ -76,6 +101,11 @@ def main():
     ap.add_argument('--out_json', default=None)
     args = ap.parse_args()
 
+    # generate.py resolves example assets relative to the repo root, so we
+    # chdir into it -- resolve our own output paths first or they land there.
+    if args.out_json:
+        args.out_json = os.path.abspath(args.out_json)
+    args.save_dir = os.path.abspath(args.save_dir)
     sys.path.insert(0, args.repo)
     os.chdir(args.repo)
     import wan
@@ -122,6 +152,7 @@ def main():
     rec['load_seconds'] = time.perf_counter() - t0
     rec['after_load_mem'] = mem()
     rec['after_load_rss_gib'] = rss_gib()
+    phase('after model load', reset_peak=True)
 
     dt = {}
     for n, p in pipe.model.named_parameters():
@@ -136,10 +167,13 @@ def main():
     rec['vae_param_dtypes'] = vdt
 
     timer = Timer()
+    # T5EncoderModel is invoked as `self.text_encoder(...)`, and Python looks
+    # dunders up on the type, so wrapping the instance's __call__ silently
+    # measures nothing. Wrap the class instead.
+    timer.wrap(type(pipe.text_encoder), '__call__', 't5_encode')
     timer.wrap(pipe.model, 'forward', 'dit_forward')
     timer.wrap(pipe.vae, 'decode', 'vae_decode')
     timer.wrap(pipe.vae, 'encode', 'vae_encode')
-    timer.wrap(pipe.text_encoder, '__call__', 't5_encode')
 
     if args.prewarm:
         sync(); tp = time.perf_counter()
@@ -152,8 +186,10 @@ def main():
     for i in range(n_runs):
         kind = 'cold' if i == 0 else f'warm{i}'
         timer.spans.clear()
+        PHASES.clear()
         torch.cuda.reset_peak_memory_stats()
         pre = mem()
+        phase(f'start of {kind} generate')
         sync(); t0 = time.perf_counter()
         video = pipe.generate(
             prompt, img, action_path=action_path,
@@ -163,6 +199,7 @@ def main():
             offload_model=bool(args.offload_model))
         sync(); wall = time.perf_counter() - t0
         post = mem()
+        phase(f'end of {kind} generate')
 
         v = video.float()
         stats = dict(
@@ -177,13 +214,17 @@ def main():
 
         f = video.shape[1]
         run = dict(
-            kind=kind, wall_seconds=wall, frames=f, size=args.size,
+            kind=kind, wall_seconds=wall, frames=f, size_requested=args.size,
+            size_actual=f'{video.shape[2]}*{video.shape[3]}',
             fps_effective=f / wall,
             spans={k: dict(n=len(x), total=sum(x), mean=sum(x) / len(x),
                            first=x[0], rest_mean=(sum(x[1:]) / len(x[1:])
                                                   if len(x) > 1 else None))
                    for k, x in timer.spans.items()},
             mem_before=pre, mem_after=post, rss_gib=rss_gib(),
+            phases=list(PHASES),
+            conv3d_temporal_split=os.environ.get(
+                'WAN_VAE_CONV3D_TEMPORAL_SPLIT', '(default)'),
             video_stats=stats,
         )
         # per-chunk latency: dit_forward spans grouped 5 per chunk

@@ -1,0 +1,11 @@
+Wan2.1 VAE decode, 480x832, FP32, upstream chunking
+  split=0: cold  110.71s  warm  110.82s  peak_alloc 13.28 GiB  peak_reserved 19.44 GiB  rel_err 0.00e+00
+  split=1: cold   18.64s  warm   16.48s  peak_alloc 11.33 GiB  peak_reserved 16.49 GiB  rel_err 3.64e-06
+  split=2: cold   16.91s  warm   16.55s  peak_alloc 15.33 GiB  peak_reserved 23.76 GiB  rel_err 3.64e-06
+  split=3: cold   66.19s  warm   16.35s  peak_alloc 19.19 GiB  peak_reserved 25.69 GiB  rel_err 3.64e-06
+
+  split | cold      | warm      | speedup | peak alloc | peak resv | rel err
+      0 |   110.71s |   110.82s |   1.00x |     13.28G |    19.44G | 0.00e+00
+      1 |    18.64s |    16.48s |   6.73x |     11.33G |    16.49G | 3.64e-06
+      2 |    16.91s |    16.55s |   6.69x |     15.33G |    23.76G | 3.64e-06
+      3 |    66.19s |    16.35s |   6.78x |     19.19G |    25.69G | 3.64e-06

@@ -1,0 +1,399 @@
++ export LD_LIBRARY_PATH=/opt/rocm-7.2.1/lib:
++ LD_LIBRARY_PATH=/opt/rocm-7.2.1/lib:
++ export HIP_VISIBLE_DEVICES=1
++ HIP_VISIBLE_DEVICES=1
++ PY=/ai/envs/lingbot-world-v2/bin/python
++ CKPT=/ai/models/lingbot-world-v2-1.3b-causal-fast-assembled
++ OUT=/ai/outputs/lingbot-world-v2-1.3b
++++ dirname ./run_baseline.sh
+++ cd .
+++ pwd
++ HERE=/ai/github/R9700/experiments/lingbot-world-v2-1.3b
++ /ai/envs/lingbot-world-v2/bin/python /ai/github/R9700/experiments/lingbot-world-v2-1.3b/bench.py --ckpt_dir /ai/models/lingbot-world-v2-1.3b-causal-fast-assembled --task i2v-1.3B --size '480*832' --frame_num 13 --chunk_size 4 --local_attn_size 18 --sink_size 6 --seed 42 --offload_model 0 --warm_repeats 1 --tag smoke --save_dir /ai/outputs/lingbot-world-v2-1.3b --out_json /ai/github/R9700/experiments/lingbot-world-v2-1.3b/logs/smoke.json
+Loading checkpoint shards:   0%|          | 0/6 [00:00<?, ?it/s]Loading checkpoint shards:  33%|███▎      | 2/6 [00:00<00:00, 12.39it/s]Loading checkpoint shards:  67%|██████▋   | 4/6 [00:00<00:00, 12.61it/s]Loading checkpoint shards: 100%|██████████| 6/6 [00:00<00:00, 12.58it/s]Loading checkpoint shards: 100%|██████████| 6/6 [00:00<00:00, 12.56it/s]
+  [mem] after model load         alloc   3.68  reserved   3.98  peak_alloc   3.68  peak_reserved   3.98  rss  11.86
+  [mem] start of cold generate   alloc   3.68  reserved   3.98  peak_alloc   3.68  peak_reserved   3.98  rss  11.86
+  [mem] before t5_encode         alloc  14.43  reserved  14.73  peak_alloc  14.43  peak_reserved  14.73  rss   1.32
+  [mem] after t5_encode          alloc  14.51  reserved  15.09  peak_alloc  14.74  peak_reserved  15.09  rss   1.87
+  [mem] before vae_encode        alloc   4.00  reserved   4.39  peak_alloc  14.74  peak_reserved  15.09  rss  12.43
+/ai/repos/lingbot-world-v2/wan/modules/vae2_1.py:722: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with amp.autocast(dtype=self.dtype):
+/ai/repos/lingbot-world-v2/wan/modules/vae2_1.py:324: UserWarning: Using AOTriton backend for Efficient Attention forward... (Triggered internally at /pytorch/aten/src/ATen/native/transformers/hip/attention.hip:1452.)
+  x = F.scaled_dot_product_attention(
+  [mem] after vae_encode         alloc   4.00  reserved   6.74  peak_alloc  12.94  peak_reserved  16.26  rss  12.44
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:03<00:00,  3.22s/it]100%|██████████| 1/1 [00:03<00:00,  3.22s/it]
+  [mem] before vae_decode        alloc   8.73  reserved  10.02  peak_alloc  12.94  peak_reserved  16.26  rss  12.59
+/ai/repos/lingbot-world-v2/wan/modules/vae2_1.py:729: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with amp.autocast(dtype=self.dtype):
+  [mem] after vae_decode         alloc   8.79  reserved  22.83  peak_alloc  19.10  peak_reserved  22.83  rss  12.59
+  [mem] end of cold generate     alloc   3.81  reserved  22.83  peak_alloc  19.10  peak_reserved  22.83  rss  12.59
+[cold] 32.16s  13 frames  -> /ai/outputs/lingbot-world-v2-1.3b/smoke_cold_480x832_13f_w18_s6.mp4
+  [mem] start of warm1 generate  alloc   3.76  reserved  22.83  peak_alloc   3.76  peak_reserved  22.83  rss  12.61
+  [mem] before vae_encode        alloc   4.00  reserved  22.83  peak_alloc   4.00  peak_reserved  22.83  rss  12.63
+  [mem] after vae_encode         alloc   4.00  reserved  22.83  peak_alloc  12.94  peak_reserved  22.83  rss  12.63
+  0%|          | 0/1 [00:00<?, ?it/s]100%|██████████| 1/1 [00:03<00:00,  3.09s/it]100%|██████████| 1/1 [00:03<00:00,  3.09s/it]
+  [mem] before vae_decode        alloc   8.73  reserved  22.83  peak_alloc  12.94  peak_reserved  22.83  rss  12.63
+  [mem] after vae_decode         alloc   8.79  reserved  22.83  peak_alloc  19.10  peak_reserved  22.83  rss  12.63
+  [mem] end of warm1 generate    alloc   3.81  reserved  22.83  peak_alloc  19.10  peak_reserved  22.83  rss  12.63
+[warm1] 28.46s  13 frames  -> /ai/outputs/lingbot-world-v2-1.3b/smoke_warm1_480x832_13f_w18_s6.mp4
+{
+  "tag": "smoke",
+  "timestamp": "2026-09-09T22:01:11.538149+00:00",
+  "args": {
+    "repo": "/ai/repos/lingbot-world-v2",
+    "ckpt_dir": "/ai/models/lingbot-world-v2-1.3b-causal-fast-assembled",
+    "task": "i2v-1.3B",
+    "size": "480*832",
+    "frame_num": 13,
+    "chunk_size": 4,
+    "local_attn_size": 18,
+    "sink_size": 6,
+    "action_path": null,
+    "image": null,
+    "prompt": null,
+    "seed": 42,
+    "sample_shift": null,
+    "offload_model": 0,
+    "warm_repeats": 1,
+    "prewarm": 0,
+    "save_dir": "/ai/outputs/lingbot-world-v2-1.3b",
+    "tag": "smoke",
+    "out_json": "/ai/github/R9700/experiments/lingbot-world-v2-1.3b/logs/smoke.json"
+  },
+  "shift": 10.0,
+  "gpu": "AMD Radeon AI PRO R9700",
+  "gcn_arch": "gfx1201",
+  "torch": "2.9.1+rocm7.2.1.gitff65f5bc",
+  "hip": "7.2.53211-e1a6bc5663",
+  "flash_attn_2": false,
+  "flash_attn_3": false,
+  "runs": [
+    {
+      "kind": "cold",
+      "wall_seconds": 32.15894930998911,
+      "frames": 13,
+      "size_requested": "480*832",
+      "size_actual": "464*832",
+      "fps_effective": 0.40424206259630446,
+      "spans": {
+        "t5_encode": {
+          "n": 1,
+          "total": 0.7358030030154623,
+          "mean": 0.7358030030154623,
+          "first": 0.7358030030154623,
+          "rest_mean": null
+        },
+        "vae_encode": {
+          "n": 1,
+          "total": 9.617553788993973,
+          "mean": 9.617553788993973,
+          "first": 9.617553788993973,
+          "rest_mean": null
+        },
+        "dit_forward": {
+          "n": 5,
+          "total": 3.1195160089991987,
+          "mean": 0.6239032017998397,
+          "first": 0.6528724959935062,
+          "rest_mean": 0.6166608782514231
+        },
+        "vae_decode": {
+          "n": 1,
+          "total": 15.469329762010602,
+          "mean": 15.469329762010602,
+          "first": 15.469329762010602,
+          "rest_mean": null
+        }
+      },
+      "mem_before": {
+        "alloc_gib": 3.679068088531494,
+        "reserved_gib": 3.978515625,
+        "peak_alloc_gib": 3.679068088531494,
+        "peak_reserved_gib": 3.978515625
+      },
+      "mem_after": {
+        "alloc_gib": 3.8142571449279785,
+        "reserved_gib": 22.828125,
+        "peak_alloc_gib": 19.103681087493896,
+        "peak_reserved_gib": 22.828125
+      },
+      "rss_gib": 12.605770111083984,
+      "phases": [
+        {
+          "alloc_gib": 3.679068088531494,
+          "reserved_gib": 3.978515625,
+          "peak_alloc_gib": 3.679068088531494,
+          "peak_reserved_gib": 3.978515625,
+          "phase": "start of cold generate",
+          "rss_gib": 11.856620788574219
+        },
+        {
+          "alloc_gib": 14.429893016815186,
+          "reserved_gib": 14.73046875,
+          "peak_alloc_gib": 14.429893016815186,
+          "peak_reserved_gib": 14.73046875,
+          "phase": "before t5_encode",
+          "rss_gib": 1.3244056701660156
+        },
+        {
+          "alloc_gib": 14.508018016815186,
+          "reserved_gib": 15.087890625,
+          "peak_alloc_gib": 14.742401123046875,
+          "peak_reserved_gib": 15.087890625,
+          "phase": "after t5_encode",
+          "rss_gib": 1.8668632507324219
+        },
+        {
+          "alloc_gib": 3.9997410774230957,
+          "reserved_gib": 4.38671875,
+          "peak_alloc_gib": 14.742401123046875,
+          "peak_reserved_gib": 15.087890625,
+          "phase": "before vae_encode",
+          "rss_gib": 12.431900024414062
+        },
+        {
+          "alloc_gib": 4.001450061798096,
+          "reserved_gib": 6.73828125,
+          "peak_alloc_gib": 12.93665599822998,
+          "peak_reserved_gib": 16.2578125,
+          "phase": "after vae_encode",
+          "rss_gib": 12.44357681274414
+        },
+        {
+          "alloc_gib": 8.730428695678711,
+          "reserved_gib": 10.021484375,
+          "peak_alloc_gib": 12.93665599822998,
+          "peak_reserved_gib": 16.2578125,
+          "phase": "before vae_decode",
+          "rss_gib": 12.592098236083984
+        },
+        {
+          "alloc_gib": 8.786516189575195,
+          "reserved_gib": 22.828125,
+          "peak_alloc_gib": 19.103681087493896,
+          "peak_reserved_gib": 22.828125,
+          "phase": "after vae_decode",
+          "rss_gib": 12.594173431396484
+        },
+        {
+          "alloc_gib": 3.8142571449279785,
+          "reserved_gib": 22.828125,
+          "peak_alloc_gib": 19.103681087493896,
+          "peak_reserved_gib": 22.828125,
+          "phase": "end of cold generate",
+          "rss_gib": 12.594215393066406
+        }
+      ],
+      "conv3d_temporal_split": "(default)",
+      "video_stats": {
+        "shape": [
+          3,
+          13,
+          464,
+          832
+        ],
+        "min": -1.0,
+        "max": 1.0,
+        "mean": 0.3721315264701843,
+        "std": 0.4178197979927063,
+        "has_nan": false,
+        "has_inf": false,
+        "per_frame_std": [
+          0.39613574743270874,
+          0.39907461404800415,
+          0.40257900953292847,
+          0.4050174653530121,
+          0.40487077832221985,
+          0.4097585380077362,
+          0.41391313076019287,
+          0.42625540494918823,
+          0.4290919303894043,
+          0.42977792024612427,
+          0.4295370578765869,
+          0.43103647232055664,
+          0.4318501055240631
+        ],
+        "frame_to_frame_l1": [
+          0.06434531509876251,
+          0.07413847744464874,
+          0.08530595153570175,
+          0.0725756585597992,
+          0.11788778752088547,
+          0.10834840685129166,
+          0.16783179342746735,
+          0.07624684274196625,
+          0.07810744643211365,
+          0.04603932797908783,
+          0.10002066195011139,
+          0.09788135439157486
+        ]
+      },
+      "dit_forwards": 5,
+      "per_chunk_dit_seconds": [
+        3.1195160089991987
+      ],
+      "time_to_first_chunk": 3.1195160089991987,
+      "output": "/ai/outputs/lingbot-world-v2-1.3b/smoke_cold_480x832_13f_w18_s6.mp4"
+    },
+    {
+      "kind": "warm1",
+      "wall_seconds": 28.46126654802356,
+      "frames": 13,
+      "size_requested": "480*832",
+      "size_actual": "464*832",
+      "fps_effective": 0.45676112052373724,
+      "spans": {
+        "vae_encode": {
+          "n": 1,
+          "total": 9.634987319004722,
+          "mean": 9.634987319004722,
+          "first": 9.634987319004722,
+          "rest_mean": null
+        },
+        "dit_forward": {
+          "n": 5,
+          "total": 3.0908871340216137,
+          "mean": 0.6181774268043227,
+          "first": 0.6239640270068776,
+          "rest_mean": 0.616730776753684
+        },
+        "vae_decode": {
+          "n": 1,
+          "total": 15.577256948017748,
+          "mean": 15.577256948017748,
+          "first": 15.577256948017748,
+          "rest_mean": null
+        }
+      },
+      "mem_before": {
+        "alloc_gib": 3.758169651031494,
+        "reserved_gib": 22.828125,
+        "peak_alloc_gib": 3.758169651031494,
+        "peak_reserved_gib": 22.828125
+      },
+      "mem_after": {
+        "alloc_gib": 3.8142571449279785,
+        "reserved_gib": 22.83203125,
+        "peak_alloc_gib": 19.104520320892334,
+        "peak_reserved_gib": 22.83203125
+      },
+      "rss_gib": 12.629871368408203,
+      "phases": [
+        {
+          "alloc_gib": 3.758169651031494,
+          "reserved_gib": 22.828125,
+          "peak_alloc_gib": 3.758169651031494,
+          "peak_reserved_gib": 22.828125,
+          "phase": "start of warm1 generate",
+          "rss_gib": 12.60626220703125
+        },
+        {
+          "alloc_gib": 4.00016450881958,
+          "reserved_gib": 22.828125,
+          "peak_alloc_gib": 4.00016450881958,
+          "peak_reserved_gib": 22.828125,
+          "phase": "before vae_encode",
+          "rss_gib": 12.629852294921875
+        },
+        {
+          "alloc_gib": 4.00187349319458,
+          "reserved_gib": 22.83203125,
+          "peak_alloc_gib": 12.9368896484375,
+          "peak_reserved_gib": 22.83203125,
+          "phase": "after vae_encode",
+          "rss_gib": 12.629852294921875
+        },
+        {
+          "alloc_gib": 8.731267929077148,
+          "reserved_gib": 22.83203125,
+          "peak_alloc_gib": 12.9368896484375,
+          "peak_reserved_gib": 22.83203125,
+          "phase": "before vae_decode",
+          "rss_gib": 12.62985610961914
+        },
+        {
+          "alloc_gib": 8.787355422973633,
+          "reserved_gib": 22.83203125,
+          "peak_alloc_gib": 19.104520320892334,
+          "peak_reserved_gib": 22.83203125,
+          "phase": "after vae_decode",
+          "rss_gib": 12.629859924316406
+        },
+        {
+          "alloc_gib": 3.8142571449279785,
+          "reserved_gib": 22.83203125,
+          "peak_alloc_gib": 19.104520320892334,
+          "peak_reserved_gib": 22.83203125,
+          "phase": "end of warm1 generate",
+          "rss_gib": 12.629871368408203
+        }
+      ],
+      "conv3d_temporal_split": "(default)",
+      "video_stats": {
+        "shape": [
+          3,
+          13,
+          464,
+          832
+        ],
+        "min": -1.0,
+        "max": 1.0,
+        "mean": 0.3721315264701843,
+        "std": 0.4178197979927063,
+        "has_nan": false,
+        "has_inf": false,
+        "per_frame_std": [
+          0.39613574743270874,
+          0.39907461404800415,
+          0.40257900953292847,
+          0.4050174653530121,
+          0.40487077832221985,
+          0.4097585380077362,
+          0.41391313076019287,
+          0.42625540494918823,
+          0.4290919303894043,
+          0.42977792024612427,
+          0.4295370578765869,
+          0.43103647232055664,
+          0.4318501055240631
+        ],
+        "frame_to_frame_l1": [
+          0.06434531509876251,
+          0.07413847744464874,
+          0.08530595153570175,
+          0.0725756585597992,
+          0.11788778752088547,
+          0.10834840685129166,
+          0.16783179342746735,
+          0.07624684274196625,
+          0.07810744643211365,
+          0.04603932797908783,
+          0.10002066195011139,
+          0.09788135439157486
+        ]
+      },
+      "dit_forwards": 5,
+      "per_chunk_dit_seconds": [
+        3.0908871340216137
+      ],
+      "time_to_first_chunk": 3.0908871340216137,
+      "output": "/ai/outputs/lingbot-world-v2-1.3b/smoke_warm1_480x832_13f_w18_s6.mp4"
+    }
+  ],
+  "load_seconds": 31.586420257983264,
+  "after_load_mem": {
+    "alloc_gib": 3.679068088531494,
+    "reserved_gib": 3.978515625,
+    "peak_alloc_gib": 3.679068088531494,
+    "peak_reserved_gib": 3.978515625
+  },
+  "after_load_rss_gib": 11.856597900390625,
+  "dit_param_dtypes": {
+    "torch.bfloat16": 1709502016
+  },
+  "dit_param_bytes": 3419004032,
+  "dit_device": "cuda:0",
+  "vae_param_dtypes": {
+    "torch.float32": 126892531
+  }
+}
