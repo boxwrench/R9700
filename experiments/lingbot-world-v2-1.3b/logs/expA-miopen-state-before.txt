@@ -1,0 +1,60 @@
+== env (login shell, before any run) ==
+(none set)
+
+== ~/.config/miopen ==
+total 136
+drwxrwxr-x  3 boxwrench boxwrench  4096 Aug 12 18:48 .
+drwx------ 59 boxwrench boxwrench  4096 Sep  8 08:05 ..
+-rwxrwxrwx  1 boxwrench boxwrench 63528 Aug 24 20:23 gfx1100_42.HIP.3_5_1_dabb6df2b9.ufdb.txt
+-rw-rw-r--  1 boxwrench boxwrench    15 Aug 24 20:23 gfx1100_42.HIP.3_5_1_dabb6df2b9.ufdb.txt.time
+-rwxrwxrwx  1 boxwrench boxwrench 41947 Sep  9 12:51 gfx1201_32.HIP.3_5_1_dabb6df2b9.ufdb.txt
+-rw-rw-r--  1 boxwrench boxwrench    15 Sep  9 12:51 gfx1201_32.HIP.3_5_1_dabb6df2b9.ufdb.txt.time
+drwxrwxrwx  2 boxwrench boxwrench  4096 Sep  9 12:51 miopen-lockfiles
+
+== ~/.cache/miopen ==
+/home/boxwrench/.cache/miopen:
+total 12
+drwxrwxr-x  3 boxwrench boxwrench 4096 Aug 12 15:20 .
+drwx------ 54 boxwrench boxwrench 4096 Sep  9 07:29 ..
+drwxrwxr-x  2 boxwrench boxwrench 4096 Sep  9 12:49 3.5.1.dabb6df2b9
+
+/home/boxwrench/.cache/miopen/3.5.1.dabb6df2b9:
+total 1136
+drwxrwxr-x 2 boxwrench boxwrench   4096 Sep  9 12:49 .
+drwxrwxr-x 3 boxwrench boxwrench   4096 Aug 12 15:20 ..
+-rw-r--r-- 1 boxwrench boxwrench 471040 Aug 23 08:15 gfx1100_42.ukdb
+-rw-r--r-- 1 boxwrench boxwrench 675840 Sep  9 12:07 gfx1201_32.ukdb
+
+== /ai/cache/miopen ==
+total 152
+drwxr-xr-x  3 boxwrench boxwrench   4096 Sep  9 12:18 .
+drwxrwxr-x 10 boxwrench boxwrench   4096 Aug 16 07:49 ..
+-rwxrwxrwx  1 boxwrench boxwrench   5615 Sep  9 12:22 gfx1201_32.HIP.3_5_1_dabb6df2b9.ufdb.txt
+-rw-rw-r--  1 boxwrench boxwrench     15 Sep  9 12:22 gfx1201_32.HIP.3_5_1_dabb6df2b9.ufdb.txt.time
+-rw-r--r--  1 boxwrench boxwrench 131072 Sep  9 12:18 gfx1201_32.ukdb
+drwxrwxrwx  2 boxwrench boxwrench   4096 Sep  9 12:22 miopen-lockfiles
+
+== system MIOpen dbs ==
+total 861728
+drwxr-xr-x 2 root root    12288 Aug 11 22:14 .
+drwxr-xr-x 3 root root     4096 Aug 11 22:14 ..
+-rw-r--r-- 1 root root   724895 Mar 12 23:12 gfx1030_36.db.txt
+-rw-r--r-- 1 root root 42363156 Mar 12 23:12 gfx1030_36.HIP.fdb.txt
+-rw-r--r-- 1 root root 19566225 Mar 12 23:12 gfx803_36.HIP.fdb.txt
+-rw-r--r-- 1 root root 13464903 Mar 12 23:12 gfx803_36.OpenCL.fdb.txt
+-rw-r--r-- 1 root root 19566225 Mar 12 23:12 gfx803_64.HIP.fdb.txt
+-rw-r--r-- 1 root root 13464903 Mar 12 23:12 gfx803_64.OpenCL.fdb.txt
+-rw-r--r-- 1 root root  5476569 Mar 12 23:12 gfx900_56.db.txt
+-rw-r--r-- 1 root root 23164667 Mar 12 23:12 gfx900_56.HIP.fdb.txt
+-rw-r--r-- 1 root root   630093 Mar 12 23:12 gfx900_56.OpenCL.fdb.txt
+-rw-r--r-- 1 root root 19566225 Mar 12 23:12 gfx900_64.HIP.fdb.txt
+-rw-r--r-- 1 root root   645420 Mar 12 23:12 gfx900_64.OpenCL.fdb.txt
+-rw-r--r-- 1 root root 11098566 Mar 12 23:12 gfx906_60.db.txt
+-rw-r--r-- 1 root root 33710981 Mar 12 23:12 gfx906_60.HIP.fdb.txt
+-rw-r--r-- 1 root root  4559931 Mar 12 23:12 gfx906_60.OpenCL.fdb.txt
+-rw-r--r-- 1 root root 23460806 Mar 12 23:12 gfx906_64.HIP.fdb.txt
+-rw-r--r-- 1 root root  3325638 Mar 12 23:12 gfx906_64.OpenCL.fdb.txt
+-rw-r--r-- 1 root root 41247824 Mar 12 23:12 gfx90878.db.txt
+
+== gfx1201 entries in system db ==
+NONE for gfx1201
