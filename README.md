@@ -41,6 +41,7 @@ The other value of this repository is avoiding dead ends. This work has already 
 | LTX continuation | Demonstrated | last-frame continuation |
 | Qwen3.8-27B | Selected | Q4_K_XL + MTP |
 | DeepSeek V4 Flash | Validated | 32K Q8 KV profile |
+| LingBot World v2 1.3B | Experiment (branch `experiment/lingbot-world-v2-1.3b`) | interactive persistent worldgen; keypress → RGB ~0.40 s, action-ready ~0.53 s ([landing page](experiments/lingbot-world-v2-1.3b/README.md)) |
 
 Verify the live system against the machine-checkable manifest at any time:
 
