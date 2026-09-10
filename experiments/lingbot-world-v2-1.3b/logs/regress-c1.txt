@@ -1,0 +1,51 @@
+loading world ...
+Loading checkpoint shards:   0%|          | 0/6 [00:00<?, ?it/s]Loading checkpoint shards:  33%|███▎      | 2/6 [00:00<00:00, 11.84it/s]Loading checkpoint shards:  67%|██████▋   | 4/6 [00:00<00:00, 12.18it/s]Loading checkpoint shards: 100%|██████████| 6/6 [00:00<00:00, 12.29it/s]Loading checkpoint shards: 100%|██████████| 6/6 [00:00<00:00, 12.22it/s]
+/ai/repos/lingbot-world-v2/wan/modules/vae2_1.py:324: UserWarning: Using AOTriton backend for Efficient Attention forward... (Triggered internally at /pytorch/aten/src/ATen/native/transformers/hip/attention.hip:1452.)
+  x = F.scaled_dot_product_attention(
+
+world ready in 35.6s (model 31.8s, T5 3.6s, image 0.2s [cached])
+  464x832  latent 58x104  1508 tokens/frame
+  KV cache 4.66 GiB  window 18 frames  sink 6
+  chunk 1 latent frames  seed 42
+
+commands
+  w / forward      move forward          s / back       move backward
+  a / left         strafe left           d / right      strafe right
+  q / turn_left    yaw left              e / turn_right yaw right
+  r / up           rise                  f / down       descend
+  t / tilt_up      pitch up              g / tilt_down  pitch down
+  x / stay         hold position
+  <action> <amt>   override step size (metres, or degrees for turns)
+  script w w e w   run several actions in sequence
+  reset            wipe world state, keep the model loaded
+  stats            show session state
+  help             this text
+  quit             end session and write the combined video
+
+  forward    first-frame   2.33s  full   2.33s   1 frames  | dit  0.78s vae  1.53s | kv 1508/27144 filling | vram 14.67 GiB
+  forward    first-frame   6.00s  full   6.00s   4 frames  | dit  0.70s vae  4.74s | kv 3016/27144 filling | vram 18.63 GiB
+  turn_right first-frame   5.51s  full   5.51s   4 frames  | dit  0.75s vae  4.76s | kv 4524/27144 filling | vram 18.92 GiB
+  forward    first-frame   6.10s  full   6.10s   4 frames  | dit  0.80s vae  4.76s | kv 6032/27144 filling | vram 18.92 GiB
+  turn_right first-frame   6.17s  full   6.18s   4 frames  | dit  0.86s vae  4.77s | kv 7540/27144 filling | vram 18.92 GiB
+  turn_right first-frame   6.24s  full   6.24s   4 frames  | dit  0.93s vae  4.78s | kv 9048/27144 filling | vram 18.92 GiB
+  forward    first-frame   6.31s  full   6.31s   4 frames  | dit  0.98s vae  4.79s | kv 10556/27144 filling | vram 18.92 GiB
+  forward    first-frame   6.39s  full   6.39s   4 frames  | dit  1.04s vae  4.79s | kv 12064/27144 filling | vram 18.92 GiB
+  forward    first-frame   6.47s  full   6.47s   4 frames  | dit  1.09s vae  4.80s | kv 13572/27144 filling | vram 18.92 GiB
+  forward    first-frame   6.47s  full   6.47s   4 frames  | dit  1.14s vae  4.78s | kv 15080/27144 filling | vram 18.92 GiB
+  forward    first-frame   6.53s  full   6.53s   4 frames  | dit  1.19s vae  4.81s | kv 16588/27144 filling | vram 18.92 GiB
+  forward    first-frame   6.56s  full   6.56s   4 frames  | dit  1.24s vae  4.80s | kv 18096/27144 filling | vram 18.92 GiB
+  forward    first-frame   6.64s  full   6.64s   4 frames  | dit  1.29s vae  4.80s | kv 19604/27144 filling | vram 18.92 GiB
+  forward    first-frame   6.70s  full   6.70s   4 frames  | dit  1.35s vae  4.80s | kv 21112/27144 filling | vram 18.92 GiB
+  forward    first-frame   6.74s  full   6.74s   4 frames  | dit  1.39s vae  4.81s | kv 22620/27144 filling | vram 18.92 GiB
+  forward    first-frame   6.79s  full   6.79s   4 frames  | dit  1.45s vae  4.80s | kv 24128/27144 filling | vram 18.92 GiB
+  forward    first-frame   6.86s  full   6.87s   4 frames  | dit  1.50s vae  4.81s | kv 25636/27144 filling | vram 18.92 GiB
+  forward    first-frame   6.90s  full   6.90s   4 frames  | dit  1.55s vae  4.81s | kv 27144/27144 filling | vram 18.92 GiB
+  forward    first-frame   6.92s  full   6.92s   4 frames  | dit  1.57s vae  4.81s | kv 27144/27144 EVICTING | vram 18.92 GiB
+  forward    first-frame   6.92s  full   6.92s   4 frames  | dit  1.58s vae  4.81s | kv 27144/27144 EVICTING | vram 18.92 GiB
+  forward    first-frame   6.92s  full   6.92s   4 frames  | dit  1.57s vae  4.82s | kv 27144/27144 EVICTING | vram 18.92 GiB
+  forward    first-frame   6.95s  full   6.95s   4 frames  | dit  1.58s vae  4.82s | kv 27144/27144 EVICTING | vram 18.92 GiB
+  forward    first-frame   6.94s  full   6.94s   4 frames  | dit  1.57s vae  4.82s | kv 27144/27144 EVICTING | vram 18.92 GiB
+  forward    first-frame   6.93s  full   6.93s   4 frames  | dit  1.57s vae  4.81s | kv 27144/27144 EVICTING | vram 18.92 GiB
+
+combined session video: /ai/outputs/lingbot-sessions/regress_c1/session.mp4  (93 frames)
+individual frames: /ai/outputs/lingbot-sessions/regress_c1/frames  (93 PNGs, written as decoded)

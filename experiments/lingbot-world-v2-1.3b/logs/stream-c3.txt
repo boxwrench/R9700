@@ -1,0 +1,31 @@
+loading world ...
+Loading checkpoint shards:   0%|          | 0/6 [00:00<?, ?it/s]Loading checkpoint shards:  33%|███▎      | 2/6 [00:00<00:00, 12.12it/s]Loading checkpoint shards:  67%|██████▋   | 4/6 [00:00<00:00, 12.11it/s]Loading checkpoint shards: 100%|██████████| 6/6 [00:00<00:00, 12.33it/s]Loading checkpoint shards: 100%|██████████| 6/6 [00:00<00:00, 12.27it/s]
+/ai/repos/lingbot-world-v2/wan/modules/vae2_1.py:324: UserWarning: Using AOTriton backend for Efficient Attention forward... (Triggered internally at /pytorch/aten/src/ATen/native/transformers/hip/attention.hip:1452.)
+  x = F.scaled_dot_product_attention(
+
+world ready in 35.5s (model 31.7s, T5 3.7s, image 0.2s [cached])
+  464x832  latent 58x104  1508 tokens/frame
+  KV cache 4.66 GiB  window 18 frames  sink 6
+  chunk 3 latent frames  seed 42
+
+commands
+  w / forward      move forward          s / back       move backward
+  a / left         strafe left           d / right      strafe right
+  q / turn_left    yaw left              e / turn_right yaw right
+  r / up           rise                  f / down       descend
+  t / tilt_up      pitch up              g / tilt_down  pitch down
+  x / stay         hold position
+  <action> <amt>   override step size (metres, or degrees for turns)
+  script w w e w   run several actions in sequence
+  reset            wipe world state, keep the model loaded
+  stats            show session state
+  help             this text
+  quit             end session and write the combined video
+
+  forward    first-frame   3.98s  full  14.93s   9 frames  | dit  2.24s vae 12.66s | kv 4524/27144 filling | vram 19.44 GiB
+  forward    first-frame  20.20s  full  30.82s  12 frames  | dit 14.84s vae 15.98s | kv 9048/27144 filling | vram 19.44 GiB
+  turn_right first-frame  23.87s  full  34.69s  12 frames  | dit 18.47s vae 16.23s | kv 13572/27144 filling | vram 19.44 GiB
+  forward    first-frame  24.42s  full  35.47s  12 frames  | dit 18.93s vae 16.54s | kv 18096/27144 filling | vram 19.44 GiB
+  turn_right first-frame  24.88s  full  36.01s  12 frames  | dit 19.36s vae 16.65s | kv 22620/27144 filling | vram 19.44 GiB
+  turn_right first-frame  25.39s  full  36.54s  12 frames  | dit 19.78s vae 16.76s | kv 27144/27144 filling | vram 19.44 GiB
+  forward    first-frame  24.66s  full  34.28s  12 frames  | dit 19.83s vae 14.45s | kv 27144/27144 EVICTING | vram 19.44 GiB

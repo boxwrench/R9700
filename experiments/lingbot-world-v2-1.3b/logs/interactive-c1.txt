@@ -1,0 +1,34 @@
+loading world ...
+Loading checkpoint shards:   0%|          | 0/6 [00:00<?, ?it/s]Loading checkpoint shards:  33%|███▎      | 2/6 [00:00<00:00, 12.08it/s]Loading checkpoint shards:  67%|██████▋   | 4/6 [00:00<00:00, 12.19it/s]Loading checkpoint shards: 100%|██████████| 6/6 [00:00<00:00, 12.29it/s]Loading checkpoint shards: 100%|██████████| 6/6 [00:00<00:00, 12.25it/s]
+/ai/repos/lingbot-world-v2/wan/modules/vae2_1.py:324: UserWarning: Using AOTriton backend for Efficient Attention forward... (Triggered internally at /pytorch/aten/src/ATen/native/transformers/hip/attention.hip:1452.)
+  x = F.scaled_dot_product_attention(
+
+world ready in 35.8s (model 32.0s, T5 3.7s, image 0.2s [cached])
+  464x832  latent 58x104  1508 tokens/frame
+  KV cache 4.66 GiB  window 18 frames  sink 6
+  chunk 1 latent frames  seed 42
+
+commands
+  w / forward      move forward          s / back       move backward
+  a / left         strafe left           d / right      strafe right
+  q / turn_left    yaw left              e / turn_right yaw right
+  r / up           rise                  f / down       descend
+  t / tilt_up      pitch up              g / tilt_down  pitch down
+  x / stay         hold position
+  <action> <amt>   override step size (metres, or degrees for turns)
+  script w w e w   run several actions in sequence
+  reset            wipe world state, keep the model loaded
+  stats            show session state
+  help             this text
+  quit             end session and write the combined video
+
+  forward    first-frame   2.33s  full   2.34s   1 frames  | dit  0.78s vae  1.53s | kv 1508/27144 filling | vram 14.67 GiB
+  forward    first-frame   6.07s  full   6.07s   4 frames  | dit  0.71s vae  4.75s | kv 3016/27144 filling | vram 18.63 GiB
+  turn_right first-frame   5.52s  full   5.53s   4 frames  | dit  0.76s vae  4.77s | kv 4524/27144 filling | vram 18.92 GiB
+  forward    first-frame   6.09s  full   6.10s   4 frames  | dit  0.80s vae  4.78s | kv 6032/27144 filling | vram 18.92 GiB
+  turn_right first-frame   6.18s  full   6.18s   4 frames  | dit  0.86s vae  4.79s | kv 7540/27144 filling | vram 18.92 GiB
+  turn_right first-frame   6.26s  full   6.26s   4 frames  | dit  0.93s vae  4.79s | kv 9048/27144 filling | vram 18.92 GiB
+  forward    first-frame   6.32s  full   6.32s   4 frames  | dit  0.98s vae  4.79s | kv 10556/27144 filling | vram 18.92 GiB
+
+combined session video: /ai/outputs/lingbot-sessions/interactive_c1/session.mp4  (25 frames)
+individual frames: /ai/outputs/lingbot-sessions/interactive_c1/frames  (25 PNGs, written as decoded)

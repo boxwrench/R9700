@@ -19,7 +19,7 @@ checkpoint's only conditioning channel is a 6-dim Plucker ray embedding
 (`control_dim = 6` in model_fast.py), and upstream sets `wasd_action = None`
 unconditionally. There is no attack/jump/interact input in this model.
 """
-import argparse, json, math, os, sys, time
+import argparse, contextlib, json, math, os, queue, sys, threading, time
 from datetime import datetime, timezone
 
 import numpy as np
@@ -77,13 +77,18 @@ def gib(x):
 
 
 class IncrementalDecoder:
-    """Upstream's `Wan2_1_VAE.decode`, minus the cache clears.
+    """Upstream's `Wan2_1_VAE.decode`, minus the cache clears, as a generator.
 
     `decode` calls `clear_cache()` on entry and exit, which is right for a
     one-shot decode of the whole latent sequence and wrong here: the decoder's
     3D convolutions are causal and carry a per-conv feature cache across latent
     frames. Dropping that cache between chunks would restart the temporal
     context and put a visible seam at every chunk boundary. This keeps it.
+
+    The loop is already frame-serial -- one decoder pass per *latent* frame,
+    producing 1 pixel frame for the very first frame of a session and 4 for
+    every one after. Yielding inside that loop is what makes the first frames
+    of a chunk visible without waiting for the rest, and costs nothing.
     """
 
     def __init__(self, vae):
@@ -92,20 +97,22 @@ class IncrementalDecoder:
         self.m.clear_cache()
         self.started = False
 
-    def decode_chunk(self, z):
-        """z: [C, T, H, W] latent for this chunk -> [3, T_pixels, H*8, W*8]."""
+    def iter_decode(self, z):
+        """z: [C, T, H, W] -> yields [3, t, H*8, W*8] once per latent frame."""
         m = self.m
         scale = self.vae.scale
         z = z.unsqueeze(0)
         z = z / scale[1].view(1, m.z_dim, 1, 1, 1) + scale[0].view(1, m.z_dim, 1, 1, 1)
         x = m.conv2(z)
-        outs = []
         for i in range(x.shape[2]):
             m._conv_idx = [0]
-            outs.append(m.decoder(x[:, :, i:i + 1], feat_cache=m._feat_map,
-                                  feat_idx=m._conv_idx))
-        self.started = True
-        return torch.cat(outs, dim=2).float().clamp_(-1, 1).squeeze(0)
+            out = m.decoder(x[:, :, i:i + 1], feat_cache=m._feat_map,
+                            feat_idx=m._conv_idx)
+            self.started = True
+            yield out.float().clamp_(-1, 1).squeeze(0)
+
+    def decode_chunk(self, z):
+        return torch.cat(list(self.iter_decode(z)), dim=1)
 
 
 class World:
@@ -344,21 +351,14 @@ class World:
         sync()
         t_dit_done = time.perf_counter()
 
-        frames = self.decoder.decode_chunk(x0)
-        sync()
-        t_end = time.perf_counter()
-
         self.lat_frames_done += self.chunk
         self.chunks_done += 1
         rec = dict(
             timestamp=datetime.now(timezone.utc).isoformat(),
             action=action, amount=amount, chunk_index=self.chunks_done - 1,
-            latency_seconds=t_end - t_start,
             dit_seconds=t_dit_done - t_dit,
-            vae_decode_seconds=t_end - t_dit_done,
             setup_seconds=t_dit - t_start,
-            frames=int(frames.shape[1]),
-            fps_effective=frames.shape[1] / (t_end - t_start),
+            t_action_start=t_start, t_dit_done=t_dit_done,
             latent_frames_done=self.lat_frames_done,
             kv_global_end=int(self.kv_cache[0]['global_end_index'].item()),
             kv_local_end=int(self.kv_cache[0]['local_end_index'].item()),
@@ -372,7 +372,11 @@ class World:
             reserved_gib=gib(torch.cuda.memory_reserved()),
         )
         self.history.append(rec)
-        return frames, rec
+        # x0 is returned undecoded on purpose: decoding is presentation work.
+        # The next causal step reads the KV cache and its own noise, never the
+        # RGB, so the caller is free to decode this on another stream while the
+        # next action's DiT already runs.
+        return x0, rec
 
     def reset(self):
         """Wipe the world back to frame 0 without reloading anything."""
@@ -386,6 +390,148 @@ class World:
         self.gen.manual_seed(self.seed)
         self.decoder = IncrementalDecoder(self.pipe.vae)
         torch.cuda.empty_cache()
+
+
+class Presenter:
+    """Decodes chunks and emits frames the instant each one exists.
+
+    Runs on its own HIP stream in its own thread so that the next action's DiT
+    can start while the previous chunk is still being decoded. That is safe
+    because the two touch disjoint mutable state: the DiT owns the KV and
+    cross-attention caches, the decoder owns the VAE feature cache, and the
+    next causal step never reads decoded RGB. The handoff is a CUDA event on
+    the latent, plus `record_stream` so the caching allocator cannot reuse that
+    memory before the decode stream is done with it.
+
+    Whether the two *actually* overlap on the device rather than time-slicing
+    is a separate question, and is measured rather than assumed -- see
+    `--overlap 0` for the serial control.
+    """
+
+    def __init__(self, world, out_dir, args):
+        self.world = world
+        self.out = out_dir
+        self.args = args
+        self.frames_dir = os.path.join(out_dir, 'frames')
+        os.makedirs(self.frames_dir, exist_ok=True)
+        self.q = queue.Queue()
+        self.results = queue.Queue()
+        self.inflight = 0
+        self.lock = threading.Lock()
+        self.stream = torch.cuda.Stream() if args.overlap else None
+        self.all_frames = []
+        self.frame_counter = 0
+        self.thread = threading.Thread(target=self._run, daemon=True)
+        self.thread.start()
+
+    def submit(self, x0, rec):
+        ev = torch.cuda.Event()
+        ev.record()
+        if self.stream is not None:
+            x0.record_stream(self.stream)
+        with self.lock:
+            self.inflight += 1
+        self.q.put((x0, rec, ev))
+
+    def _emit(self, tensor, rec):
+        """Write one decoded group of pixel frames as PNGs, immediately."""
+        from PIL import Image
+        arr = ((tensor.clamp(-1, 1) + 1.0) * 127.5).to(torch.uint8).cpu().numpy()
+        paths = []
+        for i in range(arr.shape[1]):
+            im = Image.fromarray(arr[:, i].transpose(1, 2, 0))
+            path = os.path.join(self.frames_dir, f'f_{self.frame_counter:05d}.png')
+            im.save(path, compress_level=1)
+            self.frame_counter += 1
+            paths.append(path)
+        return paths
+
+    def _run(self):
+        while True:
+            item = self.q.get()
+            if item is None:
+                break
+            x0, rec, ev = item
+            ctx = (torch.cuda.stream(self.stream) if self.stream is not None
+                   else contextlib.nullcontext())
+            groups = []
+            t_first = None
+            with ctx, torch.no_grad():
+                if self.stream is not None:
+                    self.stream.wait_event(ev)
+                t_dec0 = time.perf_counter()
+                for g in self.world.decoder.iter_decode(x0):
+                    if self.stream is not None:
+                        self.stream.synchronize()
+                    else:
+                        torch.cuda.synchronize()
+                    if t_first is None:
+                        self._emit(g, rec)
+                        t_first = time.perf_counter()
+                        rec['t_first_frame'] = t_first
+                        rec['first_frame_latency'] = t_first - rec['t_action_start']
+                    else:
+                        self._emit(g, rec)
+                    groups.append(g.cpu())
+                t_dec1 = time.perf_counter()
+            frames = torch.cat(groups, dim=1)
+            rec['vae_decode_seconds'] = t_dec1 - t_dec0
+            rec['latency_seconds'] = t_dec1 - rec['t_action_start']
+            rec['frames'] = int(frames.shape[1])
+            rec['fps_effective'] = frames.shape[1] / rec['latency_seconds']
+            rec['peak_alloc_gib'] = gib(torch.cuda.max_memory_allocated())
+            self.all_frames.append(frames)
+            if not self.args.no_chunk_mp4:
+                save_mp4(frames, os.path.join(
+                    self.out, f'chunk_{rec["chunk_index"]:03d}.mp4'), self.args.fps)
+                rec['file'] = f'chunk_{rec["chunk_index"]:03d}.mp4'
+            with self.lock:
+                self.inflight -= 1
+            self.results.put(rec)
+
+    def drain(self, log, quiet=False):
+        """Collect every finished chunk record that is ready."""
+        done = []
+        while True:
+            try:
+                rec = self.results.get_nowait()
+            except queue.Empty:
+                break
+            done.append(rec)
+            log.write(json.dumps({k: v for k, v in rec.items()
+                                  if not k.startswith('t_')}) + '\n')
+            log.flush()
+            if not quiet:
+                report(rec)
+        return done
+
+    def wait_idle(self, log, quiet=False):
+        out = []
+        while True:
+            out += self.drain(log, quiet)
+            with self.lock:
+                if self.inflight == 0 and self.results.empty():
+                    break
+            time.sleep(0.02)
+        return out + self.drain(log, quiet)
+
+    def busy(self):
+        with self.lock:
+            return self.inflight > 0
+
+    def close(self):
+        self.q.put(None)
+        self.thread.join(timeout=5)
+
+
+def report(rec):
+    ff = rec.get('first_frame_latency')
+    print(f'  {rec["action"]:<10} first-frame {ff:6.2f}s  full {rec["latency_seconds"]:6.2f}s  '
+          f'{rec["frames"]:2d} frames  | dit {rec["dit_seconds"]:5.2f}s '
+          f'vae {rec["vae_decode_seconds"]:5.2f}s '
+          f'| kv {rec["kv_local_end"]}/{rec["kv_capacity_tokens"]} '
+          f'{"EVICTING" if rec["kv_evicting"] else "filling"} '
+          f'| vram {rec["peak_alloc_gib"]:.2f} GiB', flush=True)
 
 
 def save_mp4(frames, path, fps):
@@ -420,8 +566,10 @@ def main():
                     default='/ai/models/lingbot-world-v2-1.3b-causal-fast-assembled')
     ap.add_argument('--task', default='i2v-1.3B')
     ap.add_argument('--size', default='480*832')
-    ap.add_argument('--chunk_size', type=int, default=3,
-                    help='latent frames per action (3 -> 12 video frames)')
+    ap.add_argument('--chunk_size', type=int, default=1,
+                    help='latent frames per action. 1 -> 4 video frames and the '
+                         'lowest keypress-to-frame latency; 2 and 3 are also '
+                         'valid and trade responsiveness for frames per action.')
     ap.add_argument('--local_attn_size', type=int, default=18)
     ap.add_argument('--sink_size', type=int, default=6)
     ap.add_argument('--max_lat_frames', type=int, default=90)
@@ -433,6 +581,17 @@ def main():
     ap.add_argument('--turn_deg', type=float, default=8.0)
     ap.add_argument('--fov_deg', type=float, default=60.0)
     ap.add_argument('--fps', type=int, default=16)
+    ap.add_argument('--overlap', type=int, default=0,
+                    help='decode on a second HIP stream so the next DiT can start. '
+                         'Measured on gfx1201 as a net loss -- the VAE decode '
+                         'saturates the device, so the two serialize anyway and '
+                         'the contention inflates DiT latency ~5x. Off by default.')
+    ap.add_argument('--queue_max', type=int, default=1,
+                    help='bounded in-flight chunk queue. 1 keeps each action '
+                         'uncontended, which is what minimises felt latency; '
+                         'raise to 2-4 to let input queue during presentation.')
+    ap.add_argument('--no_chunk_mp4', action='store_true',
+                    help='skip per-chunk mp4s; PNGs and session.mp4 still written')
     ap.add_argument('--cond_cache', default=None,
                     help='where to cache the encoded conditioning horizon')
     ap.add_argument('--script', type=str, default=None,
@@ -484,29 +643,32 @@ def main():
     print(HELP)
 
     actions_log = open(os.path.join(out, 'actions.jsonl'), 'a')
-    all_frames = []
+    presenter = Presenter(world, out, args)
 
     def do(action, amount=None):
-        frames, rec = world.step(action, amount)
-        path = os.path.join(out, f'chunk_{rec["chunk_index"]:03d}.mp4')
-        save_mp4(frames, path, args.fps)
-        rec['file'] = os.path.basename(path)
-        actions_log.write(json.dumps(rec) + '\n')
-        actions_log.flush()
-        all_frames.append(frames.cpu())
-        print(f'  {action:<10} {rec["latency_seconds"]:6.2f}s  '
-              f'{rec["frames"]:2d} frames  {rec["fps_effective"]:5.2f} fps  '
-              f'| dit {rec["dit_seconds"]:5.2f}s vae {rec["vae_decode_seconds"]:5.2f}s '
-              f'| kv {rec["kv_local_end"]}/{rec["kv_capacity_tokens"]} '
-              f'{"EVICTING" if rec["kv_evicting"] else "filling"} '
-              f'| vram {rec["peak_alloc_gib"]:.2f} GiB peak', flush=True)
+        t_entered = time.perf_counter()
+        x0, rec = world.step(action, amount)
+        rec['t_entered'] = t_entered
+        rec['dit_complete_latency'] = rec['t_dit_done'] - rec['t_action_start']
+        rec['queue_wait'] = rec['t_action_start'] - t_entered
+        presenter.submit(x0, rec)
+        # Bounded queue: never let more than --queue_max chunks be in flight,
+        # so input cannot build up unboundedly behind a slow decoder.
+        while presenter.inflight >= args.queue_max:
+            presenter.drain(actions_log)
+            time.sleep(0.02)
+        presenter.drain(actions_log)
 
     def finish():
-        if all_frames:
-            combined = torch.cat(all_frames, dim=1)
+        presenter.wait_idle(actions_log)
+        if presenter.all_frames:
+            combined = torch.cat(presenter.all_frames, dim=1)
             p = os.path.join(out, 'session.mp4')
             save_mp4(combined, p, args.fps)
             print(f'\ncombined session video: {p}  ({combined.shape[1]} frames)')
+            print(f'individual frames: {presenter.frames_dir}  '
+                  f'({presenter.frame_counter} PNGs, written as decoded)')
+        presenter.close()
         actions_log.close()
 
     if args.script:
@@ -525,6 +687,7 @@ def main():
         except (EOFError, KeyboardInterrupt):
             print()
             break
+        presenter.drain(actions_log)
         if not line:
             continue
         parts = line.split()
@@ -534,12 +697,14 @@ def main():
         if cmd == 'help':
             print(HELP); continue
         if cmd == 'reset':
-            world.reset(); all_frames.clear()
+            presenter.wait_idle(actions_log)
+            world.reset(); presenter.all_frames.clear()
             print('  world reset (model still loaded)'); continue
         if cmd == 'stats':
             print(f'  chunks {world.chunks_done}  latent frames '
                   f'{world.lat_frames_done}/{world.max_lat_f}  '
                   f'camera {np.round(world.t, 2).tolist()}  '
+                  f'in flight {presenter.inflight}  '
                   f'alloc {gib(torch.cuda.memory_allocated()):.2f} GiB')
             continue
         if cmd == 'script':
