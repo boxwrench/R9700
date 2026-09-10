@@ -1,0 +1,35 @@
+loading world ...
+Loading checkpoint shards:   0%|          | 0/6 [00:00<?, ?it/s]Loading checkpoint shards:  33%|███▎      | 2/6 [00:00<00:00, 12.84it/s]Loading checkpoint shards:  67%|██████▋   | 4/6 [00:00<00:00, 13.21it/s]Loading checkpoint shards: 100%|██████████| 6/6 [00:00<00:00, 12.98it/s]Loading checkpoint shards: 100%|██████████| 6/6 [00:00<00:00, 13.00it/s]
+/ai/repos/lingbot-world-v2/wan/modules/vae2_1.py:722: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with amp.autocast(dtype=self.dtype):
+/ai/repos/lingbot-world-v2/wan/modules/vae2_1.py:324: UserWarning: Using AOTriton backend for Efficient Attention forward... (Triggered internally at /pytorch/aten/src/ATen/native/transformers/hip/attention.hip:1452.)
+  x = F.scaled_dot_product_attention(
+
+world ready in 295.9s (model 31.2s, T5 3.5s, image 261.1s [encoded, cached for next time])
+  464x832  latent 58x104  1508 tokens/frame
+  KV cache 4.66 GiB  window 18 frames  sink 6
+  chunk 3 latent frames  seed 42
+
+commands
+  w / forward      move forward          s / back       move backward
+  a / left         strafe left           d / right      strafe right
+  q / turn_left    yaw left              e / turn_right yaw right
+  r / up           rise                  f / down       descend
+  t / tilt_up      pitch up              g / tilt_down  pitch down
+  x / stay         hold position
+  <action> <amt>   override step size (metres, or degrees for turns)
+  script w w e w   run several actions in sequence
+  reset            wipe world state, keep the model loaded
+  stats            show session state
+  help             this text
+  quit             end session and write the combined video
+
+  forward     13.23s   9 frames   0.68 fps  | dit  2.26s vae 10.96s | kv 4524/27144 filling | vram 18.92 GiB peak
+  forward     16.74s  12 frames   0.72 fps  | dit  2.55s vae 14.19s | kv 9048/27144 filling | vram 18.93 GiB peak
+  turn_right  17.13s  12 frames   0.70 fps  | dit  2.95s vae 14.18s | kv 13572/27144 filling | vram 18.93 GiB peak
+  forward     17.55s  12 frames   0.68 fps  | dit  3.35s vae 14.20s | kv 18096/27144 filling | vram 18.93 GiB peak
+  turn_right  17.93s  12 frames   0.67 fps  | dit  3.75s vae 14.18s | kv 22620/27144 filling | vram 18.93 GiB peak
+  turn_right  18.36s  12 frames   0.65 fps  | dit  4.17s vae 14.19s | kv 27144/27144 filling | vram 18.93 GiB peak
+  forward     18.36s  12 frames   0.65 fps  | dit  4.18s vae 14.18s | kv 27144/27144 EVICTING | vram 18.93 GiB peak
+
+combined session video: /ai/outputs/lingbot-sessions/traverse01/session.mp4  (81 frames)
