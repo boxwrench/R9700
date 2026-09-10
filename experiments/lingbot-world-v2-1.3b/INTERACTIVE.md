@@ -527,3 +527,34 @@ The transformer's cost has to come from somewhere else.
 
 Overhead is now gone as a category. Milestone 2 (<2.5 s) needs ~0.3 s from the
 two model components, and the DiT is the larger of them.
+
+---
+
+# TAEW2.1 presentation mode + decode-first scheduling (2026-09-10)
+
+New flags (canonical default unchanged):
+
+```sh
+--schedule {clean-first,decode-first}          # default clean-first
+--presentation_decoder {canonical,taew2_1}     # default canonical
+--taehv_dir /ai/models/taehv-011dfc2          # pinned taehv checkout
+```
+
+`step()` is factored into `begin_action / denoise / commit_clean /
+end_action` phases executing identical ops; `step()` recomposes the
+original order. Decode-first presents the accepted x0, then commits clean
+KV (bit-identical final state, proven at 464 and re-proven at 384 via the
+live pair below). TAE mode never runs canonical decode. Decoder choice is
+fresh-session-only. Details and full ledger in `FINDINGS.md`.
+
+Filled-window steady state, 384x672, chunk 1, window 18+6:
+
+| | canonical A-order | canonical decode-first | TAE decode-first |
+|---|---|---|---|
+| first RGB | 1.712 s | 1.522 s | **0.699 s** |
+| action-conditioned RGB | 1.837 s | ~1.647 s | **~0.824 s** |
+| next-action-ready | ~1.71 s | 1.696 s | **0.877 s** |
+| peak VRAM | 10.21 GiB | 10.26 GiB | 7.12 GiB |
+
+Performance history appends: `384x672 decode-first 1.522 s`,
+`384x672 TAE first RGB 0.699 s / conditioned ~0.824 s`.

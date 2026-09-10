@@ -183,3 +183,96 @@ Whole VAE decode, 480x832, FP32, upstream chunking, same latent:
 **6.75x faster warm.** Peak allocation rises because `GemmFwdRest` now
 actually runs and needs its im2col workspace — the naive kernel needed none.
 Smaller split values should trade some of that back; not yet measured.
+
+---
+
+# TAEW2.1 streaming presentation decoder (gfx1201, 2026-09-10)
+
+## Upstream pin (verified, not assumed)
+
+- repo `https://github.com/madebyollin/taehv`, commit
+  `011dfc2112197741c540e0bdd5b7b67bcc930771` (fresh clone HEAD equals pin)
+- weights `taew2_1.pth`, SHA-256
+  `d26151e76cdc2c9424bef988de874b33d9a53f30ef3060cd556c429c469c797e`
+  (recomputed locally; enforced at load, staged at `/ai/models/taehv-011dfc2/`)
+- architecture from pinned source: name-selected `patch_size=1`,
+  `latent_channels=16`; decoder temporal upscale 4 (TGrow pattern
+  False,True,True); `frames_to_trim = 3`, consumed internally by
+  `StreamingTAEHV.decode`; NTCHW in/out; identity latent mean/std
+  (decoder input is `tanh(x/3)*3`, not a user-side normalization);
+  output `clamp_(0,1)` RGB. Decode-only world-model streaming is the
+  documented use case (`decode(latent)` returns the first frame
+  immediately, `decode()` drains the rest, one frame per call minimum work).
+- Decoder ops are Conv2d/Upsample/PixelShuffle/ReLU only — no Conv3d, so
+  the gfx1201 MIOpen Conv3d cliff class does not apply. `taehv.py` imports
+  cleanly in `/ai/envs/lingbot-world-v2`.
+
+## Latent contract (traced in current code)
+
+- Sampler emits model-space normalized Wan VAE `x0`, `[16,1,48,84]` fp32
+  at 384x672 (measured, not assumed).
+- Canonical decode applies `z = x0/scale[1] + scale[0]` (fp32) then fp16.
+- TAE input is the **raw accepted x0** with only NCTHW -> NTCHW layout
+  conversion, fp16. No canonical scale/shift (verified against the pinned
+  Wan 2.1 TAE convention; a scale/shift trial was never needed here —
+  identity confirmed first try by sane output).
+- Feeding TAE from a random late latent was never done; all tests primed
+  from stream start or contiguous history.
+
+## Isolated saved-latent A/B (24-latent 384 stream, gfx1201)
+
+| | canonical FP16 | StreamingTAEHV fp16 |
+|---|---|---|
+| cold first latent | 0.434 s | 4.77 s (one-time MIOpen autotune; FindDb persists) |
+| warm steady per latent | 0.8158 s P50 | first RGB 3.6 ms / all-4 5.9 ms P50 |
+| peak VRAM (standalone) | 3.71 GiB | 1.82 GiB |
+| frames per latent | 4 (1 from stream head) | 1 from head latent (trim), 4 thereafter |
+
+Warm saving: **~0.810 s/latent**. Artifacts: `ab_report.json`,
+`x0_*.pt`, `canon_*.pt`, `tae_*.pt` under `/ai/outputs/lingbot-exp/tae/`.
+
+## Quality (identical latents, gfx1201)
+
+- MAD 0.0269 mean; frame means 0.6798 vs 0.6797 (no color/contrast shift);
+  intra-chunk deltas 0.0269 vs 0.0279; chunk-boundary deltas 0.0310 vs
+  0.0306 (no TAE seam pathology).
+- Turn-vs-stay divergence per frame, uint8 L1: TAE
+  [6.04, 11.65, 25.23, 28.05] vs canonical [5.38, 12.17, 24.29, 27.46] —
+  same profile, first materially action-conditioned frame is index 2
+  for **both** decoders. TAE preserves action-response structure.
+- Visual spot-checks (turn, late-session, divergence frames): same scene
+  and geometry, TAE slightly softer in foliage/cloud texture, marginally
+  more saturated blue. Coherent and pleasant for navigation.
+
+## Generation independence (measured)
+
+TAE reads x0 read-only plus its own disjoint streaming memory. A second
+session with TAE presentation (same seed/script) produced **bit-identical
+accepted x0** (max diff 0.00e+00) with correct KV positions. Decoder is
+presentation-only. Canonical conditioning encode, DiT, clean-KV,
+cross-attention unchanged.
+
+## Live integration (`--presentation_decoder taew2_1`, decode-first)
+
+27-action regression at 384 through 9 KV evictions, filled-window steady:
+
+| metric | canonical decode-first | TAE decode-first | saving |
+|---|---|---|---|
+| first RGB | 1.5217 (max 1.5284) | 0.6993 (max 0.7051) | **-822 ms** |
+| next-action-ready | 1.6962 (max 1.7028) | 0.8773 (max 0.8831) | **-819 ms** |
+| DiT (denoise/clean) | 0.6986 / 0.1718 | 0.6949 / 0.1707 | identical work |
+| decoder all-output | 0.8241 | 0.0061 | -818 ms |
+| peak VRAM | 10.26 GiB | 7.12 GiB | -3.1 GiB |
+
+105/105 frames, 0 frozen, seam ratio 1.0316, finite, KV 27216/18144
+evicting, identical camera trajectories ([7.22,0,17.19] both modes).
+Action-conditioned RGB (frame idx 2, +125 ms @16fps): ~1.647 s -> ~0.824 s.
+
+Ordering used: denoise -> TAE first frame -> display -> clean-KV commit
+-> TAE drain -> next action. TAE all-4 is ~6 ms, so completing the drain
+after the commit costs nothing measurable; no playback gap introduced.
+Decoder selected at fresh-session start; no mid-session switching (TAE
+and canonical maintain different causal decoder state). Canonical decode
+never runs in TAE mode. `WAN_VAE_CONV3D_TEMPORAL_SPLIT=1` intact.
+
+Accepted: TAEW2.1 retained as opt-in presentation decoder on gfx1201.

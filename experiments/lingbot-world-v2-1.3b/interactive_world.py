@@ -119,6 +119,84 @@ class IncrementalDecoder:
         return torch.cat(list(self.iter_decode(z)), dim=1)
 
 
+# Pinned TAEW2.1 weights (madebyollin/taehv @ 011dfc2...771).
+TAEW2_1_SHA256 = 'd26151e76cdc2c9424bef988de874b33d9a53f30ef3060cd556c429c469c797e'
+
+
+class StreamingTAEDecoder:
+    """Presentation-only streaming decoder (opt-in `--presentation_decoder taew2_1`).
+
+    Wraps the pinned `taew2_1` checkpoint's `StreamingTAEHV`. Takes the raw
+    accepted diffusion latent `x0` (no canonical VAE scale/shift — the TAE
+    checkpoint uses identity latent mean/std) with only an NCTHW -> NTCHW
+    layout conversion. Holds its own causal decoder memory, disjoint from
+    the DiT KV caches and the canonical VAE feature cache, so it can never
+    feed world generation. Do not use its output for anything but display.
+    """
+
+    def __init__(self, taehv_dir, weights_path, device, lat_h, lat_w):
+        import hashlib
+        sys.path.insert(0, taehv_dir)
+        from taehv import StreamingTAEHV, TAEHV
+        w = weights_path or os.path.join(taehv_dir, 'taew2_1.pth')
+        h = hashlib.sha256()
+        with open(w, 'rb') as f:
+            for blk in iter(lambda: f.read(1 << 20), b''):
+                h.update(blk)
+        self.weights_sha256 = h.hexdigest()
+        if self.weights_sha256 != TAEW2_1_SHA256:
+            raise RuntimeError(
+                f'taew2_1 checksum mismatch: {self.weights_sha256} != {TAEW2_1_SHA256}')
+        self.weights_path = w
+        self.device = device
+        t0 = time.perf_counter()
+        self.model = TAEHV(w).to(device=device, dtype=torch.float16).eval()
+        self.stream = StreamingTAEHV(self.model)
+        self.arch = dict(latent_channels=self.model.latent_channels,
+                         t_upscale=self.model.t_upscale,
+                         frames_to_trim=self.model.frames_to_trim)
+        # One-time MIOpen autotune for the TAE shapes, then reset the
+        # throwaway streaming memory. Later sessions reuse FindDb entries.
+        with torch.no_grad():
+            z = torch.zeros(1, 1, self.arch['latent_channels'], lat_h, lat_w,
+                            device=device, dtype=torch.float16)
+            f = self.stream.decode(z)
+            while f is not None:
+                f = self.stream.decode()
+            sync()
+        self.stream.reset()
+        sync()
+        self.t_prime = time.perf_counter() - t0
+
+    def reset(self):
+        self.stream.reset()
+
+    @torch.inference_mode()
+    def first(self, x0):
+        """Feed one accepted latent; return (first_frame_N1CHW, gpu_ms)."""
+        zl = x0.unsqueeze(0).permute(0, 2, 1, 3, 4).contiguous().to(torch.float16)
+        t0 = time.perf_counter()
+        f = self.stream.decode(zl)
+        sync()
+        ms = (time.perf_counter() - t0) * 1000.0
+        if f is None:
+            raise RuntimeError('TAEHV produced no RGB frame for an accepted latent')
+        return f, ms
+
+    @torch.inference_mode()
+    def drain(self):
+        """Collect remaining frames for the current latent; return (list, ms)."""
+        out = []
+        t0 = time.perf_counter()
+        while True:
+            f = self.stream.decode()
+            if f is None:
+                break
+            out.append(f)
+        sync()
+        return out, (time.perf_counter() - t0) * 1000.0
+
+
 class World:
     def __init__(self, args):
         self.args = args
@@ -142,7 +220,13 @@ class World:
         # ---- geometry, derived exactly as upstream does ----
         img = Image.open(args.image).convert('RGB')
         self.img_size = img.size
-        max_area = MAX_AREA_CONFIGS[args.size]
+        # --size is an area target, not a shape (upstream arithmetic derives
+        # the executed grid from it). Accept any 'H*W' target, not just the
+        # keys in MAX_AREA_CONFIGS.
+        max_area = MAX_AREA_CONFIGS.get(args.size)
+        if max_area is None:
+            a, b = [int(x) for x in args.size.split('*')]
+            max_area = a * b
         h0, w0 = img.size[1], img.size[0]
         ar = h0 / w0
         self.lat_h = round(np.sqrt(max_area * ar) // cfg.vae_stride[1]
@@ -253,6 +337,17 @@ class World:
             pipe.vae.model = pipe.vae.model.to(self.decode_dtype)
         self.decoder = IncrementalDecoder(pipe.vae, self.decode_dtype)
 
+        # Opt-in presentation decoder. Canonical remains the default; TAE is
+        # display-only and never feeds generation state.
+        self.presentation = args.presentation_decoder
+        self.tae = None
+        self.t_tae_prime = 0.0
+        if self.presentation == 'taew2_1':
+            self.tae = StreamingTAEDecoder(
+                args.taehv_dir, args.taehv_weights, self.device,
+                self.lat_h, self.lat_w)
+            self.t_tae_prime = self.tae.t_prime
+
         # ---- world pose state ----
         self.R = np.eye(3)
         self.t = np.zeros(3)
@@ -313,15 +408,21 @@ class World:
                          f=len(rel), h=self.lat_h, w=self.lat_w).to(self.cfg.param_dtype)
 
     # -- one action = one causal chunk -------------------------------------
-    @torch.no_grad()
-    def step(self, action, amount=None):
+    # step() is factored into ordered phases so the caller can interleave
+    # presentation between denoising and the clean-KV commit (decode-first).
+    # The default order (denoise -> clean -> present) is unchanged; every
+    # phase below executes the same ops in the same sequence as before.
+    def _phase_check(self):
         if self.lat_frames_done + self.chunk > self.max_lat_f:
             raise RuntimeError(
                 f'session horizon reached ({self.max_lat_f} latent frames). '
                 'Raise --max_lat_frames or use `reset`.')
+
+    @torch.no_grad()
+    def begin_action(self, action, amount=None):
+        self._phase_check()
         amount = amount if amount is not None else (
             self.args.turn_deg if action in ROTATIONS else self.args.move_amount)
-        pipe = self.pipe
         _e0 = time.perf_counter()
         torch.cuda.reset_peak_memory_stats()
         _e1 = time.perf_counter()
@@ -357,13 +458,32 @@ class World:
 
         _s['kwargs'] = time.perf_counter() - _t
         t_dit = time.perf_counter()
+        rec = dict(action=action, amount=amount,
+                   t_action_start=t_start, setup_stage=_s, t_setup_done=t_dit)
+        return latent, kwargs, rec
+
+    @torch.no_grad()
+    def denoise(self, latent, kwargs, rec):
+        """Four denoising forwards; returns the accepted clean x0.
+
+        Leaves noisy K/V in this chunk's cache slots; they are only
+        published by commit_clean(). The next action must not run until
+        that commit completes.
+        """
+        pipe = self.pipe
+        t_dit = rec['t_setup_done']
+        fwd_ms = []
         with torch.amp.autocast('cuda', dtype=pipe.param_dtype):
             for ti in range(len(self.timesteps)):
                 ts = torch.stack([self.timesteps[ti]]).to(self.device)
+                sync()
+                f0 = time.perf_counter()
                 noise_pred = pipe.model(x=[latent], t=ts,
                                         cross_attn_first_call=not self.cross_initialized,
                                         **kwargs)[0]
                 self.cross_initialized = True
+                sync()
+                fwd_ms.append((time.perf_counter() - f0) * 1000.0)
                 x0 = pipe._convert_flow_pred_to_x0(
                     flow_pred=noise_pred, xt=latent,
                     timestep=self.timesteps[ti], scheduler=pipe.scheduler)
@@ -372,21 +492,38 @@ class World:
                         x0, torch.randn(x0.shape, generator=self.gen,
                                         device=x0.device, dtype=x0.dtype),
                         self.timesteps[ti + 1])
-            # fifth forward: writes the accepted x0 into the KV cache. This is
-            # what makes the next action continue this world instead of a new one.
+        sync()
+        t_denoise_done = time.perf_counter()
+        rec['dit_denoise_seconds'] = t_denoise_done - t_dit
+        rec['denoise_forward_ms'] = fwd_ms
+        rec['t_denoise_done'] = t_denoise_done
+        return x0
+
+    @torch.no_grad()
+    def commit_clean(self, x0, kwargs, rec):
+        """Fifth forward: writes the accepted x0 into the KV cache.
+
+        This is what makes the next action continue this world instead of
+        a new one. Exact and mandatory.
+        """
+        pipe = self.pipe
+        with torch.amp.autocast('cuda', dtype=pipe.param_dtype):
+            sync()
+            t0 = time.perf_counter()
             pipe.model(x=[x0], t=torch.stack([self.timesteps[-1] * 0.0]).to(self.device),
                        cross_attn_first_call=False, **kwargs)
-        sync()
-        t_dit_done = time.perf_counter()
+            sync()
+            rec['clean_seconds'] = time.perf_counter() - t0
+        rec['t_clean_done'] = time.perf_counter()
+        return rec['clean_seconds']
 
+    def end_action(self, rec):
         self.lat_frames_done += self.chunk
         self.chunks_done += 1
-        rec = dict(
+        rec.update(dict(
             timestamp=datetime.now(timezone.utc).isoformat(),
-            action=action, amount=amount, chunk_index=self.chunks_done - 1,
-            dit_seconds=t_dit_done - t_dit,
-            setup_seconds=t_dit - t_start,
-            t_action_start=t_start, t_dit_done=t_dit_done, setup_stage=_s,
+            chunk_index=self.chunks_done - 1,
+            setup_seconds=rec['t_setup_done'] - rec['t_action_start'],
             latent_frames_done=self.lat_frames_done,
             kv_global_end=int(self.kv_cache[0]['global_end_index'].item()),
             kv_local_end=int(self.kv_cache[0]['local_end_index'].item()),
@@ -398,8 +535,19 @@ class World:
             alloc_gib=gib(torch.cuda.memory_allocated()),
             peak_alloc_gib=gib(torch.cuda.max_memory_allocated()),
             reserved_gib=gib(torch.cuda.memory_reserved()),
-        )
+        ))
         self.history.append(rec)
+        return rec
+
+    @torch.no_grad()
+    def step(self, action, amount=None):
+        latent, kwargs, rec = self.begin_action(action, amount)
+        x0 = self.denoise(latent, kwargs, rec)
+        self.commit_clean(x0, kwargs, rec)
+        rec['dit_seconds'] = (rec['t_denoise_done'] - rec['t_setup_done']
+                              + rec['clean_seconds'])
+        rec['t_dit_done'] = rec['t_clean_done']
+        self.end_action(rec)
         # x0 is returned undecoded on purpose: decoding is presentation work.
         # The next causal step reads the KV cache and its own noise, never the
         # RGB, so the caller is free to decode this on another stream while the
@@ -417,6 +565,8 @@ class World:
         self.chunks_done = 0
         self.gen.manual_seed(self.seed)
         self.decoder = IncrementalDecoder(self.pipe.vae, self.decode_dtype)
+        if self.tae is not None:
+            self.tae.reset()
         torch.cuda.empty_cache()
 
 
@@ -469,6 +619,62 @@ class Presenter:
         happened to make first. Measured on gfx1201; see PHASE-A notes.
         """
         self._decode(x0, rec, None)
+
+    def present_first_canonical(self, world, x0, rec):
+        """Inline decode for decode-first order; records first-present times."""
+        groups = []
+        t_first = None
+        with torch.no_grad():
+            t_dec0 = time.perf_counter()
+            for g in world.decoder.iter_decode(x0):
+                torch.cuda.synchronize()
+                host = ((g.clamp(-1, 1) + 1.0) * 127.5).to(torch.uint8).cpu()
+                if t_first is None:
+                    t_first = time.perf_counter()
+                    rec['t_first_frame'] = t_first
+                    rec['first_frame_latency'] = t_first - rec['t_action_start']
+                groups.append(host)
+                self.archive.put(('png', host))
+            t_dec1 = time.perf_counter()
+        rec['vae_decode_seconds'] = t_dec1 - t_dec0
+        rec['latency_seconds'] = t_dec1 - rec['t_action_start']
+        frames = torch.cat(groups, dim=1)
+        rec['frames'] = int(frames.shape[1])
+        rec['fps_effective'] = frames.shape[1] / rec['latency_seconds']
+        rec['peak_alloc_gib'] = gib(torch.cuda.max_memory_allocated())
+        self.all_frames.append(frames)
+        return frames
+
+    def present_first_tae(self, world, x0, rec):
+        """First TAE frame to host (displayable); rest drained after clean KV."""
+        f0, first_ms = world.tae.first(x0)
+        host0 = (f0[0, 0].clamp(0, 1) * 255.0).to(torch.uint8).cpu()
+        t_first = time.perf_counter()
+        rec['t_first_frame'] = t_first
+        rec['first_frame_latency'] = t_first - rec['t_action_start']
+        rec['tae_first_ms'] = first_ms
+        self.archive.put(('png', host0.unsqueeze(1)))
+        return host0
+
+    def drain_rest_tae(self, world, host0, rec):
+        """Drain remaining TAE frames; complete session artifacts."""
+        rest, drain_ms = world.tae.drain()
+        hosts = [host0.unsqueeze(1)]
+        for f in rest:
+            h = (f[0, 0].clamp(0, 1) * 255.0).to(torch.uint8).cpu()
+            hosts.append(h.unsqueeze(1))
+            self.archive.put(('png', h.unsqueeze(1)))
+        t_done = time.perf_counter()
+        frames = torch.cat(hosts, dim=1)
+        rec['tae_drain_ms'] = drain_ms
+        rec['tae_all_ms'] = rec['tae_first_ms'] + drain_ms
+        rec['vae_decode_seconds'] = rec['tae_all_ms'] / 1000.0
+        rec['latency_seconds'] = t_done - rec['t_action_start']
+        rec['frames'] = int(frames.shape[1])
+        rec['fps_effective'] = frames.shape[1] / rec['latency_seconds']
+        rec['peak_alloc_gib'] = gib(torch.cuda.max_memory_allocated())
+        self.all_frames.append(frames)
+        return frames
 
     def submit(self, x0, rec):
         ev = torch.cuda.Event()
@@ -678,6 +884,23 @@ def main():
                     help='VAE decoder precision. fp16 measured 3.77x faster than '
                          'fp32 at 3.3e-03 relative error and half the peak memory; '
                          'bf16 is slightly slower AND 8x less accurate here.')
+    ap.add_argument('--schedule', default='clean-first',
+                    choices=['clean-first', 'decode-first'],
+                    help='clean-first runs the clean t=0 KV commit before '
+                         'presentation (original order); decode-first presents '
+                         'the accepted x0 first and commits after (same final '
+                         'state, earlier first RGB). decode-first is serial.')
+    ap.add_argument('--presentation_decoder', default='canonical',
+                    choices=['canonical', 'taew2_1'],
+                    help='presentation decoder. taew2_1 is the pinned Tiny '
+                         'AE (Wan 2.1) streaming presentation decoder: '
+                         'display-only, never feeds generation state. '
+                         'Canonical remains the default/reference.')
+    ap.add_argument('--taehv_dir', default='/ai/models/taehv-011dfc2',
+                    help='pinned taehv checkout directory (taehv.py lives here)')
+    ap.add_argument('--taehv_weights', default=None,
+                    help='taew2_1 weight path; defaults to taehv-dir/taew2_1.pth '
+                         '(checksum-enforced at load)')
     ap.add_argument('--overlap', type=int, default=0,
                     help='decode on a second HIP stream so the next DiT can start. '
                          'Measured on gfx1201 as a net loss -- the VAE decode '
@@ -722,6 +945,12 @@ def main():
         torch=torch.__version__, hip=torch.version.hip,
         gpu=torch.cuda.get_device_properties(0).gcnArchName,
         vae_decode_dtype=args.vae_dtype,
+        presentation_decoder=args.presentation_decoder,
+        schedule=args.schedule,
+        taehv_weights_sha256=(world.tae.weights_sha256
+                              if world.tae is not None else None),
+        taehv_arch=(world.tae.arch if world.tae is not None else None),
+        taehv_prime_seconds=world.t_tae_prime,
         vae_conv3d_temporal_split=os.environ.get(
             'WAN_VAE_CONV3D_TEMPORAL_SPLIT', '(default 1)'),
     )
@@ -740,11 +969,41 @@ def main():
     print(f'  chunk {world.chunk} latent frames  seed {args.seed}')
     print(HELP)
 
+    if args.schedule == 'decode-first' and (args.overlap or args.queue_max > 1):
+        print('  note: decode-first is serial; ignoring --overlap/--queue_max>1')
+    if world.tae is not None and (args.overlap or args.queue_max > 1):
+        print('  note: taew2_1 presentation is serial; ignoring --overlap/--queue_max>1')
+
     actions_log = open(os.path.join(out, 'actions.jsonl'), 'a')
     presenter = Presenter(world, out, args)
 
     def do(action, amount=None):
         t_entered = time.perf_counter()
+        if args.schedule == 'decode-first':
+            # Accepted B-order: denoise -> present -> clean-KV commit.
+            # The next action must not run until the commit completes;
+            # this path is always inline (no worker/overlap).
+            latent, kwargs, rec = world.begin_action(action, amount)
+            x0 = world.denoise(latent, kwargs, rec)
+            rec['t_entered'] = t_entered
+            rec['queue_wait'] = rec['t_action_start'] - t_entered
+            if world.tae is None:
+                presenter.present_first_canonical(world, x0, rec)
+            else:
+                host0 = presenter.present_first_tae(world, x0, rec)
+            world.commit_clean(x0, kwargs, rec)
+            rec['dit_seconds'] = (rec['dit_denoise_seconds'] + rec['clean_seconds'])
+            rec['t_dit_done'] = rec['t_clean_done']
+            rec['dit_complete_latency'] = rec['t_dit_done'] - rec['t_action_start']
+            if world.tae is None:
+                pass  # canonical decode already complete in present_first
+            else:
+                presenter.drain_rest_tae(world, host0, rec)
+            world.end_action(rec)
+            rec['next_ready_latency'] = time.perf_counter() - rec['t_action_start']
+            presenter.results.put(rec)
+            presenter.drain(actions_log)   # logs + prints the record
+            return
         x0, rec = world.step(action, amount)
         rec['t_entered'] = t_entered
         rec['dit_complete_latency'] = rec['t_dit_done'] - rec['t_action_start']
