@@ -1,0 +1,3995 @@
+{
+  "wall_seconds": 4.691209511676182,
+  "reps": [
+    4.690555614011828,
+    4.68828676600242,
+    4.694786155014299
+  ],
+  "out_shape": [
+    1,
+    3,
+    4,
+    464,
+    832
+  ],
+  "by_op": {
+    "CausalConv3d": 4.429669662980208,
+    "Conv2d": 0.027736866303409144,
+    "RMS_norm": 0.10615580137042949,
+    "Upsample": 0.006677233982676019,
+    "SiLU": 0.025771097939771902,
+    "Identity": 0.001112847336723159,
+    "Dropout": 0.0008599400365104279
+  },
+  "rows": [
+    {
+      "module": "decoder.upsamples.12.residual.2",
+      "op": "CausalConv3d",
+      "in_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "weight_shape": [
+        96,
+        96,
+        3,
+        3,
+        3
+      ],
+      "out_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.29874385467458825,
+      "mean_ms": 298.74385467458825,
+      "alloc_gib": 0.55224609375,
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "groups": 1
+    },
+    {
+      "module": "decoder.upsamples.14.residual.6",
+      "op": "CausalConv3d",
+      "in_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "weight_shape": [
+        96,
+        96,
+        3,
+        3,
+        3
+      ],
+      "out_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.2983044249995146,
+      "mean_ms": 298.3044249995146,
+      "alloc_gib": 0.55224609375,
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "groups": 1
+    },
+    {
+      "module": "decoder.upsamples.13.residual.2",
+      "op": "CausalConv3d",
+      "in_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "weight_shape": [
+        96,
+        96,
+        3,
+        3,
+        3
+      ],
+      "out_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.29795017499903526,
+      "mean_ms": 297.95017499903526,
+      "alloc_gib": 0.55224609375,
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "groups": 1
+    },
+    {
+      "module": "decoder.upsamples.12.residual.6",
+      "op": "CausalConv3d",
+      "in_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "weight_shape": [
+        96,
+        96,
+        3,
+        3,
+        3
+      ],
+      "out_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.2976830529999764,
+      "mean_ms": 297.6830529999764,
+      "alloc_gib": 0.55224609375,
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "groups": 1
+    },
+    {
+      "module": "decoder.upsamples.14.residual.2",
+      "op": "CausalConv3d",
+      "in_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "weight_shape": [
+        96,
+        96,
+        3,
+        3,
+        3
+      ],
+      "out_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.2973826810096701,
+      "mean_ms": 297.3826810096701,
+      "alloc_gib": 0.55224609375,
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "groups": 1
+    },
+    {
+      "module": "decoder.upsamples.13.residual.6",
+      "op": "CausalConv3d",
+      "in_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "weight_shape": [
+        96,
+        96,
+        3,
+        3,
+        3
+      ],
+      "out_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.29723306666710414,
+      "mean_ms": 297.23306666710414,
+      "alloc_gib": 0.55224609375,
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "groups": 1
+    },
+    {
+      "module": "decoder.upsamples.10.residual.6",
+      "op": "CausalConv3d",
+      "in_shape": [
+        1,
+        192,
+        4,
+        232,
+        416
+      ],
+      "weight_shape": [
+        192,
+        192,
+        3,
+        3,
+        3
+      ],
+      "out_shape": [
+        1,
+        192,
+        4,
+        232,
+        416
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.26760770800562267,
+      "mean_ms": 267.60770800562267,
+      "alloc_gib": 0.276123046875,
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "groups": 1
+    },
+    {
+      "module": "decoder.upsamples.9.residual.2",
+      "op": "CausalConv3d",
+      "in_shape": [
+        1,
+        192,
+        4,
+        232,
+        416
+      ],
+      "weight_shape": [
+        192,
+        192,
+        3,
+        3,
+        3
+      ],
+      "out_shape": [
+        1,
+        192,
+        4,
+        232,
+        416
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.26607198267204996,
+      "mean_ms": 266.07198267204996,
+      "alloc_gib": 0.276123046875,
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "groups": 1
+    },
+    {
+      "module": "decoder.upsamples.8.residual.2",
+      "op": "CausalConv3d",
+      "in_shape": [
+        1,
+        192,
+        4,
+        232,
+        416
+      ],
+      "weight_shape": [
+        192,
+        192,
+        3,
+        3,
+        3
+      ],
+      "out_shape": [
+        1,
+        192,
+        4,
+        232,
+        416
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.26605007900313166,
+      "mean_ms": 266.05007900313166,
+      "alloc_gib": 0.276123046875,
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "groups": 1
+    },
+    {
+      "module": "decoder.upsamples.8.residual.6",
+      "op": "CausalConv3d",
+      "in_shape": [
+        1,
+        192,
+        4,
+        232,
+        416
+      ],
+      "weight_shape": [
+        192,
+        192,
+        3,
+        3,
+        3
+      ],
+      "out_shape": [
+        1,
+        192,
+        4,
+        232,
+        416
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.2657250166715433,
+      "mean_ms": 265.7250166715433,
+      "alloc_gib": 0.276611328125,
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "groups": 1
+    },
+    {
+      "module": "decoder.upsamples.10.residual.2",
+      "op": "CausalConv3d",
+      "in_shape": [
+        1,
+        192,
+        4,
+        232,
+        416
+      ],
+      "weight_shape": [
+        192,
+        192,
+        3,
+        3,
+        3
+      ],
+      "out_shape": [
+        1,
+        192,
+        4,
+        232,
+        416
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.2656352826646374,
+      "mean_ms": 265.6352826646374,
+      "alloc_gib": 0.276123046875,
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "groups": 1
+    },
+    {
+      "module": "decoder.upsamples.9.residual.6",
+      "op": "CausalConv3d",
+      "in_shape": [
+        1,
+        192,
+        4,
+        232,
+        416
+      ],
+      "weight_shape": [
+        192,
+        192,
+        3,
+        3,
+        3
+      ],
+      "out_shape": [
+        1,
+        192,
+        4,
+        232,
+        416
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.2652422900040013,
+      "mean_ms": 265.2422900040013,
+      "alloc_gib": 0.276123046875,
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "groups": 1
+    },
+    {
+      "module": "decoder.upsamples.5.residual.6",
+      "op": "CausalConv3d",
+      "in_shape": [
+        1,
+        384,
+        2,
+        116,
+        208
+      ],
+      "weight_shape": [
+        384,
+        384,
+        3,
+        3,
+        3
+      ],
+      "out_shape": [
+        1,
+        384,
+        2,
+        116,
+        208
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.13467359200391607,
+      "mean_ms": 134.67359200391607,
+      "alloc_gib": 0.06903076171875,
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "groups": 1
+    },
+    {
+      "module": "decoder.upsamples.6.residual.2",
+      "op": "CausalConv3d",
+      "in_shape": [
+        1,
+        384,
+        2,
+        116,
+        208
+      ],
+      "weight_shape": [
+        384,
+        384,
+        3,
+        3,
+        3
+      ],
+      "out_shape": [
+        1,
+        384,
+        2,
+        116,
+        208
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.13433051966906837,
+      "mean_ms": 134.33051966906837,
+      "alloc_gib": 0.06903076171875,
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "groups": 1
+    },
+    {
+      "module": "decoder.upsamples.6.residual.6",
+      "op": "CausalConv3d",
+      "in_shape": [
+        1,
+        384,
+        2,
+        116,
+        208
+      ],
+      "weight_shape": [
+        384,
+        384,
+        3,
+        3,
+        3
+      ],
+      "out_shape": [
+        1,
+        384,
+        2,
+        116,
+        208
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.13423025834102495,
+      "mean_ms": 134.23025834102495,
+      "alloc_gib": 0.06903076171875,
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "groups": 1
+    },
+    {
+      "module": "decoder.upsamples.4.residual.6",
+      "op": "CausalConv3d",
+      "in_shape": [
+        1,
+        384,
+        2,
+        116,
+        208
+      ],
+      "weight_shape": [
+        384,
+        384,
+        3,
+        3,
+        3
+      ],
+      "out_shape": [
+        1,
+        384,
+        2,
+        116,
+        208
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.1336269139913687,
+      "mean_ms": 133.6269139913687,
+      "alloc_gib": 0.06903076171875,
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "groups": 1
+    },
+    {
+      "module": "decoder.upsamples.5.residual.2",
+      "op": "CausalConv3d",
+      "in_shape": [
+        1,
+        384,
+        2,
+        116,
+        208
+      ],
+      "weight_shape": [
+        384,
+        384,
+        3,
+        3,
+        3
+      ],
+      "out_shape": [
+        1,
+        384,
+        2,
+        116,
+        208
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.1332107039828164,
+      "mean_ms": 133.2107039828164,
+      "alloc_gib": 0.06903076171875,
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "groups": 1
+    },
+    {
+      "module": "decoder.head.2",
+      "op": "CausalConv3d",
+      "in_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "weight_shape": [
+        3,
+        96,
+        3,
+        3,
+        3
+      ],
+      "out_shape": [
+        1,
+        3,
+        4,
+        464,
+        832
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.12269571500170666,
+      "mean_ms": 122.69571500170666,
+      "alloc_gib": 0.0178070068359375,
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "groups": 1
+    },
+    {
+      "module": "decoder.upsamples.4.residual.2",
+      "op": "CausalConv3d",
+      "in_shape": [
+        1,
+        192,
+        2,
+        116,
+        208
+      ],
+      "weight_shape": [
+        384,
+        192,
+        3,
+        3,
+        3
+      ],
+      "out_shape": [
+        1,
+        384,
+        2,
+        116,
+        208
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.060909938668676965,
+      "mean_ms": 60.909938668676965,
+      "alloc_gib": 0.06903076171875,
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "groups": 1
+    },
+    {
+      "module": "decoder.upsamples.7.time_conv",
+      "op": "CausalConv3d",
+      "in_shape": [
+        1,
+        384,
+        2,
+        116,
+        208
+      ],
+      "weight_shape": [
+        768,
+        384,
+        3,
+        1,
+        1
+      ],
+      "out_shape": [
+        1,
+        768,
+        2,
+        116,
+        208
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.023158688981008407,
+      "mean_ms": 23.158688981008407,
+      "alloc_gib": 0.1380615234375,
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "groups": 1
+    },
+    {
+      "module": "decoder.upsamples.0.residual.2",
+      "op": "CausalConv3d",
+      "in_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "weight_shape": [
+        384,
+        384,
+        3,
+        3,
+        3
+      ],
+      "out_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.016437415004475042,
+      "mean_ms": 16.437415004475042,
+      "alloc_gib": 0.00862884521484375,
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "groups": 1
+    },
+    {
+      "module": "decoder.middle.0.residual.2",
+      "op": "CausalConv3d",
+      "in_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "weight_shape": [
+        384,
+        384,
+        3,
+        3,
+        3
+      ],
+      "out_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.016347487330979977,
+      "mean_ms": 16.347487330979977,
+      "alloc_gib": 0.00862884521484375,
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "groups": 1
+    },
+    {
+      "module": "decoder.upsamples.0.residual.6",
+      "op": "CausalConv3d",
+      "in_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "weight_shape": [
+        384,
+        384,
+        3,
+        3,
+        3
+      ],
+      "out_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.01632999400802267,
+      "mean_ms": 16.32999400802267,
+      "alloc_gib": 0.00862884521484375,
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "groups": 1
+    },
+    {
+      "module": "decoder.middle.2.residual.6",
+      "op": "CausalConv3d",
+      "in_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "weight_shape": [
+        384,
+        384,
+        3,
+        3,
+        3
+      ],
+      "out_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.016311413996542495,
+      "mean_ms": 16.311413996542495,
+      "alloc_gib": 0.00862884521484375,
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "groups": 1
+    },
+    {
+      "module": "decoder.middle.2.residual.2",
+      "op": "CausalConv3d",
+      "in_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "weight_shape": [
+        384,
+        384,
+        3,
+        3,
+        3
+      ],
+      "out_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.016302343671365332,
+      "mean_ms": 16.302343671365332,
+      "alloc_gib": 0.00862884521484375,
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "groups": 1
+    },
+    {
+      "module": "decoder.middle.0.residual.6",
+      "op": "CausalConv3d",
+      "in_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "weight_shape": [
+        384,
+        384,
+        3,
+        3,
+        3
+      ],
+      "out_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.016297769994707778,
+      "mean_ms": 16.297769994707778,
+      "alloc_gib": 0.00862884521484375,
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "groups": 1
+    },
+    {
+      "module": "decoder.upsamples.2.residual.6",
+      "op": "CausalConv3d",
+      "in_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "weight_shape": [
+        384,
+        384,
+        3,
+        3,
+        3
+      ],
+      "out_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.01627287033867712,
+      "mean_ms": 16.27287033867712,
+      "alloc_gib": 0.00862884521484375,
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "groups": 1
+    },
+    {
+      "module": "decoder.upsamples.2.residual.2",
+      "op": "CausalConv3d",
+      "in_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "weight_shape": [
+        384,
+        384,
+        3,
+        3,
+        3
+      ],
+      "out_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.016229229659074917,
+      "mean_ms": 16.229229659074917,
+      "alloc_gib": 0.00862884521484375,
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "groups": 1
+    },
+    {
+      "module": "decoder.upsamples.1.residual.6",
+      "op": "CausalConv3d",
+      "in_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "weight_shape": [
+        384,
+        384,
+        3,
+        3,
+        3
+      ],
+      "out_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.016081871988717467,
+      "mean_ms": 16.081871988717467,
+      "alloc_gib": 0.00862884521484375,
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "groups": 1
+    },
+    {
+      "module": "decoder.upsamples.1.residual.2",
+      "op": "CausalConv3d",
+      "in_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "weight_shape": [
+        384,
+        384,
+        3,
+        3,
+        3
+      ],
+      "out_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.015985258660900097,
+      "mean_ms": 15.985258660900097,
+      "alloc_gib": 0.00862884521484375,
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "groups": 1
+    },
+    {
+      "module": "decoder.upsamples.11.resample.1",
+      "op": "Conv2d",
+      "in_shape": [
+        4,
+        192,
+        464,
+        832
+      ],
+      "weight_shape": [
+        96,
+        192,
+        3,
+        3
+      ],
+      "out_shape": [
+        4,
+        96,
+        464,
+        832
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.013399364659562707,
+      "mean_ms": 13.399364659562707,
+      "alloc_gib": 0.55224609375,
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        1,
+        1
+      ],
+      "groups": 1
+    },
+    {
+      "module": "decoder.upsamples.7.resample.1",
+      "op": "Conv2d",
+      "in_shape": [
+        4,
+        384,
+        232,
+        416
+      ],
+      "weight_shape": [
+        192,
+        384,
+        3,
+        3
+      ],
+      "out_shape": [
+        4,
+        192,
+        232,
+        416
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.011415136328044658,
+      "mean_ms": 11.415136328044658,
+      "alloc_gib": 0.276123046875,
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        1,
+        1
+      ],
+      "groups": 1
+    },
+    {
+      "module": "decoder.upsamples.12.residual.3",
+      "op": "RMS_norm",
+      "in_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.010042452670556182,
+      "mean_ms": 10.042452670556182,
+      "alloc_gib": 0.55224609375,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.13.residual.3",
+      "op": "RMS_norm",
+      "in_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.010041366331279278,
+      "mean_ms": 10.041366331279278,
+      "alloc_gib": 0.55224609375,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.14.residual.3",
+      "op": "RMS_norm",
+      "in_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.010032455999559412,
+      "mean_ms": 10.032455999559412,
+      "alloc_gib": 0.55224609375,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.12.residual.0",
+      "op": "RMS_norm",
+      "in_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.009990882341905186,
+      "mean_ms": 9.990882341905186,
+      "alloc_gib": 0.55224609375,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.head.0",
+      "op": "RMS_norm",
+      "in_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.009955961994516352,
+      "mean_ms": 9.955961994516352,
+      "alloc_gib": 0.55224609375,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.13.residual.0",
+      "op": "RMS_norm",
+      "in_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.009951262327376753,
+      "mean_ms": 9.951262327376753,
+      "alloc_gib": 0.55224609375,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.14.residual.0",
+      "op": "RMS_norm",
+      "in_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.009935781999956816,
+      "mean_ms": 9.935781999956816,
+      "alloc_gib": 0.55224609375,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.10.residual.3",
+      "op": "RMS_norm",
+      "in_shape": [
+        1,
+        192,
+        4,
+        232,
+        416
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        192,
+        4,
+        232,
+        416
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.004754586339307328,
+      "mean_ms": 4.754586339307328,
+      "alloc_gib": 0.276123046875,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.9.residual.3",
+      "op": "RMS_norm",
+      "in_shape": [
+        1,
+        192,
+        4,
+        232,
+        416
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        192,
+        4,
+        232,
+        416
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.004650588351069018,
+      "mean_ms": 4.650588351069018,
+      "alloc_gib": 0.276123046875,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.8.residual.3",
+      "op": "RMS_norm",
+      "in_shape": [
+        1,
+        192,
+        4,
+        232,
+        416
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        192,
+        4,
+        232,
+        416
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.004632048667796577,
+      "mean_ms": 4.632048667796577,
+      "alloc_gib": 0.276611328125,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.10.residual.0",
+      "op": "RMS_norm",
+      "in_shape": [
+        1,
+        192,
+        4,
+        232,
+        416
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        192,
+        4,
+        232,
+        416
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.00455600466618004,
+      "mean_ms": 4.55600466618004,
+      "alloc_gib": 0.276123046875,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.9.residual.0",
+      "op": "RMS_norm",
+      "in_shape": [
+        1,
+        192,
+        4,
+        232,
+        416
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        192,
+        4,
+        232,
+        416
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.004551794670987874,
+      "mean_ms": 4.551794670987874,
+      "alloc_gib": 0.276123046875,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.8.residual.0",
+      "op": "RMS_norm",
+      "in_shape": [
+        1,
+        192,
+        4,
+        232,
+        416
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        192,
+        4,
+        232,
+        416
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.004551334326000263,
+      "mean_ms": 4.551334326000263,
+      "alloc_gib": 0.276123046875,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.11.resample.0",
+      "op": "Upsample",
+      "in_shape": [
+        4,
+        192,
+        232,
+        416
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        4,
+        192,
+        464,
+        832
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.0041306013202605145,
+      "mean_ms": 4.1306013202605145,
+      "alloc_gib": 1.1044921875,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.3.time_conv",
+      "op": "CausalConv3d",
+      "in_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "weight_shape": [
+        768,
+        384,
+        3,
+        1,
+        1
+      ],
+      "out_shape": [
+        1,
+        768,
+        1,
+        58,
+        104
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.0024511949935307107,
+      "mean_ms": 2.4511949935307107,
+      "alloc_gib": 0.0172576904296875,
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "groups": 1
+    },
+    {
+      "module": "decoder.upsamples.12.residual.4",
+      "op": "SiLU",
+      "in_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.0024298516606601575,
+      "mean_ms": 2.4298516606601575,
+      "alloc_gib": 0.55224609375,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.head.1",
+      "op": "SiLU",
+      "in_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.002337921323487535,
+      "mean_ms": 2.337921323487535,
+      "alloc_gib": 0.55224609375,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.13.residual.4",
+      "op": "SiLU",
+      "in_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.0023290109917676696,
+      "mean_ms": 2.3290109917676696,
+      "alloc_gib": 0.55224609375,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.14.residual.4",
+      "op": "SiLU",
+      "in_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.002324134334533786,
+      "mean_ms": 2.324134334533786,
+      "alloc_gib": 0.55224609375,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.12.residual.1",
+      "op": "SiLU",
+      "in_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.0023200473321291306,
+      "mean_ms": 2.3200473321291306,
+      "alloc_gib": 0.55224609375,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.13.residual.1",
+      "op": "SiLU",
+      "in_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.002319173994086062,
+      "mean_ms": 2.319173994086062,
+      "alloc_gib": 0.55224609375,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.14.residual.1",
+      "op": "SiLU",
+      "in_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.0023029776639305055,
+      "mean_ms": 2.3029776639305055,
+      "alloc_gib": 0.55224609375,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.7.resample.0",
+      "op": "Upsample",
+      "in_shape": [
+        4,
+        384,
+        116,
+        208
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        4,
+        384,
+        232,
+        416
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.0022861803299747407,
+      "mean_ms": 2.2861803299747407,
+      "alloc_gib": 0.55224609375,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.4.shortcut",
+      "op": "CausalConv3d",
+      "in_shape": [
+        1,
+        192,
+        2,
+        116,
+        208
+      ],
+      "weight_shape": [
+        384,
+        192,
+        1,
+        1,
+        1
+      ],
+      "out_shape": [
+        1,
+        384,
+        2,
+        116,
+        208
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.0021388996586514017,
+      "mean_ms": 2.1388996586514017,
+      "alloc_gib": 0.06903076171875,
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "groups": 1
+    },
+    {
+      "module": "decoder.upsamples.3.resample.1",
+      "op": "Conv2d",
+      "in_shape": [
+        2,
+        384,
+        116,
+        208
+      ],
+      "weight_shape": [
+        192,
+        384,
+        3,
+        3
+      ],
+      "out_shape": [
+        2,
+        192,
+        116,
+        208
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.0018941910044911008,
+      "mean_ms": 1.8941910044911008,
+      "alloc_gib": 0.034515380859375,
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        1,
+        1
+      ],
+      "groups": 1
+    },
+    {
+      "module": "conv2",
+      "op": "CausalConv3d",
+      "in_shape": [
+        1,
+        16,
+        16,
+        58,
+        104
+      ],
+      "weight_shape": [
+        16,
+        16,
+        1,
+        1,
+        1
+      ],
+      "out_shape": [
+        1,
+        16,
+        16,
+        58,
+        104
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.0013290269998833537,
+      "mean_ms": 1.3290269998833537,
+      "alloc_gib": 0.0057525634765625,
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "groups": 1
+    },
+    {
+      "module": "decoder.upsamples.5.residual.3",
+      "op": "RMS_norm",
+      "in_shape": [
+        1,
+        384,
+        2,
+        116,
+        208
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        384,
+        2,
+        116,
+        208
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.0012646163425718744,
+      "mean_ms": 1.2646163425718744,
+      "alloc_gib": 0.06903076171875,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.6.residual.3",
+      "op": "RMS_norm",
+      "in_shape": [
+        1,
+        384,
+        2,
+        116,
+        208
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        384,
+        2,
+        116,
+        208
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.0012492059904616326,
+      "mean_ms": 1.2492059904616326,
+      "alloc_gib": 0.06903076171875,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.5.residual.0",
+      "op": "RMS_norm",
+      "in_shape": [
+        1,
+        384,
+        2,
+        116,
+        208
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        384,
+        2,
+        116,
+        208
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.0012044356650828074,
+      "mean_ms": 1.2044356650828074,
+      "alloc_gib": 0.06903076171875,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.4.residual.3",
+      "op": "RMS_norm",
+      "in_shape": [
+        1,
+        384,
+        2,
+        116,
+        208
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        384,
+        2,
+        116,
+        208
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.0011881190002895892,
+      "mean_ms": 1.1881190002895892,
+      "alloc_gib": 0.06903076171875,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.6.residual.0",
+      "op": "RMS_norm",
+      "in_shape": [
+        1,
+        384,
+        2,
+        116,
+        208
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        384,
+        2,
+        116,
+        208
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.0011849490013749648,
+      "mean_ms": 1.1849490013749648,
+      "alloc_gib": 0.06903076171875,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.10.residual.4",
+      "op": "SiLU",
+      "in_shape": [
+        1,
+        192,
+        4,
+        232,
+        416
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        192,
+        4,
+        232,
+        416
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.0011740853272688885,
+      "mean_ms": 1.1740853272688885,
+      "alloc_gib": 0.276123046875,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.9.residual.1",
+      "op": "SiLU",
+      "in_shape": [
+        1,
+        192,
+        4,
+        232,
+        416
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        192,
+        4,
+        232,
+        416
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.0011549923413743575,
+      "mean_ms": 1.1549923413743575,
+      "alloc_gib": 0.276611328125,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.9.residual.4",
+      "op": "SiLU",
+      "in_shape": [
+        1,
+        192,
+        4,
+        232,
+        416
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        192,
+        4,
+        232,
+        416
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.0010884650012788673,
+      "mean_ms": 1.0884650012788673,
+      "alloc_gib": 0.276611328125,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.8.residual.4",
+      "op": "SiLU",
+      "in_shape": [
+        1,
+        192,
+        4,
+        232,
+        416
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        192,
+        4,
+        232,
+        416
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.0010827949833280097,
+      "mean_ms": 1.0827949833280097,
+      "alloc_gib": 0.276123046875,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.10.residual.1",
+      "op": "SiLU",
+      "in_shape": [
+        1,
+        192,
+        4,
+        232,
+        416
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        192,
+        4,
+        232,
+        416
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.0010805179869445662,
+      "mean_ms": 1.0805179869445662,
+      "alloc_gib": 0.276123046875,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.8.residual.1",
+      "op": "SiLU",
+      "in_shape": [
+        1,
+        192,
+        4,
+        232,
+        416
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        192,
+        4,
+        232,
+        416
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.001066628339079519,
+      "mean_ms": 1.066628339079519,
+      "alloc_gib": 0.276123046875,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.conv1",
+      "op": "CausalConv3d",
+      "in_shape": [
+        1,
+        16,
+        1,
+        58,
+        104
+      ],
+      "weight_shape": [
+        384,
+        16,
+        3,
+        3,
+        3
+      ],
+      "out_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.0006889416642176608,
+      "mean_ms": 0.6889416642176608,
+      "alloc_gib": 0.00862884521484375,
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "groups": 1
+    },
+    {
+      "module": "decoder.middle.1.to_qkv",
+      "op": "Conv2d",
+      "in_shape": [
+        1,
+        384,
+        58,
+        104
+      ],
+      "weight_shape": [
+        1152,
+        384,
+        1,
+        1
+      ],
+      "out_shape": [
+        1,
+        1152,
+        58,
+        104
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.000679798317529882,
+      "mean_ms": 0.679798317529882,
+      "alloc_gib": 0.02588653564453125,
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0
+      ],
+      "groups": 1
+    },
+    {
+      "module": "decoder.upsamples.4.residual.0",
+      "op": "RMS_norm",
+      "in_shape": [
+        1,
+        192,
+        2,
+        116,
+        208
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        192,
+        2,
+        116,
+        208
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.0005305573383035759,
+      "mean_ms": 0.5305573383035759,
+      "alloc_gib": 0.034515380859375,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.4.residual.4",
+      "op": "SiLU",
+      "in_shape": [
+        1,
+        384,
+        2,
+        116,
+        208
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        384,
+        2,
+        116,
+        208
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.0003579259985902657,
+      "mean_ms": 0.3579259985902657,
+      "alloc_gib": 0.06903076171875,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.middle.1.proj",
+      "op": "Conv2d",
+      "in_shape": [
+        1,
+        384,
+        58,
+        104
+      ],
+      "weight_shape": [
+        384,
+        384,
+        1,
+        1
+      ],
+      "out_shape": [
+        1,
+        384,
+        58,
+        104
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.00034837599378079176,
+      "mean_ms": 0.34837599378079176,
+      "alloc_gib": 0.00862884521484375,
+      "stride": [
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0
+      ],
+      "groups": 1
+    },
+    {
+      "module": "decoder.upsamples.5.residual.1",
+      "op": "SiLU",
+      "in_shape": [
+        1,
+        384,
+        2,
+        116,
+        208
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        384,
+        2,
+        116,
+        208
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.0003401159968537589,
+      "mean_ms": 0.3401159968537589,
+      "alloc_gib": 0.06903076171875,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.6.residual.4",
+      "op": "SiLU",
+      "in_shape": [
+        1,
+        384,
+        2,
+        116,
+        208
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        384,
+        2,
+        116,
+        208
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.0003361156559549272,
+      "mean_ms": 0.3361156559549272,
+      "alloc_gib": 0.06903076171875,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.5.residual.4",
+      "op": "SiLU",
+      "in_shape": [
+        1,
+        384,
+        2,
+        116,
+        208
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        384,
+        2,
+        116,
+        208
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.0003347326710354537,
+      "mean_ms": 0.3347326710354537,
+      "alloc_gib": 0.06903076171875,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.6.residual.1",
+      "op": "SiLU",
+      "in_shape": [
+        1,
+        384,
+        2,
+        116,
+        208
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        384,
+        2,
+        116,
+        208
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.0003215423397098978,
+      "mean_ms": 0.3215423397098978,
+      "alloc_gib": 0.06903076171875,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.middle.1.norm",
+      "op": "RMS_norm",
+      "in_shape": [
+        1,
+        384,
+        58,
+        104
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        384,
+        58,
+        104
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.000267499010078609,
+      "mean_ms": 0.267499010078609,
+      "alloc_gib": 0.00862884521484375,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.3.resample.0",
+      "op": "Upsample",
+      "in_shape": [
+        2,
+        384,
+        58,
+        104
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        2,
+        384,
+        116,
+        208
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.0002604523324407637,
+      "mean_ms": 0.2604523324407637,
+      "alloc_gib": 0.06903076171875,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.14.shortcut",
+      "op": "Identity",
+      "in_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.00019953832573567828,
+      "mean_ms": 0.19953832573567828,
+      "alloc_gib": 0.0,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.middle.0.residual.0",
+      "op": "RMS_norm",
+      "in_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.00017961799555147687,
+      "mean_ms": 0.17961799555147687,
+      "alloc_gib": 0.00862884521484375,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.middle.0.residual.3",
+      "op": "RMS_norm",
+      "in_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.00017882767133414745,
+      "mean_ms": 0.17882767133414745,
+      "alloc_gib": 0.00862884521484375,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.middle.2.residual.3",
+      "op": "RMS_norm",
+      "in_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.00016916500559697548,
+      "mean_ms": 0.16916500559697548,
+      "alloc_gib": 0.00862884521484375,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.2.residual.4",
+      "op": "SiLU",
+      "in_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.00016907500685192645,
+      "mean_ms": 0.16907500685192645,
+      "alloc_gib": 0.00862884521484375,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.0.residual.3",
+      "op": "RMS_norm",
+      "in_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.0001615310029592365,
+      "mean_ms": 0.1615310029592365,
+      "alloc_gib": 0.00862884521484375,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.1.residual.3",
+      "op": "RMS_norm",
+      "in_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.000160744326421991,
+      "mean_ms": 0.160744326421991,
+      "alloc_gib": 0.00862884521484375,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.2.residual.3",
+      "op": "RMS_norm",
+      "in_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.00015762432788809141,
+      "mean_ms": 0.15762432788809141,
+      "alloc_gib": 0.00862884521484375,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.0.residual.0",
+      "op": "RMS_norm",
+      "in_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.00015549466479569674,
+      "mean_ms": 0.15549466479569674,
+      "alloc_gib": 0.00862884521484375,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.middle.2.residual.0",
+      "op": "RMS_norm",
+      "in_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.00015445767591396967,
+      "mean_ms": 0.15445767591396967,
+      "alloc_gib": 0.00862884521484375,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.6.shortcut",
+      "op": "Identity",
+      "in_shape": [
+        1,
+        384,
+        2,
+        116,
+        208
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        384,
+        2,
+        116,
+        208
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.00015326133385921517,
+      "mean_ms": 0.15326133385921517,
+      "alloc_gib": 0.0,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.1.residual.0",
+      "op": "RMS_norm",
+      "in_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.00015243133141969642,
+      "mean_ms": 0.15243133141969642,
+      "alloc_gib": 0.00862884521484375,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.2.residual.0",
+      "op": "RMS_norm",
+      "in_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.00015000433389407894,
+      "mean_ms": 0.15000433389407894,
+      "alloc_gib": 0.00862884521484375,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.4.residual.1",
+      "op": "SiLU",
+      "in_shape": [
+        1,
+        192,
+        2,
+        116,
+        208
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        192,
+        2,
+        116,
+        208
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.00014132766712767383,
+      "mean_ms": 0.14132766712767383,
+      "alloc_gib": 0.034515380859375,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.1.residual.1",
+      "op": "SiLU",
+      "in_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.00013092767524843416,
+      "mean_ms": 0.13092767524843416,
+      "alloc_gib": 0.00862884521484375,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.0.shortcut",
+      "op": "Identity",
+      "in_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 0.00012361432891339064,
+      "mean_ms": 0.12361432891339064,
+      "alloc_gib": 0.0,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.2.residual.5",
+      "op": "Dropout",
+      "in_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 8.755432403025527e-05,
+      "mean_ms": 0.08755432403025527,
+      "alloc_gib": 0.0,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.middle.0.residual.1",
+      "op": "SiLU",
+      "in_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 8.465733844786882e-05,
+      "mean_ms": 0.08465733844786882,
+      "alloc_gib": 0.00862884521484375,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.13.residual.5",
+      "op": "Dropout",
+      "in_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 8.402367044861118e-05,
+      "mean_ms": 0.08402367044861118,
+      "alloc_gib": 0.0,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.middle.0.residual.4",
+      "op": "SiLU",
+      "in_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 8.373732756202419e-05,
+      "mean_ms": 0.08373732756202419,
+      "alloc_gib": 0.00862884521484375,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.10.shortcut",
+      "op": "Identity",
+      "in_shape": [
+        1,
+        192,
+        4,
+        232,
+        416
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        192,
+        4,
+        232,
+        416
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 8.171699785937865e-05,
+      "mean_ms": 0.08171699785937865,
+      "alloc_gib": 0.0,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.middle.2.residual.4",
+      "op": "SiLU",
+      "in_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 8.055731692972283e-05,
+      "mean_ms": 0.08055731692972283,
+      "alloc_gib": 0.00862884521484375,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.9.shortcut",
+      "op": "Identity",
+      "in_shape": [
+        1,
+        192,
+        4,
+        232,
+        416
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        192,
+        4,
+        232,
+        416
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 7.909766281954944e-05,
+      "mean_ms": 0.07909766281954944,
+      "alloc_gib": 0.0,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.middle.2.residual.1",
+      "op": "SiLU",
+      "in_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 7.83969978025804e-05,
+      "mean_ms": 0.0783969978025804,
+      "alloc_gib": 0.00862884521484375,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.1.residual.4",
+      "op": "SiLU",
+      "in_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 7.808333612047136e-05,
+      "mean_ms": 0.07808333612047136,
+      "alloc_gib": 0.00862884521484375,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.13.shortcut",
+      "op": "Identity",
+      "in_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 7.781398987087111e-05,
+      "mean_ms": 0.07781398987087111,
+      "alloc_gib": 0.0,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.0.residual.1",
+      "op": "SiLU",
+      "in_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 7.532732949281733e-05,
+      "mean_ms": 0.07532732949281733,
+      "alloc_gib": 0.00862884521484375,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.14.residual.5",
+      "op": "Dropout",
+      "in_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 7.474766850161056e-05,
+      "mean_ms": 0.07474766850161056,
+      "alloc_gib": 0.0,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.2.residual.1",
+      "op": "SiLU",
+      "in_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 7.399367556596796e-05,
+      "mean_ms": 0.07399367556596796,
+      "alloc_gib": 0.00862884521484375,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.0.residual.4",
+      "op": "SiLU",
+      "in_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 7.398032660906513e-05,
+      "mean_ms": 0.07398032660906513,
+      "alloc_gib": 0.00862884521484375,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.5.shortcut",
+      "op": "Identity",
+      "in_shape": [
+        1,
+        384,
+        2,
+        116,
+        208
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        384,
+        2,
+        116,
+        208
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 7.327033866507311e-05,
+      "mean_ms": 0.07327033866507311,
+      "alloc_gib": 0.0,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.9.residual.5",
+      "op": "Dropout",
+      "in_shape": [
+        1,
+        192,
+        4,
+        232,
+        416
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        192,
+        4,
+        232,
+        416
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 7.085401254395644e-05,
+      "mean_ms": 0.07085401254395644,
+      "alloc_gib": 0.0,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.middle.2.shortcut",
+      "op": "Identity",
+      "in_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 7.0820339412118e-05,
+      "mean_ms": 0.070820339412118,
+      "alloc_gib": 0.0,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.8.residual.5",
+      "op": "Dropout",
+      "in_shape": [
+        1,
+        192,
+        4,
+        232,
+        416
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        192,
+        4,
+        232,
+        416
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 6.984434245775144e-05,
+      "mean_ms": 0.06984434245775144,
+      "alloc_gib": 0.0,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.5.residual.5",
+      "op": "Dropout",
+      "in_shape": [
+        1,
+        384,
+        2,
+        116,
+        208
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        384,
+        2,
+        116,
+        208
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 6.847734524247547e-05,
+      "mean_ms": 0.06847734524247547,
+      "alloc_gib": 0.0,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.12.shortcut",
+      "op": "Identity",
+      "in_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 6.502368099366625e-05,
+      "mean_ms": 0.06502368099366625,
+      "alloc_gib": 0.0,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.6.residual.5",
+      "op": "Dropout",
+      "in_shape": [
+        1,
+        384,
+        2,
+        116,
+        208
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        384,
+        2,
+        116,
+        208
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 6.139999216732879e-05,
+      "mean_ms": 0.06139999216732879,
+      "alloc_gib": 0.0,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.12.residual.5",
+      "op": "Dropout",
+      "in_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 5.551700208646556e-05,
+      "mean_ms": 0.05551700208646556,
+      "alloc_gib": 0.0,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.middle.0.shortcut",
+      "op": "Identity",
+      "in_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 5.488700116984546e-05,
+      "mean_ms": 0.05488700116984546,
+      "alloc_gib": 0.0,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.middle.0.residual.5",
+      "op": "Dropout",
+      "in_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 5.334367354710897e-05,
+      "mean_ms": 0.05334367354710897,
+      "alloc_gib": 0.0,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.10.residual.5",
+      "op": "Dropout",
+      "in_shape": [
+        1,
+        192,
+        4,
+        232,
+        416
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        192,
+        4,
+        232,
+        416
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 5.310700119783481e-05,
+      "mean_ms": 0.05310700119783481,
+      "alloc_gib": 0.0,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.middle.2.residual.5",
+      "op": "Dropout",
+      "in_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 5.048666692649325e-05,
+      "mean_ms": 0.05048666692649325,
+      "alloc_gib": 0.0,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.8.shortcut",
+      "op": "Identity",
+      "in_shape": [
+        1,
+        192,
+        4,
+        232,
+        416
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        192,
+        4,
+        232,
+        416
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 4.66900043344746e-05,
+      "mean_ms": 0.0466900043344746,
+      "alloc_gib": 0.0,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.1.shortcut",
+      "op": "Identity",
+      "in_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 4.471666761673987e-05,
+      "mean_ms": 0.04471666761673987,
+      "alloc_gib": 0.0,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.0.residual.5",
+      "op": "Dropout",
+      "in_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 4.454999968099097e-05,
+      "mean_ms": 0.04454999968099097,
+      "alloc_gib": 0.0,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.4.residual.5",
+      "op": "Dropout",
+      "in_shape": [
+        1,
+        384,
+        2,
+        116,
+        208
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        384,
+        2,
+        116,
+        208
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 4.381399291257063e-05,
+      "mean_ms": 0.04381399291257063,
+      "alloc_gib": 0.0,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.2.shortcut",
+      "op": "Identity",
+      "in_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 4.239666547315816e-05,
+      "mean_ms": 0.04239666547315816,
+      "alloc_gib": 0.0,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    },
+    {
+      "module": "decoder.upsamples.1.residual.5",
+      "op": "Dropout",
+      "in_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "weight_shape": null,
+      "out_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "dtype": "torch.float32",
+      "calls": 1,
+      "total_s": 4.222034476697445e-05,
+      "mean_ms": 0.04222034476697445,
+      "alloc_gib": 0.0,
+      "stride": null,
+      "padding": null,
+      "groups": null
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+Wan2.1 VAE decoder, one latent frame at 464x832, warm causal cache
+
+  fp32 (reference)        4.6811s  peak 10.84 GiB  finite=True  mean -0.23079 std 0.38195
+  bf16                    1.2643s  peak  5.43 GiB  finite=True  mean -0.23172 std 0.38204  maxerr 0.0330 rel 2.57e-02
+  bf16 + fp32 norms      FAILED RuntimeError: Input type (float) and bias type (c10::BFloat16) should be the same
+  fp16                    1.2418s  peak  5.45 GiB  finite=True  mean -0.23071 std 0.38193  maxerr 0.0042 rel 3.26e-03
+  fp16 + fp32 norms      FAILED RuntimeError: Input type (float) and bias type (c10::Half) should be the same
+
+summary
+  fp32 (reference)        4.6811s   peak 10.84 GiB  rel_err 0.00e+00  finite=True
+  bf16                    1.2643s  3.70x  peak  5.43 GiB  rel_err 2.57e-02  finite=True
+  bf16 + fp32 norms      FAILED
+  fp16                    1.2418s  3.77x  peak  5.45 GiB  rel_err 3.26e-03  finite=True
+  fp16 + fp32 norms      FAILED

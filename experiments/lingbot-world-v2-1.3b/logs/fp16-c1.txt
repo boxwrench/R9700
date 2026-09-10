@@ -1,0 +1,49 @@
+loading world ...
+Loading checkpoint shards:   0%|          | 0/6 [00:00<?, ?it/s]Loading checkpoint shards:  33%|███▎      | 2/6 [00:00<00:00, 11.98it/s]Loading checkpoint shards:  67%|██████▋   | 4/6 [00:00<00:00, 12.17it/s]Loading checkpoint shards: 100%|██████████| 6/6 [00:00<00:00, 12.27it/s]Loading checkpoint shards: 100%|██████████| 6/6 [00:00<00:00, 12.22it/s]
+
+world ready in 34.7s (model 31.5s, T5 3.1s, image 0.2s [cached])
+  464x832  latent 58x104  1508 tokens/frame
+  KV cache 4.66 GiB  window 18 frames  sink 6
+  chunk 1 latent frames  seed 42
+
+commands
+  w / forward      move forward          s / back       move backward
+  a / left         strafe left           d / right      strafe right
+  q / turn_left    yaw left              e / turn_right yaw right
+  r / up           rise                  f / down       descend
+  t / tilt_up      pitch up              g / tilt_down  pitch down
+  x / stay         hold position
+  <action> <amt>   override step size (metres, or degrees for turns)
+  script w w e w   run several actions in sequence
+  reset            wipe world state, keep the model loaded
+  stats            show session state
+  help             this text
+  quit             end session and write the combined video
+
+  forward    first-frame   1.23s  full   1.23s   1 frames  | dit  0.77s vae  0.44s | kv 1508/27144 filling | vram 11.38 GiB
+  forward    first-frame   2.58s  full   2.59s   4 frames  | dit  0.70s vae  1.31s | kv 3016/27144 filling | vram 13.37 GiB
+  turn_right first-frame   2.63s  full   2.63s   4 frames  | dit  0.75s vae  1.32s | kv 4524/27144 filling | vram 13.52 GiB
+  forward    first-frame   2.66s  full   2.66s   4 frames  | dit  0.80s vae  1.31s | kv 6032/27144 filling | vram 13.52 GiB
+  turn_right first-frame   2.70s  full   2.70s   4 frames  | dit  0.86s vae  1.31s | kv 7540/27144 filling | vram 13.52 GiB
+  turn_right first-frame   2.80s  full   2.80s   4 frames  | dit  0.93s vae  1.32s | kv 9048/27144 filling | vram 13.52 GiB
+  forward    first-frame   2.95s  full   2.95s   4 frames  | dit  0.99s vae  1.32s | kv 10556/27144 filling | vram 13.52 GiB
+  forward    first-frame   2.91s  full   2.91s   4 frames  | dit  1.03s vae  1.32s | kv 12064/27144 filling | vram 13.52 GiB
+  forward    first-frame   2.95s  full   2.95s   4 frames  | dit  1.08s vae  1.32s | kv 13572/27144 filling | vram 13.52 GiB
+  forward    first-frame   3.00s  full   3.00s   4 frames  | dit  1.13s vae  1.32s | kv 15080/27144 filling | vram 13.52 GiB
+  forward    first-frame   3.05s  full   3.05s   4 frames  | dit  1.18s vae  1.33s | kv 16588/27144 filling | vram 13.52 GiB
+  forward    first-frame   3.12s  full   3.12s   4 frames  | dit  1.23s vae  1.32s | kv 18096/27144 filling | vram 13.52 GiB
+  forward    first-frame   3.16s  full   3.16s   4 frames  | dit  1.28s vae  1.33s | kv 19604/27144 filling | vram 13.52 GiB
+  forward    first-frame   3.20s  full   3.21s   4 frames  | dit  1.33s vae  1.32s | kv 21112/27144 filling | vram 13.52 GiB
+  forward    first-frame   3.26s  full   3.26s   4 frames  | dit  1.38s vae  1.32s | kv 22620/27144 filling | vram 13.52 GiB
+  forward    first-frame   3.31s  full   3.32s   4 frames  | dit  1.43s vae  1.33s | kv 24128/27144 filling | vram 13.52 GiB
+  forward    first-frame   3.37s  full   3.37s   4 frames  | dit  1.49s vae  1.33s | kv 25636/27144 filling | vram 13.52 GiB
+  forward    first-frame   3.43s  full   3.43s   4 frames  | dit  1.54s vae  1.33s | kv 27144/27144 filling | vram 13.52 GiB
+  forward    first-frame   3.45s  full   3.45s   4 frames  | dit  1.56s vae  1.33s | kv 27144/27144 EVICTING | vram 13.52 GiB
+  forward    first-frame   3.44s  full   3.45s   4 frames  | dit  1.56s vae  1.33s | kv 27144/27144 EVICTING | vram 13.52 GiB
+  forward    first-frame   3.60s  full   3.60s   4 frames  | dit  1.56s vae  1.33s | kv 27144/27144 EVICTING | vram 13.52 GiB
+  forward    first-frame   3.45s  full   3.45s   4 frames  | dit  1.56s vae  1.33s | kv 27144/27144 EVICTING | vram 13.52 GiB
+  forward    first-frame   3.43s  full   3.43s   4 frames  | dit  1.56s vae  1.33s | kv 27144/27144 EVICTING | vram 13.52 GiB
+  forward    first-frame   3.46s  full   3.46s   4 frames  | dit  1.56s vae  1.34s | kv 27144/27144 EVICTING | vram 13.52 GiB
+
+combined session video: /ai/outputs/lingbot-sessions/fp16_c1/session.mp4  (93 frames)
+individual frames: /ai/outputs/lingbot-sessions/fp16_c1/frames  (93 PNGs, written as decoded)

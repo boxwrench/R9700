@@ -91,9 +91,10 @@ class IncrementalDecoder:
     of a chunk visible without waiting for the rest, and costs nothing.
     """
 
-    def __init__(self, vae):
+    def __init__(self, vae, dtype=torch.float32):
         self.vae = vae
         self.m = vae.model
+        self.dtype = dtype
         self.m.clear_cache()
         self.started = False
 
@@ -101,9 +102,12 @@ class IncrementalDecoder:
         """z: [C, T, H, W] -> yields [3, t, H*8, W*8] once per latent frame."""
         m = self.m
         scale = self.vae.scale
-        z = z.unsqueeze(0)
+        # de-scaling stays in fp32 regardless of the decoder's own precision:
+        # it is a per-channel affine on the latent, costs nothing, and keeps
+        # the low-precision cast to exactly one place.
+        z = z.unsqueeze(0).to(torch.float32)
         z = z / scale[1].view(1, m.z_dim, 1, 1, 1) + scale[0].view(1, m.z_dim, 1, 1, 1)
-        x = m.conv2(z)
+        x = m.conv2(z.to(self.dtype))
         for i in range(x.shape[2]):
             m._conv_idx = [0]
             out = m.decoder(x[:, :, i:i + 1], feat_cache=m._feat_map,
@@ -240,7 +244,14 @@ class World:
                             c['v'].numel() * c['v'].element_size()
                             for c in self.kv_cache)
 
-        self.decoder = IncrementalDecoder(pipe.vae)
+        # ---- decoder precision ----
+        # The conditioning encode above ran in upstream FP32. Cast only now,
+        # so the encode is untouched and the cast applies to decode alone.
+        self.decode_dtype = {'fp32': torch.float32, 'fp16': torch.float16,
+                             'bf16': torch.bfloat16}[args.vae_dtype]
+        if self.decode_dtype is not torch.float32:
+            pipe.vae.model = pipe.vae.model.to(self.decode_dtype)
+        self.decoder = IncrementalDecoder(pipe.vae, self.decode_dtype)
 
         # ---- world pose state ----
         self.R = np.eye(3)
@@ -388,7 +399,7 @@ class World:
         self.lat_frames_done = 0
         self.chunks_done = 0
         self.gen.manual_seed(self.seed)
-        self.decoder = IncrementalDecoder(self.pipe.vae)
+        self.decoder = IncrementalDecoder(self.pipe.vae, self.decode_dtype)
         torch.cuda.empty_cache()
 
 
@@ -581,6 +592,10 @@ def main():
     ap.add_argument('--turn_deg', type=float, default=8.0)
     ap.add_argument('--fov_deg', type=float, default=60.0)
     ap.add_argument('--fps', type=int, default=16)
+    ap.add_argument('--vae_dtype', default='fp16', choices=['fp32', 'fp16', 'bf16'],
+                    help='VAE decoder precision. fp16 measured 3.77x faster than '
+                         'fp32 at 3.3e-03 relative error and half the peak memory; '
+                         'bf16 is slightly slower AND 8x less accurate here.')
     ap.add_argument('--overlap', type=int, default=0,
                     help='decode on a second HIP stream so the next DiT can start. '
                          'Measured on gfx1201 as a net loss -- the VAE decode '
@@ -624,6 +639,7 @@ def main():
         conditioning_cache_file=world.cond_cache_file,
         torch=torch.__version__, hip=torch.version.hip,
         gpu=torch.cuda.get_device_properties(0).gcnArchName,
+        vae_decode_dtype=args.vae_dtype,
         vae_conv3d_temporal_split=os.environ.get(
             'WAN_VAE_CONV3D_TEMPORAL_SPLIT', '(default 1)'),
     )

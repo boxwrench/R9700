@@ -1,0 +1,75 @@
+[
+  {
+    "lane": "fp32 (reference)",
+    "dtype": "torch.float32",
+    "keep_norm_fp32": false,
+    "wall": 4.6811157949850895,
+    "walls": [
+      4.6811157949850895,
+      4.702009797998471,
+      4.720166743005393
+    ],
+    "peak_gib": 10.838785648345947,
+    "finite": true,
+    "has_nan": false,
+    "has_inf": false,
+    "min": -1.2839387655258179,
+    "max": 1.2127982378005981,
+    "mean": -0.2307882010936737,
+    "std": 0.38195011019706726
+  },
+  {
+    "lane": "bf16",
+    "dtype": "torch.bfloat16",
+    "keep_norm_fp32": false,
+    "wall": 1.2643230679968838,
+    "walls": [
+      1.2643230679968838,
+      1.2662864419980906,
+      1.2688747950014658
+    ],
+    "peak_gib": 5.430875778198242,
+    "finite": true,
+    "has_nan": false,
+    "has_inf": false,
+    "min": -1.28125,
+    "max": 1.2109375,
+    "mean": -0.23171773552894592,
+    "std": 0.3820365369319916,
+    "max_abs_err": 0.03298509120941162,
+    "mean_abs_err": 0.0021022153086960316,
+    "rel_err": 0.02569054812192917,
+    "speedup": 3.702468074399341
+  },
+  {
+    "lane": "bf16 + fp32 norms",
+    "error": "RuntimeError: Input type (float) and bias type (c10::BFloat16) should be the same"
+  },
+  {
+    "lane": "fp16",
+    "dtype": "torch.float16",
+    "keep_norm_fp32": false,
+    "wall": 1.241754373011645,
+    "walls": [
+      1.241754373011645,
+      1.2439591170114,
+      1.2453326990071218
+    ],
+    "peak_gib": 5.447657108306885,
+    "finite": true,
+    "has_nan": false,
+    "has_inf": false,
+    "min": -1.283203125,
+    "max": 1.212890625,
+    "mean": -0.23071381449699402,
+    "std": 0.3819264769554138,
+    "max_abs_err": 0.0041866302490234375,
+    "mean_abs_err": 0.0002461613912601024,
+    "rel_err": 0.003260771045461297,
+    "speedup": 3.7697598629203224
+  },
+  {
+    "lane": "fp16 + fp32 norms",
+    "error": "RuntimeError: Input type (float) and bias type (c10::Half) should be the same"
+  }
+]

@@ -285,3 +285,106 @@ Because decode and DiT demonstrably do not overlap on this device, latency is
 now simply their sum, and the VAE remains the term worth attacking. The
 per-frame cost has not moved since the temporal-split workaround — what changed
 here is when frames become visible, not how fast they are produced.
+
+
+---
+
+# VAE optimization pass (Phases 1-2)
+
+## Phase 1 — decoder profile
+
+Steady-state `chunk_size=1` decode, warm causal cache, 464x832, one latent
+frame in / four pixel frames out. Wall 4.6912 s (reps 4.6906 / 4.6883 / 4.6948).
+
+| operator class | total | share |
+|---|---:|---:|
+| **CausalConv3d** | **4.4297 s** | **94.4%** |
+| RMS_norm | 0.1062 s | 2.3% |
+| Conv2d | 0.0277 s | 0.6% |
+| SiLU | 0.0258 s | 0.5% |
+| Upsample | 0.0067 s | 0.1% |
+
+Ranked individual operators covering 90.3% of wall time:
+
+| in shape | weight | n | mean | total | share |
+|---|---|---:|---:|---:|---:|
+| `[1,96,4,464,832]` | `[96,96,3,3,3]` | 6 | 298 ms | 1.787 s | 38.1% |
+| `[1,192,4,232,416]` | `[192,192,3,3,3]` | 6 | 266 ms | 1.596 s | 34.0% |
+| `[1,384,2,116,208]` | `[384,384,3,3,3]` | 5 | 134 ms | 0.670 s | 14.3% |
+| `[1,96,4,464,832]` | `[3,96,3,3,3]` | 1 | 123 ms | 0.123 s | 2.6% |
+| `[1,192,2,116,208]` | `[384,192,3,3,3]` | 1 | 61 ms | 0.061 s | 1.3% |
+
+Nothing outside Conv3d is worth touching. The convolutions are already on the
+healthy `GemmFwdRest` path (~2.6 TFLOP/s FP32) thanks to the temporal split, so
+the remaining cost is not another solver cliff -- it is simply FP32
+convolution arithmetic.
+
+## Phase 2 — selective precision
+
+Isolated A/B on identical latents with an identically warmed causal cache:
+
+| lane | wall | speedup | peak | rel err | finite |
+|---|---:|---:|---:|---:|---|
+| fp32 (reference) | 4.6811 s | 1.00x | 10.84 GiB | — | yes |
+| bf16 | 1.2643 s | 3.70x | 5.43 GiB | 2.57e-02 | yes |
+| **fp16** | **1.2418 s** | **3.77x** | **5.45 GiB** | **3.26e-03** | yes |
+
+**FP16 is both faster and 8x more accurate than BF16 here**, which is the
+expected result once you look at what the decoder actually holds: activations
+live in roughly [-1, 1], so FP16's narrower exponent range is irrelevant and
+its four extra mantissa bits are decisive. The "obvious" choice of BF16 --
+the dtype used everywhere else in this stack -- is the wrong one for this
+module.
+
+Mixed lanes keeping RMS_norm in FP32 were tried and failed on dtype mismatch
+at the conv boundary; they were also unnecessary, since full-FP16 error is
+already negligible and norms are only 2.3% of the profile.
+
+The FP32 encode at init is untouched: the cast happens after the conditioning
+horizon is encoded, so it applies to decode alone.
+
+## End-to-end result
+
+24-action regression, `chunk_size=1`, window 18+6, 464x832:
+
+| | before | after (fp16) | change |
+|---|---:|---:|---|
+| **keypress → first visible frame** | **6.93 s** | **3.45 s** | **2.01x** |
+| DiT | 1.56 s | 1.56 s | unchanged |
+| VAE decode | 4.81 s | 1.33 s | **3.62x** |
+| peak VRAM | 18.92 GiB | **13.52 GiB** | −5.40 GiB |
+| frames per action | 4 | 4 | unchanged |
+
+**Milestone 1 (<4 s) met.**
+
+## Validation
+
+- finite, range [0, 1] fully spanned, no NaN/Inf
+- frame-to-frame L1 has no zeros — nothing frozen
+- **no seam**: boundary/interior L1 ratio 0.985, identical to the FP32 run
+- KV progression correct, eviction at exactly 27144 tokens, sink retained
+- **no causal drift**: comparing the fp16 and fp32 sessions frame by frame over
+  all 93 frames, mean absolute difference is 0.00020 — one twentieth of an
+  8-bit quantum (0.0039) — and it is flat across the session (0.00016 at the
+  start, 0.00022 at the end). Worst single pixel differs by 0.0235. Low
+  precision is not accumulating error into the world state.
+
+## What this changes about the next step
+
+The dominant term has flipped:
+
+| component | time | share |
+|---|---:|---:|
+| DiT | 1.56 s | 45% |
+| VAE decode | 1.33 s | 39% |
+| presentation + setup | ~0.56 s | 16% |
+
+Phase 3 (Conv3d → causal Conv2d decomposition) was queued on the assumption
+that Conv3d would still dominate. It no longer does: the whole decoder is now
+1.33 s, so even a further 2x there buys 0.66 s against the DiT's 1.56 s.
+
+Also newly visible: **~0.56 s per action is neither DiT nor decoder.** That is
+PNG encoding of four 464x832 frames plus the device-to-host copy and the
+per-group synchronisation the streaming presenter needs. At 6.93 s it was 8%
+of the budget and invisible; at 3.45 s it is 16% and cheaper to remove than
+either model component.
