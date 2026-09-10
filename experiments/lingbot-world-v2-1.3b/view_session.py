@@ -93,12 +93,18 @@ PAGE = """
           font-size:12px; white-space:nowrap; }
   #wait { position:fixed; top:12px; right:14px; font-size:13px; color:#8a8a8a;
           display:none; }
+  #banner { position:fixed; top:0; left:0; right:0; display:none;
+            background:#3a1414; color:#f0b0b0; font-size:13px; padding:8px 12px;
+            border-bottom:1px solid #6a2a2a; z-index:10; }
+  #banner.show { display:block; }
+  #banner code { font-family:ui-monospace,Menlo,monospace; color:#fff; }
   @media (prefers-reduced-motion: no-preference) {
     #wait.show { display:block; animation:blink 1s steps(2) infinite; }
   }
   #wait.show { display:block; }
   @keyframes blink { 50% { opacity:.35; } }
 </style></head><body>
+<div id="banner"></div>
 <div id="stage"><img id="a" alt=""><img id="b" alt=""></div>
 <div id="hud"><span class="dim">keys —</span> <span id="keys"></span></div>
 <div id="wait">generating&hellip;</div>
@@ -111,7 +117,7 @@ PAGE = """
 </div>
 <script>
 const A = document.getElementById('a'), B = document.getElementById('b');
-let shown = A, hidden = B, seenCount = 0, queue = [], busy = false;
+let shown = A, hidden = B, seenCount = -1, queue = [], busy = false;
 let waiting = false, lastFrame = '';
 const keysEl = document.getElementById('keys');
 const statEl = document.getElementById('stat');
@@ -125,6 +131,11 @@ function noteKey(k, ok) {
   keysEl.innerHTML = keyHist.join('<br>');
 }
 
+const bannerEl = document.getElementById('banner');
+function showBanner(msg) {
+  bannerEl.innerHTML = msg;
+  bannerEl.classList.add('show');
+}
 async function send(cmd) {
   noteKey(cmd, true);
   waiting = true; waitEl.classList.add('show');
@@ -132,7 +143,16 @@ async function send(cmd) {
     const r = await fetch('/key', {method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({key: cmd})});
-    if (!r.ok) noteKey(cmd + ' rejected', false);
+    if (!r.ok) {
+      noteKey(cmd + ' rejected', false);
+      let why = '';
+      try { why = (await r.json()).error || ''; } catch (e) {}
+      showBanner('Key <b>' + cmd + '</b> was rejected: ' + why +
+        ' — quit this session and restart it with ' +
+        '<code>run_product.sh &lt; /tmp/lingbot-keys</code> so the page can drive it.');
+    } else {
+      bannerEl.classList.remove('show');
+    }
   } catch (e) { noteKey(cmd + ' failed', false); waiting = false; waitEl.classList.remove('show'); }
 }
 
@@ -152,11 +172,17 @@ function playNext() {
 
 async function poll() {
   try {
-    const r = await fetch('/frames?since=' + seenCount, {cache: 'no-store'});
+    const r = await fetch('/frames?since=' + Math.max(seenCount, 0), {cache: 'no-store'});
     if (r.ok) {
       const j = await r.json();
-      for (const n of j.frames) { queue.push(n); seenCount++; }
-      playNext();
+      if (seenCount < 0) {
+        // First poll: snap to the live edge. Replaying the whole backlog
+        // looks like the world moving on its own; only new frames queue.
+        seenCount = j.total;
+      } else {
+        for (const n of j.frames) { queue.push(n); seenCount++; }
+        playNext();
+      }
     }
     const l = await (await fetch('/log', {cache: 'no-store'})).json();
     if (l.action) statEl.textContent =
@@ -266,4 +292,5 @@ class Handler(http.server.BaseHTTPRequestHandler):
             self._json({'ok': True})
 
 
-http.server.HTTPServer(('127.0.0.1', PORT), Handler).serve_forever()
+if __name__ == '__main__':
+    http.server.HTTPServer(('127.0.0.1', PORT), Handler).serve_forever()
