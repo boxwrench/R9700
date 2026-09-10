@@ -288,13 +288,20 @@ class World:
             p[:3, :3] = dR
             p[:3, 3] = dt
             poses.append(p)
+        self._pose_stage = {}
+        _t = time.perf_counter()
         rel = torch.from_numpy(np.stack(poses)).float()
+        self._pose_stage['from_numpy'] = time.perf_counter() - _t; _t = time.perf_counter()
         if self.lat_frames_done == 0:
             rel[0] = torch.eye(4)          # upstream forces frame 0 to identity
         n = torch.norm(rel[:, :3, 3], dim=-1).max()
+        self._pose_stage['norm'] = time.perf_counter() - _t; _t = time.perf_counter()
         if n > 0:
             rel[:, :3, 3] = rel[:, :3, 3] / n
-        return rel.to(self.device)
+        self._pose_stage['divide'] = time.perf_counter() - _t; _t = time.perf_counter()
+        out = rel.to(self.device)
+        self._pose_stage['to_device'] = time.perf_counter() - _t
+        return out
 
     def _plucker(self, rel):
         from wan.utils.cam_utils import get_plucker_embeddings
@@ -315,17 +322,26 @@ class World:
         amount = amount if amount is not None else (
             self.args.turn_deg if action in ROTATIONS else self.args.move_amount)
         pipe = self.pipe
+        _e0 = time.perf_counter()
         torch.cuda.reset_peak_memory_stats()
+        _e1 = time.perf_counter()
         sync()
+        _e2 = time.perf_counter()
         t_start = time.perf_counter()
 
+        _s = {'reset_peak_stats': _e1 - _e0, 'entry_sync': _e2 - _e1}
+        _t = time.perf_counter()
         i0 = self.lat_frames_done
         rel = self._relative_poses(action, amount)
+        _s['poses'] = time.perf_counter() - _t; _s.update(self._pose_stage); _t = time.perf_counter()
         plucker = self._plucker(rel)
+        _s['plucker'] = time.perf_counter() - _t; _t = time.perf_counter()
         cond = self.y[:, i0:i0 + self.chunk]
+        _s['cond_slice'] = time.perf_counter() - _t; _t = time.perf_counter()
         latent = torch.randn(16, self.chunk, self.lat_h, self.lat_w,
                              dtype=torch.float32, generator=self.gen,
                              device=self.device)
+        _s['noise'] = time.perf_counter() - _t; _t = time.perf_counter()
 
         kwargs = dict(
             context=[self.context[0]],
@@ -339,6 +355,7 @@ class World:
             frame_seqlen=self.frame_seqlen,
         )
 
+        _s['kwargs'] = time.perf_counter() - _t
         t_dit = time.perf_counter()
         with torch.amp.autocast('cuda', dtype=pipe.param_dtype):
             for ti in range(len(self.timesteps)):
@@ -369,7 +386,7 @@ class World:
             action=action, amount=amount, chunk_index=self.chunks_done - 1,
             dit_seconds=t_dit_done - t_dit,
             setup_seconds=t_dit - t_start,
-            t_action_start=t_start, t_dit_done=t_dit_done,
+            t_action_start=t_start, t_dit_done=t_dit_done, setup_stage=_s,
             latent_frames_done=self.lat_frames_done,
             kv_global_end=int(self.kv_cache[0]['global_end_index'].item()),
             kv_local_end=int(self.kv_cache[0]['local_end_index'].item()),
@@ -432,8 +449,26 @@ class Presenter:
         self.stream = torch.cuda.Stream() if args.overlap else None
         self.all_frames = []
         self.frame_counter = 0
-        self.thread = threading.Thread(target=self._run, daemon=True)
-        self.thread.start()
+        self.archive = queue.Queue()
+        self.archive_thread = threading.Thread(target=self._archive_run, daemon=True)
+        self.archive_thread.start()
+        self.inline = (args.queue_max <= 1 and not args.overlap)
+        self.thread = None
+        if not self.inline:
+            self.thread = threading.Thread(target=self._run, daemon=True)
+            self.thread.start()
+
+    def process_inline(self, x0, rec):
+        """Decode in the calling thread.
+
+        With `--queue_max 1` the worker thread buys nothing -- the caller waits
+        for the chunk anyway -- and it costs a great deal: blocks freed by the
+        decode on the worker thread carry stream events that the *next*
+        allocation from the main thread has to reconcile, and that reconciliation
+        was showing up as ~480 ms charged to whatever GPU call the next action
+        happened to make first. Measured on gfx1201; see PHASE-A notes.
+        """
+        self._decode(x0, rec, None)
 
     def submit(self, x0, rec):
         ev = torch.cuda.Event()
@@ -447,7 +482,15 @@ class Presenter:
     def _emit(self, tensor, rec):
         """Write one decoded group of pixel frames as PNGs, immediately."""
         from PIL import Image
-        arr = ((tensor.clamp(-1, 1) + 1.0) * 127.5).to(torch.uint8).cpu().numpy()
+        st = rec.setdefault('stage', {})
+        t0 = time.perf_counter()
+        u8 = ((tensor.clamp(-1, 1) + 1.0) * 127.5).to(torch.uint8)
+        torch.cuda.synchronize()
+        t1 = time.perf_counter()
+        host = u8.cpu()
+        t2 = time.perf_counter()
+        arr = host.numpy()
+        t3 = time.perf_counter()
         paths = []
         for i in range(arr.shape[1]):
             im = Image.fromarray(arr[:, i].transpose(1, 2, 0))
@@ -455,6 +498,11 @@ class Presenter:
             im.save(path, compress_level=1)
             self.frame_counter += 1
             paths.append(path)
+        t4 = time.perf_counter()
+        st['uint8_gpu'] = st.get('uint8_gpu', 0) + (t1 - t0)
+        st['d2h'] = st.get('d2h', 0) + (t2 - t1)
+        st['numpy'] = st.get('numpy', 0) + (t3 - t2)
+        st['png'] = st.get('png', 0) + (t4 - t3)
         return paths
 
     def _run(self):
@@ -463,42 +511,66 @@ class Presenter:
             if item is None:
                 break
             x0, rec, ev = item
-            ctx = (torch.cuda.stream(self.stream) if self.stream is not None
-                   else contextlib.nullcontext())
-            groups = []
-            t_first = None
-            with ctx, torch.no_grad():
+            self._decode(x0, rec, ev)
+
+    def _decode(self, x0, rec, ev):
+        ctx = (torch.cuda.stream(self.stream) if self.stream is not None
+               else contextlib.nullcontext())
+        groups = []
+        t_first = None
+        with ctx, torch.no_grad():
+            if self.stream is not None and ev is not None:
+                self.stream.wait_event(ev)
+            rec['queue_handoff'] = time.perf_counter() - rec['t_dit_done']
+            t_dec0 = time.perf_counter()
+            for g in self.world.decoder.iter_decode(x0):
                 if self.stream is not None:
-                    self.stream.wait_event(ev)
-                t_dec0 = time.perf_counter()
-                for g in self.world.decoder.iter_decode(x0):
-                    if self.stream is not None:
-                        self.stream.synchronize()
-                    else:
-                        torch.cuda.synchronize()
-                    if t_first is None:
-                        self._emit(g, rec)
-                        t_first = time.perf_counter()
-                        rec['t_first_frame'] = t_first
-                        rec['first_frame_latency'] = t_first - rec['t_action_start']
-                    else:
-                        self._emit(g, rec)
-                    groups.append(g.cpu())
-                t_dec1 = time.perf_counter()
-            frames = torch.cat(groups, dim=1)
-            rec['vae_decode_seconds'] = t_dec1 - t_dec0
-            rec['latency_seconds'] = t_dec1 - rec['t_action_start']
-            rec['frames'] = int(frames.shape[1])
-            rec['fps_effective'] = frames.shape[1] / rec['latency_seconds']
-            rec['peak_alloc_gib'] = gib(torch.cuda.max_memory_allocated())
-            self.all_frames.append(frames)
-            if not self.args.no_chunk_mp4:
-                save_mp4(frames, os.path.join(
-                    self.out, f'chunk_{rec["chunk_index"]:03d}.mp4'), self.args.fps)
-                rec['file'] = f'chunk_{rec["chunk_index"]:03d}.mp4'
-            with self.lock:
-                self.inflight -= 1
-            self.results.put(rec)
+                    self.stream.synchronize()
+                else:
+                    torch.cuda.synchronize()
+                # One device->host copy, reused for both display and archive.
+                host = ((g.clamp(-1, 1) + 1.0) * 127.5).to(torch.uint8).cpu()
+                if t_first is None:
+                    t_first = time.perf_counter()
+                    rec['t_first_frame'] = t_first
+                    rec['first_frame_latency'] = t_first - rec['t_action_start']
+                groups.append(host)
+                self.archive.put(('png', host))
+            t_dec1 = time.perf_counter()
+        rec['vae_decode_seconds'] = t_dec1 - t_dec0
+        rec['latency_seconds'] = t_dec1 - rec['t_action_start']
+        frames = torch.cat(groups, dim=1)
+        rec['frames'] = int(frames.shape[1])
+        rec['fps_effective'] = frames.shape[1] / rec['latency_seconds']
+        rec['peak_alloc_gib'] = gib(torch.cuda.max_memory_allocated())
+        self.all_frames.append(frames)
+        if not self.args.no_chunk_mp4:
+            rec['file'] = f'chunk_{rec["chunk_index"]:03d}.mp4'
+        with self.lock:
+            self.inflight -= 1
+        self.results.put(rec)
+
+    def _archive_run(self):
+        """PNG encoding and per-chunk MP4, entirely off the interaction path.
+
+        Both used to sit inside the measured window -- PNG encoding of four
+        464x832 frames alone was ~92 ms per action. The frames are already on
+        the host by the time they get here, so nothing in this thread touches
+        the GPU and it cannot contend with the next action.
+        """
+        from PIL import Image
+        while True:
+            item = self.archive.get()
+            if item is None:
+                break
+            if item[0] == 'png':
+                arr = item[1].numpy()
+                for i in range(arr.shape[1]):
+                    Image.fromarray(arr[:, i].transpose(1, 2, 0)).save(
+                        os.path.join(self.frames_dir,
+                                     f'f_{self.frame_counter:05d}.png'),
+                        compress_level=1)
+                    self.frame_counter += 1
 
     def drain(self, log, quiet=False):
         """Collect every finished chunk record that is ready."""
@@ -518,6 +590,8 @@ class Presenter:
 
     def wait_idle(self, log, quiet=False):
         out = []
+        if self.inline:
+            return self.drain(log, quiet)
         while True:
             out += self.drain(log, quiet)
             with self.lock:
@@ -531,8 +605,11 @@ class Presenter:
             return self.inflight > 0
 
     def close(self):
-        self.q.put(None)
-        self.thread.join(timeout=5)
+        if self.thread is not None:
+            self.q.put(None)
+            self.thread.join(timeout=5)
+        self.archive.put(None)
+        self.archive_thread.join(timeout=60)
 
 
 def report(rec):
@@ -543,6 +620,11 @@ def report(rec):
           f'| kv {rec["kv_local_end"]}/{rec["kv_capacity_tokens"]} '
           f'{"EVICTING" if rec["kv_evicting"] else "filling"} '
           f'| vram {rec["peak_alloc_gib"]:.2f} GiB', flush=True)
+
+
+def uint8_to_signed(u8):
+    """Archive tensors are uint8 [0,255]; save_video wants float [-1,1]."""
+    return u8.float().div_(127.5).sub_(1.0)
 
 
 def save_mp4(frames, path, fps):
@@ -667,24 +749,41 @@ def main():
         rec['t_entered'] = t_entered
         rec['dit_complete_latency'] = rec['t_dit_done'] - rec['t_action_start']
         rec['queue_wait'] = rec['t_action_start'] - t_entered
-        presenter.submit(x0, rec)
-        # Bounded queue: never let more than --queue_max chunks be in flight,
-        # so input cannot build up unboundedly behind a slow decoder.
-        while presenter.inflight >= args.queue_max:
+        if presenter.inline:
+            with presenter.lock:
+                presenter.inflight += 1
+            presenter.process_inline(x0, rec)
+            presenter.drain(actions_log)   # logs + prints the record
+        else:
+            presenter.submit(x0, rec)
+            # Bounded queue: never let more than --queue_max chunks be in
+            # flight, so input cannot build up unboundedly behind a decoder.
+            while presenter.inflight >= args.queue_max:
+                presenter.drain(actions_log)
+                time.sleep(0.02)
             presenter.drain(actions_log)
-            time.sleep(0.02)
-        presenter.drain(actions_log)
 
     def finish():
         presenter.wait_idle(actions_log)
         if presenter.all_frames:
-            combined = torch.cat(presenter.all_frames, dim=1)
+            combined = uint8_to_signed(torch.cat(presenter.all_frames, dim=1))
             p = os.path.join(out, 'session.mp4')
             save_mp4(combined, p, args.fps)
             print(f'\ncombined session video: {p}  ({combined.shape[1]} frames)')
+        # Per-chunk MP4s are written here rather than per action. Encoding one
+        # inside the loop cost ~1.7 s of the *next* action's DiT time -- the
+        # ffmpeg feed contends with the main thread far more than the ~92 ms of
+        # PNG work it replaced. The frames are already retained on the host, so
+        # writing them at session end costs nothing during interaction and the
+        # artifact is unchanged.
+        if not args.no_chunk_mp4:
+            for i, fr in enumerate(presenter.all_frames):
+                save_mp4(uint8_to_signed(fr),
+                         os.path.join(out, f'chunk_{i:03d}.mp4'), args.fps)
+        presenter.close()          # drains the archival queue before returning
+        if presenter.all_frames:
             print(f'individual frames: {presenter.frames_dir}  '
                   f'({presenter.frame_counter} PNGs, written as decoded)')
-        presenter.close()
         actions_log.close()
 
     if args.script:

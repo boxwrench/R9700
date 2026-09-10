@@ -1,0 +1,25 @@
+Loading checkpoint shards:   0%|          | 0/6 [00:00<?, ?it/s]Loading checkpoint shards:  33%|███▎      | 2/6 [00:00<00:00, 12.53it/s]Loading checkpoint shards:  67%|██████▋   | 4/6 [00:00<00:00, 12.97it/s]Loading checkpoint shards: 100%|██████████| 6/6 [00:00<00:00, 13.30it/s]Loading checkpoint shards: 100%|██████████| 6/6 [00:00<00:00, 13.16it/s]
+world ready. chunk=1 frame_seqlen=1508
+
+timesteps used: [999.0, 967.0, 908.0, 768.0]    fifth forward timestep: 0.0
+
+KV cache contents written by this chunk, compared against the state
+the model actually keeps (after the fifth forward):
+
+  after_denoise_1 vs after_fifth
+     K  max|diff| 17.5312   max|ref| 104.0000   relative 0.169
+     V  max|diff| 20.2188   max|ref| 13.9375   relative 1.451
+  after_denoise_2 vs after_fifth
+     K  max|diff| 17.9688   max|ref| 104.0000   relative 0.173
+     V  max|diff| 17.9375   max|ref| 13.9375   relative 1.287
+  after_denoise_3 vs after_fifth
+     K  max|diff| 16.9375   max|ref| 104.0000   relative 0.163
+     V  max|diff| 18.0938   max|ref| 13.9375   relative 1.298
+  after_denoise_4 vs after_fifth
+     K  max|diff| 17.6875   max|ref| 104.0000   relative 0.170
+     V  max|diff| 15.7656   max|ref| 13.9375   relative 1.131
+
+  sanity: the fourth denoising forward vs the third
+  after_denoise_4 vs after_denoise_3
+     K  max|diff| 17.9688   max|ref| 104.5000   relative 0.172
+     V  max|diff| 23.4375   max|ref| 16.2500   relative 1.442

@@ -1,0 +1,31 @@
+loading world ...
+Loading checkpoint shards:   0%|          | 0/6 [00:00<?, ?it/s]Loading checkpoint shards:  33%|███▎      | 2/6 [00:00<00:00, 13.24it/s]Loading checkpoint shards:  67%|██████▋   | 4/6 [00:00<00:00, 13.37it/s]Loading checkpoint shards: 100%|██████████| 6/6 [00:00<00:00, 13.40it/s]Loading checkpoint shards: 100%|██████████| 6/6 [00:00<00:00, 13.38it/s]
+
+world ready in 33.7s (model 30.5s, T5 3.1s, image 0.2s [cached])
+  464x832  latent 58x104  1508 tokens/frame
+  KV cache 4.66 GiB  window 18 frames  sink 6
+  chunk 1 latent frames  seed 42
+
+commands
+  w / forward      move forward          s / back       move backward
+  a / left         strafe left           d / right      strafe right
+  q / turn_left    yaw left              e / turn_right yaw right
+  r / up           rise                  f / down       descend
+  t / tilt_up      pitch up              g / tilt_down  pitch down
+  x / stay         hold position
+  <action> <amt>   override step size (metres, or degrees for turns)
+  script w w e w   run several actions in sequence
+  reset            wipe world state, keep the model loaded
+  stats            show session state
+  help             this text
+  quit             end session and write the combined video
+
+  forward    first-frame   1.19s  full   1.19s   1 frames  | dit  0.77s vae  0.40s | kv 1508/27144 filling | vram 11.38 GiB
+  forward    first-frame   1.91s  full   1.91s   4 frames  | dit  0.70s vae  1.22s | kv 3016/27144 filling | vram 13.36 GiB
+  forward    first-frame   1.97s  full   1.97s   4 frames  | dit  0.75s vae  1.22s | kv 4524/27144 filling | vram 13.50 GiB
+  forward    first-frame   2.02s  full   2.03s   4 frames  | dit  0.80s vae  1.23s | kv 6032/27144 filling | vram 13.50 GiB
+  forward    first-frame   2.10s  full   2.10s   4 frames  | dit  0.87s vae  1.23s | kv 7540/27144 filling | vram 13.50 GiB
+  forward    first-frame   2.16s  full   2.16s   4 frames  | dit  0.93s vae  1.23s | kv 9048/27144 filling | vram 13.50 GiB
+
+combined session video: /ai/outputs/lingbot-sessions/breakdown7/session.mp4  (21 frames)
+individual frames: /ai/outputs/lingbot-sessions/breakdown7/frames  (21 PNGs, written as decoded)

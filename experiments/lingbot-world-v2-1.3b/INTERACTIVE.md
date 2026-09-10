@@ -388,3 +388,142 @@ PNG encoding of four 464x832 frames plus the device-to-host copy and the
 per-group synchronisation the streaming presenter needs. At 6.93 s it was 8%
 of the budget and invisible; at 3.45 s it is 16% and cheaper to remove than
 either model component.
+
+
+---
+
+# Phase A — presentation overhead
+
+## Breakdown (before)
+
+Instrumented every stage of the path from keypress to visible frame:
+
+| stage | time |
+|---|---:|
+| **first GPU op of the action** | **477-576 ms** |
+| DiT | (model) |
+| GPU decode + sync | (model) |
+| PNG encode + write (4 frames) | 91.9 ms |
+| device→host copy #2 (redundant) | 1.3 ms |
+| uint8 convert (GPU) | 0.3 ms |
+| device→host copy #1 | 0.3 ms |
+| queue handoff | 0.5 ms |
+| `.numpy()` | 0.0 ms |
+| per-chunk MP4 | 0.0 ms |
+
+The dominant term was **not** I/O. It first appeared as 541 ms inside "setup",
+then narrowed to `rel.to(device)` — a 64-byte host-to-device copy — at 539 ms.
+Substituting a `torch.zeros(1, device=...)` probe moved the entire cost onto
+the probe (576 ms) and dropped the copy to 0.1 ms, which showed it was not the
+copy at all: **the first GPU call of each action was absorbing a wait.**
+
+Ruled out along the way:
+
+- *Device wake-up from idle.* Measured directly: a small H2D after 0.02-2.0 s
+  of idle costs 0.58-0.78 ms, not 500.
+- *Un-drained work.* `torch.cuda.synchronize()` immediately before the timer
+  returned in 0.0 ms.
+- *Plücker / pose construction.* Micro-benchmarked at 0.20 ms, 0.06 ms and
+  0.10 ms for the embedding, the rearrange and the pose build.
+
+The actual cause: **cross-thread caching-allocator reconciliation.** The
+decode ran in a worker thread, and blocks it freed carry stream events that the
+next allocation from the main thread has to process. With `--queue_max 1` the
+caller waits for the chunk anyway, so the worker was buying nothing and costing
+~0.5 s per action.
+
+## Changes
+
+1. **Inline decode when `queue_max <= 1` and overlap is off** — no worker
+   thread, no cross-thread block hand-back. Removes the whole 477-576 ms.
+2. **One device→host copy instead of two.** The uint8 host tensor is now the
+   single artifact used for both display and archive.
+3. **PNG encoding moved to a CPU archive thread**, off the critical path. It
+   touches no GPU memory, so it cannot contend for the device.
+4. **Per-chunk MP4s written at session end.** Encoding one per action inside
+   the archive thread cost ~1.7 s of the *next* action's DiT time — ffmpeg
+   feeding contends with the main thread far more than the 92 ms of PNG work it
+   replaced. Frames are already retained on the host, so writing them at exit
+   costs nothing during interaction. Every artifact is unchanged.
+
+## Result
+
+| | before | after |
+|---|---:|---:|
+| setup / presentation overhead | ~560 ms | **1.2 ms** |
+| keypress → DiT done | 2.11 s | **1.56 s** |
+| keypress → VAE done | 3.44 s | **2.81 s** |
+| **keypress → display-ready frame** | **3.45 s** | **2.81 s** |
+| keypress → archival complete | 3.54 s | 2.81 s + async |
+| peak VRAM | 13.52 GiB | **13.50 GiB** |
+
+**Output is bit-identical to the FP16 baseline** — Phase A changed only when
+work happens, never what is computed. Seam ratio 0.985, no NaN/Inf, no frozen
+frames, KV eviction correct at 27144.
+
+# Phase B — the fifth DiT forward
+
+## Why it exists
+
+Self-attention writes `roped_key` / `v` into the KV cache on **every** forward,
+so after four denoising forwards the cache is already populated. The question
+is whether it holds the right thing.
+
+- Denoising forward *i* runs on `latent`, a **noisy** sample, at timestep
+  t ∈ {999, 967, 908, 768}.
+- The fifth forward runs on `x0`, the **accepted clean latent**, at timestep 0.
+
+Future chunks must attend to a clean representation of this chunk. The fifth
+forward exists to overwrite the noisy K/V with clean ones.
+
+## Is reuse valid? No — measured
+
+Comparing the K/V each forward leaves in the slots this chunk wrote, against
+what the model actually keeps:
+
+| cache state | max abs K diff | rel | max abs V diff | rel |
+|---|---:|---:|---:|---:|
+| after denoise 1 | 17.53 | 0.169 | 20.22 | **1.451** |
+| after denoise 2 | 17.97 | 0.173 | 17.94 | **1.287** |
+| after denoise 3 | 16.94 | 0.163 | 18.09 | **1.298** |
+| **after denoise 4** | **17.69** | **0.170** | **15.77** | **1.131** |
+
+The fourth denoising forward's K differ by 17% of the reference magnitude, and
+its **V differ by more than the reference magnitude itself** (relative 1.13).
+These are not a slightly-stale approximation, they encode a different input.
+Sanity check: consecutive denoising forwards differ from each other by the same
+order (K 0.172, V 1.442), confirming the cache is rewritten wholesale each pass.
+
+**Exact reuse is impossible. Not implemented, per the stop condition.**
+
+## Is a bounded prefix enough?
+
+Also no, and the reason is structural. Layer *L*'s cache entry is
+`norm_k(W_k · h_L)` and `W_v · h_L`, where `h_L` is that layer's input hidden
+state. `h_L` depends on layers 0…L−1 in full — self-attention output,
+cross-attention and FFN all feed the residual stream. Computing K/V for all 30
+layers therefore requires running all 30 layers.
+
+The only genuinely skippable work is the tail *after* the last layer's K/V are
+formed: layer 29's attention, output projection, cross-attention and FFN, plus
+the head and unpatchify. That is roughly one layer of thirty plus the head —
+**an estimated 3-4% of a forward, ~50 ms of the 1.56 s DiT, under 2% of the
+2.81 s action.** This is an estimate from the graph structure, not a
+measurement, and it is far below the threshold that would justify the
+correctness risk. Not implemented.
+
+## Conclusion
+
+The fifth forward is required by the algorithm. 5 forwards per action stands.
+The transformer's cost has to come from somewhere else.
+
+# Where the time is now
+
+| component | time | share |
+|---|---:|---:|
+| **DiT (5 forwards)** | **1.56 s** | **55%** |
+| FP16 VAE decode | 1.25 s | 44% |
+| setup + presentation | 1.2 ms | <1% |
+
+Overhead is now gone as a category. Milestone 2 (<2.5 s) needs ~0.3 s from the
+two model components, and the DiT is the larger of them.
