@@ -875,6 +875,14 @@ def main():
     ap.add_argument('--shift', type=float, default=10.0)
     ap.add_argument('--timesteps_index', type=int, nargs='+',
                     default=[0, 250, 500, 750])
+    ap.add_argument('--denoise_schedule', default='4-step',
+                    choices=['4-step', '3-step-A'],
+                    help='denoise evaluations per action. 4-step is the '
+                         'reference ([0,250,500,750] -> t 999/967/908/768). '
+                         '3-step-A drops the 967 evaluation ([0,500,750]), '
+                         'keeping the exact x0->add_noise transition rule and '
+                         'the mandatory clean t=0 KV pass. Overrides '
+                         '--timesteps_index.')
     ap.add_argument('--seed', type=int, default=42)
     ap.add_argument('--move_amount', type=float, default=1.0)
     ap.add_argument('--turn_deg', type=float, default=8.0)
@@ -917,6 +925,11 @@ def main():
     ap.add_argument('--script', type=str, default=None,
                     help='space-separated actions to run non-interactively, then exit')
     args = ap.parse_args()
+
+    if args.denoise_schedule == '3-step-A':
+        args.timesteps_index = [0, 500, 750]
+        print('  denoise schedule 3-step-A: grid [0,500,750] -> t [999,908,768] '
+              '(+ exact clean t=0 KV pass)')
 
     out = os.path.abspath(args.output)
     os.makedirs(out, exist_ok=True)

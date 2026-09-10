@@ -558,3 +558,22 @@ Filled-window steady state, 384x672, chunk 1, window 18+6:
 
 Performance history appends: `384x672 decode-first 1.522 s`,
 `384x672 TAE first RGB 0.699 s / conditioned ~0.824 s`.
+
+---
+
+# 3-step-A denoise schedule (2026-09-10, opt-in)
+
+`--denoise_schedule 3-step-A` drops the t=967 evaluation (grid [0,500,750]
+-> t [999,908,768]); 4-step remains the default/reference. Exact clean t=0
+KV pass and `x0 -> add_noise(next retained t)` transitions unchanged.
+Accepted after RNG-controlled matched A/B (x0 MAD 0.0038 same-noise) and
+50-action independent rollouts with exact pose round-trip (both worlds
+return bit-close to action-3 pose at action 35 and to origin at 39).
+
+Filled-window steady, 384x672, TAE decode-first:
+
+| | 4-step | 3-step-A |
+|---|---|---|
+| first RGB | 0.699 s | **0.544 s** |
+| conditioned RGB idx2 | ~0.824 s | **~0.669 s** |
+| next-action-ready | 0.877 s | **~0.759 s** |

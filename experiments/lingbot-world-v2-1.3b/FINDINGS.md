@@ -276,3 +276,75 @@ and canonical maintain different causal decoder state). Canonical decode
 never runs in TAE mode. `WAN_VAE_CONV3D_TEMPORAL_SPLIT=1` intact.
 
 Accepted: TAEW2.1 retained as opt-in presentation decoder on gfx1201.
+
+---
+
+# 3-denoise sampler Candidate A (gfx1201, 2026-09-10): ACCEPTED as opt-in
+
+## Phase 0 — exact baseline sampler semantics (logged from live objects)
+
+- Scheduler: `FlowUniPCMultistepScheduler`, 1000-step grid,
+  `set_timesteps(1000, shift=10.0)`.
+- `timesteps_index=[0,250,500,750]` -> model timesteps **[999, 967, 908, 768]**,
+  sigmas [0.9999, 0.967617, 0.908925, 0.768994].
+- Per evaluation: `model(xt, t)` -> `x0 = xt - sigma_t * pred` (float64,
+  nearest on-grid sigma); if another timestep remains,
+  `xt = add_noise(x0, fresh_noise, next_t)` with sigma from exact grid
+  lookup (`index_for_timestep`), `xt = alpha*x0 + sigma*noise`.
+- The causal-fast path never calls `scheduler.step`: no hidden multistep
+  history. Removing an evaluation removes only its model call + renoise draw.
+- Initial noise: randn [16,1,48,84] fp32 from world RNG; 3 renoise draws
+  per action. Clean pass input is `t = timesteps[-1]*0.0`, unchanged.
+
+## Candidate A: grid [0,500,750] -> t [999,908,768] (drop 967)
+
+RNG-controlled matched-state A/B from identical full-window state
+(KV/metadata/cross-attn/pose/cond/init-latent/RNG/TAE priming); the
+candidate reuses the baseline's own noise tensors at retained timesteps:
+
+| | 4-step baseline | 3-step A |
+|---|---|---|
+| per-forward | 188/174/173/172 ms | 188/171/173 ms |
+| denoise total | 0.707 s | 0.533 s (**-0.174 s**, one forward, no hidden behavior) |
+| clean-KV | 0.175 s | 0.173 s (unchanged) |
+| x0 diff (same noises) | — | MAD 0.0038, max 0.099 (0.5% of signal) |
+| x0 diff (natural RNG) | — | MAD 0.103 (noise-draw dominated, expected) |
+
+Quality (identical-state decodes): injected-noise candidate vs baseline —
+canonical MAD 0.0012, TAE MAD 0.0014, means equal. Natural-RNG candidate —
+MAD ~0.025 both decoders (same order as the TAE approximation itself).
+Visuals coherent, same geometry/camera. Turn-vs-stay TAE profile:
+candidate [7.0, 13.1, 19.5, 22.3] vs baseline [6.0, 11.7, 25.2, 28.1] —
+**first conditioned frame stays index 2**; turn magnitude marginally softer.
+
+## Persistent validation (50 actions, 32 evicting, exact pose round-trip)
+
+Independent worlds, same seed/script (out-and-back: action 35 reproduces
+action 3's pose exactly, action 39 reproduces the origin — verified
+bit-close in both worlds), turns/reversals/stay/abrupt change/continued
+travel, canonical + TAE presentation each:
+
+| world | frozen | seam ratio | finite | KV | late visual |
+|---|---|---|---|---|---|
+| base canon | 0 | 1.007 | yes | 50400/18144 | stable |
+| base TAE | 0 | 1.034 | yes | same | stable |
+| cand canon | 0 | 1.084 | yes | same | stable |
+| cand TAE | 0 | 1.080 | yes | same | stable, no drift at action 49 |
+
+Return-point frames (same pose): same scene class, diverged content as
+expected for independent sampler trajectories — no collapse in either.
+Candidate B never tested (A passed; per plan, no sweep).
+
+## Accepted latency (filled-window steady, 384, TAE decode-first)
+
+| | 4-step | 3-step A |
+|---|---|---|
+| first RGB | 0.699 s (max 0.705) | **0.544 s** (max ~0.55) |
+| conditioned RGB idx2 | ~0.824 s | **~0.669 s** |
+| next-action-ready | 0.877 s (max 0.883) | **~0.759 s** |
+| DiT denoise / clean | 0.695 / 0.171 | 0.521 / 0.171 |
+
+Integration: `--denoise_schedule {4-step,3-step-A}` (default 4-step
+reference); 3-step-A maps to grid [0,500,750] with the exact transition
+rule and mandatory clean pass. TAE/384/clean-KV/canonical-fallback/SDPA
+all unchanged. Target answered: action-conditioned 0.824 s -> ~0.67 s.
