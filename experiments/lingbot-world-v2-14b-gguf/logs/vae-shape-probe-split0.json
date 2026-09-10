@@ -1,0 +1,583 @@
+{
+  "lane": "14b-shape-probe",
+  "env": {
+    "HIP_VISIBLE_DEVICES": "1"
+  },
+  "cudnn_enabled": true,
+  "cudnn_benchmark": false,
+  "miopen_immediate": false,
+  "torch": "2.9.1+rocm7.2.1.gitff65f5bc",
+  "hip": "7.2.53211-e1a6bc5663",
+  "gpu": "gfx1201",
+  "runs": [
+    {
+      "index": 0,
+      "seconds": 177.03994408700964,
+      "peak_alloc_gib": 6.483453750610352,
+      "peak_reserved_gib": 18.857421875
+    }
+  ],
+  "output": {
+    "shape": [
+      3,
+      21,
+      464,
+      832
+    ],
+    "dtype": "torch.float32",
+    "mean": -0.26369529962539673,
+    "std": 0.0627410039305687,
+    "min": -0.5969293713569641,
+    "max": -0.10461963713169098,
+    "finite": true,
+    "sha256": "52adf632921e0eb83c2a59e320ff87f3"
+  },
+  "unique_conv3d_shapes": 17,
+  "conv3d_total_seconds": 175.61819226198713,
+  "conv3d_shapes": [
+    {
+      "in_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "weight_shape": [
+        96,
+        96,
+        3,
+        3,
+        3
+      ],
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "dtype": "torch.float32",
+      "count": 30,
+      "first": 4.905427776015131,
+      "repeat_mean": 4.892523433996067,
+      "total": 146.7886073619011,
+      "transient_gib": 1.662308692932129
+    },
+    {
+      "in_shape": [
+        1,
+        96,
+        4,
+        464,
+        832
+      ],
+      "weight_shape": [
+        3,
+        96,
+        3,
+        3,
+        3
+      ],
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "dtype": "torch.float32",
+      "count": 5,
+      "first": 2.978546243015444,
+      "repeat_mean": 2.984239159988647,
+      "total": 14.915502882970031,
+      "transient_gib": 1.662308692932129
+    },
+    {
+      "in_shape": [
+        1,
+        192,
+        4,
+        232,
+        416
+      ],
+      "weight_shape": [
+        192,
+        192,
+        3,
+        3,
+        3
+      ],
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "dtype": "torch.float32",
+      "count": 30,
+      "first": 0.27698034499189816,
+      "repeat_mean": 0.2577482036872895,
+      "total": 7.751678251923295,
+      "transient_gib": 8.15185546875
+    },
+    {
+      "in_shape": [
+        1,
+        384,
+        2,
+        116,
+        208
+      ],
+      "weight_shape": [
+        384,
+        384,
+        3,
+        3,
+        3
+      ],
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "dtype": "torch.float32",
+      "count": 25,
+      "first": 0.14197374100331217,
+      "repeat_mean": 0.13644449804269243,
+      "total": 3.4166416940279305,
+      "transient_gib": 2.0746536254882812
+    },
+    {
+      "in_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "weight_shape": [
+        384,
+        384,
+        3,
+        3,
+        3
+      ],
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "dtype": "torch.float32",
+      "count": 60,
+      "first": 0.018313031003344804,
+      "repeat_mean": 0.016200082662211478,
+      "total": 0.974117908073822,
+      "transient_gib": 0.268951416015625
+    },
+    {
+      "in_shape": [
+        1,
+        96,
+        1,
+        464,
+        832
+      ],
+      "weight_shape": [
+        96,
+        96,
+        3,
+        3,
+        3
+      ],
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "dtype": "torch.float32",
+      "count": 6,
+      "first": 0.08105625602183864,
+      "repeat_mean": 0.07022263840772211,
+      "total": 0.4321694480604492,
+      "transient_gib": 4.2835469245910645
+    },
+    {
+      "in_shape": [
+        1,
+        192,
+        1,
+        232,
+        416
+      ],
+      "weight_shape": [
+        192,
+        192,
+        3,
+        3,
+        3
+      ],
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "dtype": "torch.float32",
+      "count": 6,
+      "first": 0.06965567701263353,
+      "repeat_mean": 0.06464541499735788,
+      "total": 0.3928827519994229,
+      "transient_gib": 2.1427431106567383
+    },
+    {
+      "in_shape": [
+        1,
+        384,
+        1,
+        116,
+        208
+      ],
+      "weight_shape": [
+        384,
+        384,
+        3,
+        3,
+        3
+      ],
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "dtype": "torch.float32",
+      "count": 5,
+      "first": 0.06815039602224715,
+      "repeat_mean": 0.06541615575406468,
+      "total": 0.32981501903850585,
+      "transient_gib": 1.072774887084961
+    },
+    {
+      "in_shape": [
+        1,
+        192,
+        2,
+        116,
+        208
+      ],
+      "weight_shape": [
+        384,
+        192,
+        3,
+        3,
+        3
+      ],
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "dtype": "torch.float32",
+      "count": 5,
+      "first": 0.06931686500320211,
+      "repeat_mean": 0.06107343624898931,
+      "total": 0.31361060999915935,
+      "transient_gib": 1.0718421936035156
+    },
+    {
+      "in_shape": [
+        1,
+        384,
+        2,
+        116,
+        208
+      ],
+      "weight_shape": [
+        768,
+        384,
+        3,
+        1,
+        1
+      ],
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "dtype": "torch.float32",
+      "count": 5,
+      "first": 0.026776440994581208,
+      "repeat_mean": 0.023006204995908774,
+      "total": 0.1188012609782163,
+      "transient_gib": 0.48321533203125
+    },
+    {
+      "in_shape": [
+        1,
+        16,
+        6,
+        58,
+        104
+      ],
+      "weight_shape": [
+        16,
+        16,
+        1,
+        1,
+        1
+      ],
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "dtype": "torch.float32",
+      "count": 1,
+      "first": 0.08888297498924658,
+      "repeat_mean": null,
+      "total": 0.08888297498924658,
+      "transient_gib": 0.004314422607421875
+    },
+    {
+      "in_shape": [
+        1,
+        96,
+        1,
+        464,
+        832
+      ],
+      "weight_shape": [
+        3,
+        96,
+        3,
+        3,
+        3
+      ],
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "dtype": "torch.float32",
+      "count": 1,
+      "first": 0.032911729998886585,
+      "repeat_mean": null,
+      "total": 0.032911729998886585,
+      "transient_gib": 4.149916172027588
+    },
+    {
+      "in_shape": [
+        1,
+        192,
+        1,
+        116,
+        208
+      ],
+      "weight_shape": [
+        384,
+        192,
+        3,
+        3,
+        3
+      ],
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "dtype": "torch.float32",
+      "count": 1,
+      "first": 0.030581277009332553,
+      "repeat_mean": null,
+      "total": 0.030581277009332553,
+      "transient_gib": 0.5544843673706055
+    },
+    {
+      "in_shape": [
+        1,
+        384,
+        1,
+        58,
+        104
+      ],
+      "weight_shape": [
+        768,
+        384,
+        3,
+        1,
+        1
+      ],
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "dtype": "torch.float32",
+      "count": 5,
+      "first": 0.0029176700045354664,
+      "repeat_mean": 0.0022566062471014448,
+      "total": 0.011944094992941245,
+      "transient_gib": 0.06903076171875
+    },
+    {
+      "in_shape": [
+        1,
+        192,
+        2,
+        116,
+        208
+      ],
+      "weight_shape": [
+        384,
+        192,
+        1,
+        1,
+        1
+      ],
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "dtype": "torch.float32",
+      "count": 5,
+      "first": 0.0022538320044986904,
+      "repeat_mean": 0.0022122872542240657,
+      "total": 0.011102981021394953,
+      "transient_gib": 0.1389007568359375
+    },
+    {
+      "in_shape": [
+        1,
+        16,
+        1,
+        58,
+        104
+      ],
+      "weight_shape": [
+        384,
+        16,
+        3,
+        3,
+        3
+      ],
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "dtype": "torch.float32",
+      "count": 6,
+      "first": 0.0029947519942652434,
+      "repeat_mean": 0.0009150632016826421,
+      "total": 0.007570068002678454,
+      "transient_gib": 0.020172119140625
+    },
+    {
+      "in_shape": [
+        1,
+        192,
+        1,
+        116,
+        208
+      ],
+      "weight_shape": [
+        384,
+        192,
+        1,
+        1,
+        1
+      ],
+      "stride": [
+        1,
+        1,
+        1
+      ],
+      "padding": [
+        0,
+        0,
+        0
+      ],
+      "dtype": "torch.float32",
+      "count": 1,
+      "first": 0.001371947000734508,
+      "repeat_mean": null,
+      "total": 0.001371947000734508,
+      "transient_gib": 0.0517730712890625
+    }
+  ]
+}

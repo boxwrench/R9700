@@ -1,0 +1,2 @@
+71e0ae7d4d245288713c1aaf8132018d977605831f00c4ab2fc56939aac394d1  /ai/models/lingbot-gguf/LingBot-World-14B-causal-fast_merged-Q4_K_M.gguf
+4a3176f32fd70c0a335b4419fcbf8c86cc875e23498c0fc06f5b4aa0930889e0  /ai/models/lingbot-gguf/umt5-xxl-encoder-Q4_K_S.gguf

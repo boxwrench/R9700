@@ -1,0 +1,79 @@
+  [mem] process start              alloc   0.00 resv   0.00 peak   0.00 rss   0.86 pinned  0.00
+[LBWorld] building WanModelFast skeleton (14B)
+[LBWorld] loading GGUF: /ai/models/lingbot-gguf/LingBot-World-14B-causal-fast_merged-Q4_K_M.gguf
+[LBWorld] orig_shape metadata for: ['patch_embedding.weight']
+[LBWorld] pinned 2.16 GB of quantized weights (async H2D)
+[LBWorld] quant histogram (count / GB): 0 x810 (0.02GB), 12 x443 (7.52GB), 14 x120 (4.04GB), 1 x48 (0.47GB)
+[LBWorld] 1421 tensors attached; unmatched-in-model: 0; still-meta params: 0
+  [mem] after loader               alloc   0.00 resv   0.00 peak   0.00 rss   7.69 pinned  0.00
+  wrapped Linear: 563  quant bytes host 10.77 GiB  dense params 0.44 GiB  meta left 0
+  lat 58x104  1508 tok/frame  their pre-flight KV 9.88 GB  actual upstream KV 7.41 GB
+  [mem] after T5 (CPU, released)   alloc   0.00 resv   0.00 peak   0.00 rss   8.13 pinned  0.00
+  [mem] start cold                 alloc   0.00 resv   0.00 peak   0.00 rss   8.13 pinned  0.00
+  [mem] cold after move to GPU     alloc   0.94 resv   0.96 peak   0.94 rss   7.24 pinned  0.00
+  [mem] before vae_encode          alloc   1.30 resv   1.43 peak   1.30 rss   7.31 pinned  0.00
+  [mem] after vae_encode           alloc   1.30 resv   4.04 peak  10.24 rss   7.34 pinned  0.00
+  0%|          | 0/2 [00:00<?, ?it/s] 50%|█████     | 1/2 [00:22<00:22, 22.26s/it]100%|██████████| 2/2 [00:45<00:00, 22.97s/it]100%|██████████| 2/2 [00:45<00:00, 22.87s/it]
+[LBWorld] GPU dequant kernels loaded from /ai/lab/lingbot-gguf-r9700/ComfyUI-GGUF/dequant.py
+  [mem] before vae_decode          alloc   8.07 resv   8.18 peak  10.94 rss  15.96 pinned  0.00
+  [mem] after vae_decode           alloc   8.16 resv  23.19 peak  18.48 rss  15.96 pinned  0.00
+  [mem] end cold                   alloc   0.66 resv  23.19 peak  18.48 rss  15.96 pinned  0.00
+[cold] 86.76s  21f  464x832  -> /ai/outputs/lingbot-world-v2-14b-gguf/q4km-w6s2-vaesplit1_cold_464x832_21f_w6_s2.mp4
+  [mem] start warm1                alloc   0.57 resv   0.61 peak   0.57 rss  16.01 pinned  0.00
+  [mem] warm1 after move to GPU    alloc   1.02 resv   1.04 peak   1.02 rss  15.58 pinned  0.00
+  [mem] before vae_encode          alloc   1.30 resv   1.43 peak   1.30 rss  15.58 pinned  0.00
+  [mem] after vae_encode           alloc   1.30 resv  13.71 peak  10.24 rss  15.58 pinned  0.00
+  0%|          | 0/2 [00:00<?, ?it/s] 50%|█████     | 1/2 [00:21<00:21, 21.96s/it]100%|██████████| 2/2 [00:45<00:00, 22.83s/it]100%|██████████| 2/2 [00:45<00:00, 22.70s/it]
+  [mem] before vae_decode          alloc   8.07 resv   9.55 peak  10.94 rss  16.01 pinned  0.00
+  [mem] after vae_decode           alloc   8.16 resv  23.53 peak  18.48 rss  16.01 pinned  0.00
+  [mem] end warm1                  alloc   0.66 resv  23.53 peak  18.48 rss  16.01 pinned  0.00
+[warm1] 86.48s  21f  464x832  -> /ai/outputs/lingbot-world-v2-14b-gguf/q4km-w6s2-vaesplit1_warm1_464x832_21f_w6_s2.mp4
+{
+  "tag": "q4km-w6s2-vaesplit1",
+  "timestamp": "2026-09-10T00:35:43.816840+00:00",
+  "args": {
+    "gguf": "LingBot-World-14B-causal-fast_merged-Q4_K_M.gguf",
+    "models_dir": "/ai/models/lingbot-gguf",
+    "vae_dir": "/ai/models/lingbot-world-v2-14b-assets",
+    "vae_name": "Wan2.1_VAE.pth",
+    "action_root": "/ai/lab/lingbot-gguf-r9700/input",
+    "action_dir": "03",
+    "image": "/ai/github/lingbot-world-v2/examples/03/image.jpg",
+    "resolution": "480x832 (needs tiny window)",
+    "frame_num": 29,
+    "chunk_size": 3,
+    "local_attn_size": 6,
+    "sink_size": 2,
+    "shift": 3.0,
+    "seed": 42,
+    "pin_gb": 2,
+    "warm_repeats": 1,
+    "vae_split": "1",
+    "profile_dequant": true,
+    "tag": "q4km-w6s2-vaesplit1",
+    "save_dir": "/ai/outputs/lingbot-world-v2-14b-gguf",
+    "out_json": "/ai/github/R9700/experiments/lingbot-world-v2-14b-gguf/logs/q4km-w6s2-vaesplit1.json"
+  },
+  "torch": "2.9.1+rocm7.2.1.gitff65f5bc",
+  "hip": "7.2.53211-e1a6bc5663",
+  "gpu": "gfx1201",
+  "vae_split": "1",
+  "gguf_bytes": 12054188608,
+  "flash_attn": [
+    false,
+    false
+  ],
+  "load_seconds": 0.6507484150060918,
+  "pinned_bytes": 2155499520,
+  "gguf_linear_wrappers": 563,
+  "quantized_bytes_host": 11567431680,
+  "dense_param_bytes": 471173248,
+  "meta_params_left": 0,
+  "lat_h": 58,
+  "lat_w": 104,
+  "tokens_per_frame": 1508,
+  "preflight_kv_gb_their_formula": 9.8828288,
+  "kv_gb_upstream_allocation": 7.4121216,
+  "t5_encode_seconds": 2.390373629023088
+}
+[W909 17:39:15.048607824 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())

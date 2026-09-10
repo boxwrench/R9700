@@ -52,6 +52,8 @@ def main():
     ap.add_argument('--lane', required=True)
     ap.add_argument('--runs', type=int, default=3)
     ap.add_argument('--frames', type=int, default=4, help='latent frames')
+    ap.add_argument('--lat_h', type=int, default=60)
+    ap.add_argument('--lat_w', type=int, default=104)
     ap.add_argument('--disable-miopen', action='store_true')
     ap.add_argument('--shapes', action='store_true')
     ap.add_argument('--out_json', default=None)
@@ -80,7 +82,7 @@ def main():
     if args.shapes:
         instrument(vae.model, table)
 
-    z = torch.zeros(16, args.frames, 60, 104, device='cuda')
+    z = torch.zeros(16, args.frames, args.lat_h, args.lat_w, device='cuda')
     runs = []
     out_ref = None
     for i in range(args.runs):

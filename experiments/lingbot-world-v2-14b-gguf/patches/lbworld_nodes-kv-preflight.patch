@@ -1,0 +1,18 @@
+--- /dev/fd/63	2026-09-09 17:50:08.489174281 -0700
++++ ComfyUI_Rebels_LingBotWorld/lbworld_nodes.py	2026-09-09 17:35:33.550041606 -0700
+@@ -464,7 +464,14 @@
+         lat_h = round(_m.sqrt(max_area * ar) // 8 // 2 * 2)
+         lat_w = round(_m.sqrt(max_area / ar) // 8 // 2 * 2)
+         tokens = max(int(lat_h * lat_w // 4), 1)
+-        kv_gb = 2 * 40 * (local_ + sink_) * tokens * 5120 * 2 / 1e9
++        # CORRECTED (R9700 bring-up): upstream image2video.py allocates
++        #     kv_size = frame_seqlen * self.local_attn_size
++        # so sink frames live INSIDE the local window rather than extending it.
++        # `(local_ + sink_)` overestimates by (local+sink)/local -- 1.33x at
++        # 18+6 -- and refuses configurations that actually fit. Note their own
++        # need_window suggestion below already uses the correct per-frame cost;
++        # only this check was inconsistent with it.
++        kv_gb = 2 * 40 * local_ * tokens * 5120 * 2 / 1e9
+         free_gb = 0.0
+         if torch.cuda.is_available():
+             free_b, _tot = torch.cuda.mem_get_info()

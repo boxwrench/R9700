@@ -1,0 +1,18 @@
+flash2/3: False False
+[LBWorld] building WanModelFast skeleton (14B)
+[LBWorld] loading GGUF: /ai/models/lingbot-gguf/LingBot-World-14B-causal-fast_merged-Q4_K_M.gguf
+[LBWorld] orig_shape metadata for: ['patch_embedding.weight']
+[LBWorld] pinned 2.16 GB of quantized weights (async H2D)
+[LBWorld] quant histogram (count / GB): 0 x810 (0.02GB), 12 x443 (7.52GB), 14 x120 (4.04GB), 1 x48 (0.47GB)
+[LBWorld] 1421 tensors attached; unmatched-in-model: 0; still-meta params: 0
+load 0.7s
+wrapped Linear: 563
+host quant bytes 10.77 GiB
+dense (non-streamed) params 0.44 GiB
+meta left: 0
+pinned 2.01 GiB
+GPU alloc 0.00 reserved 0.00
+   VmSize:	33340204 kB
+   VmPin:	       0 kB
+   VmRSS:	 8063152 kB
+[W909 17:17:01.717174190 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
