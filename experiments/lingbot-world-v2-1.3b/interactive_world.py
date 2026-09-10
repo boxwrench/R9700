@@ -642,6 +642,8 @@ class Presenter:
         rec['frames'] = int(frames.shape[1])
         rec['fps_effective'] = frames.shape[1] / rec['latency_seconds']
         rec['peak_alloc_gib'] = gib(torch.cuda.max_memory_allocated())
+        rec['output_range'] = [float(frames.min()), float(frames.max())]
+        rec['output_finite'] = bool(torch.isfinite(frames).all().item())
         self.all_frames.append(frames)
         return frames
 
@@ -673,6 +675,8 @@ class Presenter:
         rec['frames'] = int(frames.shape[1])
         rec['fps_effective'] = frames.shape[1] / rec['latency_seconds']
         rec['peak_alloc_gib'] = gib(torch.cuda.max_memory_allocated())
+        rec['output_range'] = [float(frames.min()), float(frames.max())]
+        rec['output_finite'] = bool(torch.isfinite(frames).all().item())
         self.all_frames.append(frames)
         return frames
 
@@ -749,6 +753,8 @@ class Presenter:
         rec['frames'] = int(frames.shape[1])
         rec['fps_effective'] = frames.shape[1] / rec['latency_seconds']
         rec['peak_alloc_gib'] = gib(torch.cuda.max_memory_allocated())
+        rec['output_range'] = [float(frames.min()), float(frames.max())]
+        rec['output_finite'] = bool(torch.isfinite(frames).all().item())
         self.all_frames.append(frames)
         if not self.args.no_chunk_mp4:
             rec['file'] = f'chunk_{rec["chunk_index"]:03d}.mp4'
