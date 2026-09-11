@@ -599,6 +599,21 @@ class Presenter:
         self.stream = torch.cuda.Stream() if args.overlap else None
         self.all_frames = []
         self.frame_counter = 0
+        # Presentation-only 2x upscale (opt-in --upscale2). Reads host RGB
+        # only; never feeds VAE/DiT/KV/camera/world state. Async (default):
+        # the archive thread upscales. Sync (--upscale2_sync): the present
+        # path upscales inline and the archive thread only saves.
+        self.upscale2 = args.upscale2
+        self.upscale2_sync = args.upscale2_sync
+        self.up2_dir = None
+        self.up2_frame_counter = 0
+        self.up2_log = []
+        self.up2_lock = threading.Lock()
+        self.up2_max_qsize = 0
+        self.up2_seq = 0
+        if self.upscale2 != 'off':
+            self.up2_dir = os.path.join(out_dir, 'frames_2x')
+            os.makedirs(self.up2_dir, exist_ok=True)
         self.archive = queue.Queue()
         self.archive_thread = threading.Thread(target=self._archive_run, daemon=True)
         self.archive_thread.start()
@@ -647,6 +662,18 @@ class Presenter:
         self.all_frames.append(frames)
         return frames
 
+    def _upscale_sync_inline(self, host_chw, rec):
+        """Inline 2x upscale for --upscale2_sync. Returns array or None."""
+        if self.upscale2 == 'off' or not self.upscale2_sync:
+            return None
+        import numpy as np
+        t0 = time.perf_counter()
+        up2 = upscale_frame_pil(host_chw.numpy().transpose(1, 2, 0),
+                                self.upscale2)
+        ms = (time.perf_counter() - t0) * 1000.0
+        rec.setdefault('upscale2_sync_ms', []).append(ms)
+        return up2
+
     def present_first_tae(self, world, x0, rec):
         """First TAE frame to host (displayable); rest drained after clean KV."""
         f0, first_ms = world.tae.first(x0)
@@ -655,7 +682,15 @@ class Presenter:
         rec['t_first_frame'] = t_first
         rec['first_frame_latency'] = t_first - rec['t_action_start']
         rec['tae_first_ms'] = first_ms
-        self.archive.put(('png', host0.unsqueeze(1)))
+        t_put = time.perf_counter()
+        self.up2_seq += 1
+        seq = self.up2_seq
+        self.archive.put(('png', host0.unsqueeze(1), seq, t_put))
+        up2 = self._upscale_sync_inline(host0, rec)
+        if up2 is not None:
+            rec['t_up2_first'] = time.perf_counter()
+            self.archive.put(('up2png', up2, seq, t_put,
+                              rec['upscale2_sync_ms'][-1]))
         return host0
 
     def drain_rest_tae(self, world, host0, rec):
@@ -665,7 +700,12 @@ class Presenter:
         for f in rest:
             h = (f[0, 0].clamp(0, 1) * 255.0).to(torch.uint8).cpu()
             hosts.append(h.unsqueeze(1))
-            self.archive.put(('png', h.unsqueeze(1)))
+            t_put = time.perf_counter()
+            self.archive.put(('png', h.unsqueeze(1), self.up2_seq, t_put))
+            up2 = self._upscale_sync_inline(h, rec)
+            if up2 is not None:
+                self.archive.put(('up2png', up2, self.up2_seq,
+                                  t_put, rec['upscale2_sync_ms'][-1]))
         t_done = time.perf_counter()
         frames = torch.cat(hosts, dim=1)
         rec['tae_drain_ms'] = drain_ms
@@ -775,14 +815,58 @@ class Presenter:
             item = self.archive.get()
             if item is None:
                 break
+            try:
+                self.up2_max_qsize = max(self.up2_max_qsize,
+                                         self.archive.qsize())
+            except Exception:
+                pass
             if item[0] == 'png':
                 arr = item[1].numpy()
+                chunk = item[2] if len(item) > 2 else None
+                t_put = item[3] if len(item) > 3 else None
                 for i in range(arr.shape[1]):
                     Image.fromarray(arr[:, i].transpose(1, 2, 0)).save(
                         os.path.join(self.frames_dir,
                                      f'f_{self.frame_counter:05d}.png'),
                         compress_level=1)
                     self.frame_counter += 1
+                # Async upscale: archive thread owns it (default). Sync mode
+                # arrives as 'up2png' items instead (upscaled inline).
+                if (self.upscale2 != 'off' and not self.upscale2_sync):
+                    for i in range(arr.shape[1]):
+                        t0 = time.perf_counter()
+                        up2 = upscale_frame_pil(
+                            arr[:, i].transpose(1, 2, 0), self.upscale2)
+                        t1 = time.perf_counter()
+                        Image.fromarray(up2).save(
+                            os.path.join(self.up2_dir,
+                                         f'f_{self.up2_frame_counter:05d}.png'),
+                            compress_level=1)
+                        t2 = time.perf_counter()
+                        with self.up2_lock:
+                            self.up2_log.append({
+                                'frame': self.up2_frame_counter,
+                                'chunk': chunk, 'mode': 'async',
+                                't_put': t_put, 't_done': t2,
+                                'upscale_ms': (t1 - t0) * 1000.0,
+                                'save_ms': (t2 - t1) * 1000.0})
+                        self.up2_frame_counter += 1
+            elif item[0] == 'up2png':
+                _, up2, chunk, t_put, up_ms = item
+                t1 = time.perf_counter()
+                Image.fromarray(up2).save(
+                    os.path.join(self.up2_dir,
+                                 f'f_{self.up2_frame_counter:05d}.png'),
+                    compress_level=1)
+                t2 = time.perf_counter()
+                with self.up2_lock:
+                    self.up2_log.append({
+                        'frame': self.up2_frame_counter,
+                        'chunk': chunk, 'mode': 'sync-inline',
+                        't_put': t_put, 't_done': t2,
+                        'upscale_ms': up_ms,
+                        'save_ms': (t2 - t1) * 1000.0})
+                self.up2_frame_counter += 1
 
     def drain(self, log, quiet=False):
         """Collect every finished chunk record that is ready."""
@@ -822,6 +906,52 @@ class Presenter:
             self.thread.join(timeout=5)
         self.archive.put(None)
         self.archive_thread.join(timeout=60)
+        if self.upscale2 != 'off':
+            import statistics
+            log = sorted(self.up2_log, key=lambda e: e['frame'])
+            ups = sorted(e['upscale_ms'] for e in log)
+            p50 = statistics.median(ups) if ups else 0.0
+            p95 = ups[min(len(ups) - 1, int(0.95 * len(ups)))] if ups else 0.0
+            # Per-packet (4-frame chunk) upscale wall from frame timestamps.
+            by_chunk = {}
+            for e in log:
+                by_chunk.setdefault(e['chunk'], []).append(e['t_done'])
+            pkts = sorted(max(v) - min(v) for v in by_chunk.values() if v)
+            summary = {
+                'method': self.upscale2,
+                'mode': ('sync-inline' if self.upscale2_sync else 'async'),
+                'frames': len(log),
+                'per_frame_upscale_ms_p50': p50,
+                'per_frame_upscale_ms_p95': p95,
+                'packet_wall_ms_p50': (statistics.median(pkts) * 1000.0
+                                       if pkts else 0.0),
+                'packet_wall_ms_p95': (pkts[min(len(pkts) - 1,
+                                                int(0.95 * len(pkts)))] * 1000.0
+                                       if pkts else 0.0),
+                'max_archive_qsize': self.up2_max_qsize,
+            }
+            with open(os.path.join(self.out,
+                                   'upscale2_summary.json'), 'w') as f:
+                json.dump({'summary': summary, 'frames': log}, f, indent=1)
+            print(f"  upscale2 {self.upscale2} "
+                  f"({'sync' if self.upscale2_sync else 'async'}): "
+                  f"{len(log)} frames, per-frame P50 {p50:.1f} / P95 {p95:.1f} ms, "
+                  f"packet P50 {summary['packet_wall_ms_p50']:.1f} / P95 "
+                  f"{summary['packet_wall_ms_p95']:.1f} ms, "
+                  f"max queue {self.up2_max_qsize}", flush=True)
+
+
+def upscale_frame_pil(arr_hwc, method):
+    """2x spatial upscale of a uint8 HxWxC frame. CPU-only, terminal output.
+
+    method is 'bicubic' or 'lanczos'. Returns a new uint8 array at (2H, 2W).
+    Never touches model state; the input array is not modified.
+    """
+    from PIL import Image
+    import numpy as np
+    filt = {'bicubic': Image.BICUBIC, 'lanczos': Image.LANCZOS}[method]
+    im = Image.fromarray(np.ascontiguousarray(arr_hwc))
+    return np.asarray(im.resize((im.width * 2, im.height * 2), filt))
 
 
 def report(rec):
@@ -889,7 +1019,17 @@ def main():
                          'keeping the exact x0->add_noise transition rule and '
                          'the mandatory clean t=0 KV pass. Overrides '
                          '--timesteps_index.')
+                    help='pass the fixed (F,H,W) latent geometry to RoPE as '
     ap.add_argument('--seed', type=int, default=42)
+    ap.add_argument('--upscale2', default='off',
+                    choices=('off', 'bicubic', 'lanczos'),
+                    help='presentation-only 2x spatial upscale of TAE RGB '
+                         '(368x672 -> 736x1344) as terminal output. Never '
+                         'feeds VAE/DiT/KV/camera/world state.')
+    ap.add_argument('--upscale2_sync', action='store_true',
+                    help='upscale inline on the present path (mode A). '
+                         'Default is async: the archive thread upscales '
+                         '(mode B).')
     ap.add_argument('--move_amount', type=float, default=1.0)
     ap.add_argument('--turn_deg', type=float, default=8.0)
     ap.add_argument('--fov_deg', type=float, default=60.0)
