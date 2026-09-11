@@ -610,10 +610,31 @@ class Presenter:
         self.up2_log = []
         self.up2_lock = threading.Lock()
         self.up2_max_qsize = 0
-        self.up2_seq = 0
+        # Present-action sequence; pre-incremented per action so the first
+        # frame is 0, matching the archive up2_frame_counter numbering.
+        self.up2_seq = -1
         if self.upscale2 != 'off':
             self.up2_dir = os.path.join(out_dir, 'frames_2x')
             os.makedirs(self.up2_dir, exist_ok=True)
+        # Live 2x present server (opt-in --present_port, only with upscale):
+        # serves the in-memory JPEG slot, never PNG files, never the model.
+        self.present_server = None
+        # Display worker: upscale + JPEG + publish on its own thread, fed
+        # from the present path. PNG archival stays on the archive thread,
+        # so display never waits for encode/disk (or vice versa). Bounded
+        # queue with latest-wins drop; generator never blocks on it.
+        self.display_q = None
+        self.display_thread = None
+        self.up2_pub = []
+        present_port = getattr(args, 'present_port', 8735)
+        if self.upscale2 != 'off' and present_port > 0:
+            self.present_server = PresentServer(present_port)
+            self.present_server.start()
+            print(f'  present stream: {self.present_server.url}', flush=True)
+            self.display_q = queue.Queue(maxsize=8)
+            self.display_thread = threading.Thread(
+                target=self._display_run, daemon=True)
+            self.display_thread.start()
         self.archive = queue.Queue()
         self.archive_thread = threading.Thread(target=self._archive_run, daemon=True)
         self.archive_thread.start()
@@ -622,6 +643,48 @@ class Presenter:
         if not self.inline:
             self.thread = threading.Thread(target=self._run, daemon=True)
             self.thread.start()
+
+    def _display_put(self, host_chw, idx, t_put):
+        """Non-blocking handoff to the display worker. Drops oldest on
+        overload (never blocks the model loop). No-op without a server."""
+        if self.display_q is None:
+            return
+        try:
+            self.display_q.put_nowait((host_chw, idx, t_put))
+        except queue.Full:
+            try:
+                self.display_q.get_nowait()
+            except queue.Empty:
+                pass
+            try:
+                self.display_q.put_nowait((host_chw, idx, t_put))
+            except queue.Full:
+                pass
+
+    def _display_run(self):
+        """Upscale + JPEG + publish. Reads host tensors only."""
+        from PIL import Image
+        import io as _io
+        import numpy as np
+        while True:
+            item = self.display_q.get()
+            if item is None:
+                break
+            host_chw, idx, t_put = item
+            t0 = time.perf_counter()
+            up2 = upscale_frame_pil(
+                np.ascontiguousarray(host_chw.numpy().transpose(1, 2, 0)),
+                self.upscale2)
+            t1 = time.perf_counter()
+            buf = _io.BytesIO()
+            Image.fromarray(up2).save(buf, 'JPEG', quality=80)
+            t_slot = time.perf_counter()
+            self.present_server.publish(idx, buf.getvalue(), t_slot)
+            with self.up2_lock:
+                self.up2_pub.append({
+                    'frame': idx, 't_put': t_put, 't_slot': t_slot,
+                    'upscale_ms': (t1 - t0) * 1000.0,
+                    'jpeg_ms': (t_slot - t1) * 1000.0})
 
     def process_inline(self, x0, rec):
         """Decode in the calling thread.
@@ -686,6 +749,7 @@ class Presenter:
         self.up2_seq += 1
         seq = self.up2_seq
         self.archive.put(('png', host0.unsqueeze(1), seq, t_put))
+        self._display_put(host0, seq, t_put)
         up2 = self._upscale_sync_inline(host0, rec)
         if up2 is not None:
             rec['t_up2_first'] = time.perf_counter()
@@ -702,6 +766,7 @@ class Presenter:
             hosts.append(h.unsqueeze(1))
             t_put = time.perf_counter()
             self.archive.put(('png', h.unsqueeze(1), self.up2_seq, t_put))
+            self._display_put(h, self.up2_seq, t_put)
             up2 = self._upscale_sync_inline(h, rec)
             if up2 is not None:
                 self.archive.put(('up2png', up2, self.up2_seq,
@@ -906,12 +971,24 @@ class Presenter:
             self.thread.join(timeout=5)
         self.archive.put(None)
         self.archive_thread.join(timeout=60)
+        if self.display_thread is not None:
+            try:
+                self.display_q.put(None)
+            except Exception:
+                pass
+            self.display_thread.join(timeout=60)
+        if self.present_server is not None:
+            self.present_server.stop()
         if self.upscale2 != 'off':
             import statistics
             log = sorted(self.up2_log, key=lambda e: e['frame'])
             ups = sorted(e['upscale_ms'] for e in log)
             p50 = statistics.median(ups) if ups else 0.0
             p95 = ups[min(len(ups) - 1, int(0.95 * len(ups)))] if ups else 0.0
+            # Display-publish latency (present-path put -> live slot).
+            pub = sorted(self.up2_pub, key=lambda e: e['frame'])
+            lags = sorted((e['t_slot'] - e['t_put']) * 1000.0 for e in pub)
+            jpeg = sorted(e['jpeg_ms'] for e in pub)
             # Per-packet (4-frame chunk) upscale wall from frame timestamps.
             by_chunk = {}
             for e in log:
@@ -921,6 +998,13 @@ class Presenter:
                 'method': self.upscale2,
                 'mode': ('sync-inline' if self.upscale2_sync else 'async'),
                 'frames': len(log),
+                'pub_frames': len(pub),
+                'put_to_slot_ms_p50': (statistics.median(lags) if lags
+                                       else 0.0),
+                'put_to_slot_ms_p95': (lags[min(len(lags) - 1,
+                                                int(0.95 * len(lags)))]
+                                       if lags else 0.0),
+                'jpeg_ms_p50': (statistics.median(jpeg) if jpeg else 0.0),
                 'per_frame_upscale_ms_p50': p50,
                 'per_frame_upscale_ms_p95': p95,
                 'packet_wall_ms_p50': (statistics.median(pkts) * 1000.0
@@ -932,13 +1016,17 @@ class Presenter:
             }
             with open(os.path.join(self.out,
                                    'upscale2_summary.json'), 'w') as f:
-                json.dump({'summary': summary, 'frames': log}, f, indent=1)
+                json.dump({'summary': summary, 'frames': log,
+                           'pub': pub}, f, indent=1)
             print(f"  upscale2 {self.upscale2} "
                   f"({'sync' if self.upscale2_sync else 'async'}): "
                   f"{len(log)} frames, per-frame P50 {p50:.1f} / P95 {p95:.1f} ms, "
                   f"packet P50 {summary['packet_wall_ms_p50']:.1f} / P95 "
                   f"{summary['packet_wall_ms_p95']:.1f} ms, "
-                  f"max queue {self.up2_max_qsize}", flush=True)
+                  f"max queue {self.up2_max_qsize}, "
+                  f"put->slot P50 {summary['put_to_slot_ms_p50']:.1f} / P95 "
+                  f"{summary['put_to_slot_ms_p95']:.1f} ms "
+                  f"({summary['pub_frames']} published)", flush=True)
 
 
 def upscale_frame_pil(arr_hwc, method):
@@ -952,6 +1040,132 @@ def upscale_frame_pil(arr_hwc, method):
     filt = {'bicubic': Image.BICUBIC, 'lanczos': Image.LANCZOS}[method]
     im = Image.fromarray(np.ascontiguousarray(arr_hwc))
     return np.asarray(im.resize((im.width * 2, im.height * 2), filt))
+
+
+class PresentServer:
+    """In-process MJPEG/latest-JPEG server for upscaled frames.
+
+    Owns one bounded latest-frame slot (JPEG bytes + monotonic index):
+    publish() overwrites, so a slow browser drops stale frames instead of
+    blocking simulation. Serves /stream2x.mjpg (multipart push, one part per
+    new frame with an X-Frame-Idx header) and /latest2x.jpg (one-shot).
+    stdlib only, daemon threads; stop() in Presenter.close().
+    """
+
+    def __init__(self, port, quality=80):
+        import http.server
+        self.port = port
+        self.quality = quality
+        self._lock = threading.Lock()
+        self._idx = -1
+        self._jpeg = b''
+        self._t_slot = 0.0
+        self._served_parts = 0
+        self._httpd = None
+        self._thread = None
+        self._http_mod = http.server
+
+    def publish(self, idx, jpeg_bytes, t_slot):
+        with self._lock:
+            if idx > self._idx:
+                self._idx, self._jpeg, self._t_slot = idx, jpeg_bytes, t_slot
+
+    def snapshot(self):
+        with self._lock:
+            return self._idx, self._jpeg, self._t_slot
+
+    def start(self):
+        server = self
+
+        class H(self._http_mod.BaseHTTPRequestHandler):
+            server_version = 'lingbot-present/1'
+
+            def log_message(self, *a):
+                pass
+
+            def do_GET(self):
+                if self.path == '/stream2x.mjpg' or \
+                        self.path.startswith('/stream2x.mjpg?'):
+                    self.send_response(200)
+                    self.send_header('Content-Type',
+                                     'multipart/x-mixed-replace; boundary=frame')
+                    self.send_header('Cache-Control', 'no-cache')
+                    self.end_headers()
+                    last = -1
+                    try:
+                        while True:
+                            idx, blob, t_slot = server.snapshot()
+                            if idx == last or not blob:
+                                time.sleep(0.005)
+                                continue
+                            self.wfile.write(
+                                b'--frame\r\nContent-Type: image/jpeg\r\n'
+                                b'X-Frame-Idx: ' + str(idx).encode() +
+                                b'\r\nX-Slot-Time: ' + repr(t_slot).encode() +
+                                b'\r\nContent-Length: ' + str(len(blob)).encode() +
+                                b'\r\n\r\n' + blob + b'\r\n')
+                            server._note_served()
+                            last = idx
+                    except (BrokenPipeError, ConnectionResetError, OSError):
+                        return
+                elif self.path == '/latest2x.jpg' or \
+                        self.path.startswith('/latest2x.jpg?'):
+                    idx, blob, t_slot = server.snapshot()
+                    if not blob:
+                        self.send_response(204)
+                        self.end_headers()
+                        return
+                    self.send_response(200)
+                    self.send_header('Content-Type', 'image/jpeg')
+                    self.send_header('X-Frame-Idx', str(idx))
+                    self.send_header('Content-Length', str(len(blob)))
+                    self.end_headers()
+                    try:
+                        self.wfile.write(blob)
+                    except (BrokenPipeError, ConnectionResetError, OSError):
+                        pass
+                elif self.path == '/present_stats':
+                    idx, _, t_slot = server.snapshot()
+                    import json as _json
+                    body = _json.dumps(
+                        {'idx': idx, 't_slot': t_slot,
+                         'served_parts': server._served_parts}).encode()
+                    self.send_response(200)
+                    self.send_header('Content-Type', 'application/json')
+                    self.send_header('Content-Length', str(len(body)))
+                    self.end_headers()
+                    self.wfile.write(body)
+                else:
+                    self.send_response(404)
+                    self.end_headers()
+
+        self._httpd = self._http_mod.ThreadingHTTPServer(
+            ('127.0.0.1', self.port), H)
+        self._httpd.daemon_threads = True
+        self._thread = threading.Thread(target=self._httpd.serve_forever,
+                                        kwargs={'poll_interval': 0.05},
+                                        daemon=True)
+        self._thread.start()
+
+    def _note_served(self):
+        with self._lock:
+            self._served_parts += 1
+
+    def stop(self):
+        try:
+            if self._httpd is not None:
+                self._httpd.shutdown()
+        except Exception:
+            pass
+        try:
+            if self._thread is not None:
+                self._thread.join(timeout=5)
+        except Exception:
+            pass
+
+    @property
+    def url(self):
+        return f'http://127.0.0.1:{self.port}/stream2x.mjpg'
 
 
 def report(rec):
@@ -1030,6 +1244,11 @@ def main():
                     help='upscale inline on the present path (mode A). '
                          'Default is async: the archive thread upscales '
                          '(mode B).')
+    ap.add_argument('--present_port', type=int, default=8735,
+                    help='in-process MJPEG/latest-JPEG server for upscaled '
+                         'frames (0 disables). Serves the in-memory slot '
+                         'only when --upscale2 is active; never touches '
+                         'PNG files or model state.')
     ap.add_argument('--move_amount', type=float, default=1.0)
     ap.add_argument('--turn_deg', type=float, default=8.0)
     ap.add_argument('--fov_deg', type=float, default=60.0)

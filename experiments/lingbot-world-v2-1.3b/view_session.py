@@ -21,6 +21,11 @@ FRAMES = os.path.abspath(sys.argv[1] if len(sys.argv) > 1 else
                           '/ai/outputs/lingbot-session/frames')
 PORT = int(sys.argv[2] if len(sys.argv) > 2 else 8734)
 KEYFIFO = sys.argv[3] if len(sys.argv) > 3 else '/tmp/lingbot-keys'
+# Optional live 2x MJPEG stream served by the session's present server
+# (interactive_world.py --upscale2 + --present_port). Empty (default) keeps
+# the legacy PNG-poll display byte-for-byte as it was.
+PRESENT = (sys.argv[4] if len(sys.argv) > 4
+           else os.environ.get('PRESENT_URL', ''))
 ACTIONS = os.path.join(os.path.dirname(FRAMES), 'actions.jsonl')
 
 KEYMAP = {
@@ -105,7 +110,7 @@ PAGE = """
   @keyframes blink { 50% { opacity:.35; } }
 </style></head><body>
 <div id="banner"></div>
-<div id="stage"><img id="a" alt=""><img id="b" alt=""></div>
+<div id="stage"><img id="a" alt=""><img id="b" alt=""><img id="live" alt="" style="display:none"></div>
 <div id="hud"><span class="dim">keys —</span> <span id="keys"></span></div>
 <div id="wait">generating&hellip;</div>
 <div id="bar">
@@ -116,7 +121,16 @@ PAGE = """
   <span id="stat">move: WASD / arrows &middot; click the page first so keys register</span>
 </div>
 <script>
+const STREAM = '__STREAM2X__';
 const A = document.getElementById('a'), B = document.getElementById('b');
+const LIVE = document.getElementById('live');
+if (STREAM) {
+  // Live 2x MJPEG push: newest frame wins, no filesystem polling.
+  A.style.display = 'none'; B.style.display = 'none';
+  LIVE.style.display = 'block'; LIVE.style.opacity = '1';
+  LIVE.onerror = () => { setTimeout(() => { LIVE.src = STREAM; }, 1000); };
+  LIVE.src = STREAM;
+}
 let shown = A, hidden = B, seenCount = -1, queue = [], busy = false;
 let waiting = false, lastFrame = '';
 const keysEl = document.getElementById('keys');
@@ -172,16 +186,18 @@ function playNext() {
 
 async function poll() {
   try {
-    const r = await fetch('/frames?since=' + Math.max(seenCount, 0), {cache: 'no-store'});
-    if (r.ok) {
-      const j = await r.json();
-      if (seenCount < 0) {
-        // First poll: snap to the live edge. Replaying the whole backlog
-        // looks like the world moving on its own; only new frames queue.
-        seenCount = j.total;
-      } else {
-        for (const n of j.frames) { queue.push(n); seenCount++; }
-        playNext();
+    if (!STREAM) {
+      const r = await fetch('/frames?since=' + Math.max(seenCount, 0), {cache: 'no-store'});
+      if (r.ok) {
+        const j = await r.json();
+        if (seenCount < 0) {
+          // First poll: snap to the live edge. Replaying the whole backlog
+          // looks like the world moving on its own; only new frames queue.
+          seenCount = j.total;
+        } else {
+          for (const n of j.frames) { queue.push(n); seenCount++; }
+          playNext();
+        }
       }
     }
     const l = await (await fetch('/log', {cache: 'no-store'})).json();
@@ -225,11 +241,12 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
     def do_GET(self):
         if self.path == '/' or self.path.startswith('/?'):
+            page = PAGE.replace(b'__STREAM2X__', PRESENT.encode())
             self.send_response(200)
             self.send_header('Content-Type', 'text/html; charset=utf-8')
-            self.send_header('Content-Length', str(len(PAGE)))
+            self.send_header('Content-Length', str(len(page)))
             self.end_headers()
-            self.wfile.write(PAGE)
+            self.wfile.write(page)
         elif self.path.startswith('/frames'):
             try:
                 since = int(self.path.split('since=')[1].split('&')[0])
