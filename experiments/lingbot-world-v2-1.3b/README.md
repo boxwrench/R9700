@@ -1,49 +1,78 @@
-# LingBot World v2 1.3B — interactive persistent world on R9700
+# LingBot World v2 1.3B on AMD ROCm
 
-Interactive, persistent, causal world generation with the 1.3B LingBot World v2
-model on a single AMD Radeon AI PRO R9700 (`gfx1201`, ROCm). One process holds
-the whole world: every keypress advances the same DiT KV cache by one chunk,
-and frames render in a browser window as they are generated.
+Persistent interactive world generation on one Radeon AI PRO R9700.
 
-Current validated budget (fast stack, saturated window, seed 42):
+```text
+368×672 simulation
+736×1344 async presentation
+~456 ms first 2× RGB
+~524 ms closed-loop action cadence
+~6.05 GiB peak VRAM
+```
+
+The world model simulates at 368×672 and asynchronously presents at 736×1344.
+The 736×1344 frames are presentation-only resampling — never native model
+generation, never fed back into world state.
+
+## What this is
+
+One process holds a persistent causal world: every keypress advances the same
+DiT KV cache by one chunk (966 tokens/frame, 12-frame window with 6-frame
+sink), commits the accepted latent with an exact clean forward, and presents
+frames — first natively, then upscaled 2× on an async CPU worker that never
+touches the model loop.
+
+## Hardware / software tested
+
+- AMD Radeon AI PRO R9700 (`gfx1201`, HIP device 1), ROCm 7.2.1,
+  PyTorch `2.9.1+rocm7.2.1`, venv `/ai/envs/lingbot-world-v2`
+- Upstream `/ai/repos/lingbot-world-v2` @ `7cf8109` (+ local fast-path
+  plumbing, uncommitted — see [REPRODUCIBILITY.md](REPRODUCIBILITY.md))
+- Assembled 1.3B checkpoint + TAEW2.1 weights (SHA enforced at load);
+  full provenance in [REPRODUCIBILITY.md](REPRODUCIBILITY.md)
+
+## Quickstart
+
+```sh
+export LD_LIBRARY_PATH=/opt/rocm-7.2.1/lib HIP_VISIBLE_DEVICES=1
+export WAN_VAE_CONV3D_TEMPORAL_SPLIT=1
+./run_product_2x.sh        # validated product stack (2× Lanczos present)
+# ./run_product.sh         # reference: same world state, native 368×672 only
+# ./play.sh                # press-and-play with browser viewer (own defaults)
+```
+
+`IMAGE=`, `PROMPT=`, `OUT=` override the defaults; extra args append.
+Details, controls, and troubleshooting: [QUICKSTART.md](QUICKSTART.md).
+
+## Architecture overview
+
+```text
+keys → Plücker camera conditioning → persistent DiT (chunk = 1 latent frame)
+  → accepted x0 → exact clean t=0 KV commit → TAEW2.1 → 368×672 RGB
+  → async CPU Lanczos → 736×1344 presentation (terminal, never fed back)
+```
+
+Details: [ARCHITECTURE.md](ARCHITECTURE.md).
+
+## Current measured latency (saturated, seed 42)
 
 | metric | latency |
 |---|---:|
-| keypress → first RGB | **~0.40 s** |
-| keypress → action-conditioned RGB | **~0.53 s** |
-| keypress → next-action-ready | **~0.53 s** |
+| keypress → first native RGB | ~391 ms |
+| keypress → first 2× RGB | ~456 ms |
+| keypress → next-action-ready | ~524 ms |
 
-Definitions of the three metrics: [PERFORMANCE.md](PERFORMANCE.md#metrics).
+Definitions and the full milestone progression: [PERFORMANCE.md](PERFORMANCE.md).
+What each change preserved or traded:
+[PERFORMANCE.md](PERFORMANCE.md#exact-versus-quality-affecting).
 
-## Start here
+## Technical evidence
 
-- [QUICKSTART.md](QUICKSTART.md) — environment → models → launch → controls → what to expect
-- Fastest validated launch: [`./play.sh`](play.sh) (starts viewer + session; open http://localhost:8734/)
-- Reference launch (upstream-faithful defaults): [`./run_product.sh`](run_product.sh) without the fast flags — see [PERFORMANCE.md](PERFORMANCE.md#stacks) for both flag sets
-
-## How it works (one paragraph)
-
-Movement keys become camera motions, encoded as 6-channel Plücker ray
-embeddings — the only conditioning this checkpoint accepts. Each action runs
-3 denoising DiT forwards plus one mandatory exact clean forward that commits
-the accepted latent into a rolling KV cache (6 sink + 5 recent + 1 current
-frame at the fast setting), so the next action continues the same world.
-Decoded RGB comes from the pinned TAEW2.1 presentation decoder or the
-canonical FP16 VAE. Details: [ARCHITECTURE.md](ARCHITECTURE.md).
-
-## Status
-
-Active experiment on branch `experiment/lingbot-world-v2-1.3b`, isolated from
-the production ComfyUI work on `main`. Runner defaults are the conservative
-reference (4-step sampler, canonical renderer, clean-first order, 18-frame
-window); every faster behavior is an opt-in flag — see
-[PERFORMANCE.md](PERFORMANCE.md#exact-versus-quality-affecting) for which
-changes are bit-exact and which trade quality.
-
-## Deeper records
-
-- [QUICKSTART.md](QUICKSTART.md) — setup and controls
-- [ARCHITECTURE.md](ARCHITECTURE.md) — world state, caches, renderers
-- [PERFORMANCE.md](PERFORMANCE.md) — stacks, latency progression, rejected ideas
-- [REPRODUCIBILITY.md](REPRODUCIBILITY.md) — hardware, software, provenance, benchmark recipe
-- [research/](research/) — full experiment history, raw logs, harnesses, negative results
+- [PERFORMANCE.md](PERFORMANCE.md) — stacks, milestone progression, rejected ideas
+- [REPRODUCIBILITY.md](REPRODUCIBILITY.md) — provenance, pins, benchmark recipe
+- [research/FINDINGS.md](research/FINDINGS.md) — full experiment chronology
+- [research/LATENCY_LEDGER.md](research/LATENCY_LEDGER.md) — interactive latency ledger
+- [research/RESOLUTION_PATHS.md](research/RESOLUTION_PATHS.md) — why presentation
+  upscale won over native higher-resolution DiT
+- [research/rejected/](research/rejected/) — closed paths, so they stay closed
+- [research/milestones/](research/milestones/) — frozen product snapshots

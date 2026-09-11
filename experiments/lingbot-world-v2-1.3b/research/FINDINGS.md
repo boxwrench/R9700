@@ -348,3 +348,226 @@ Integration: `--denoise_schedule {4-step,3-step-A}` (default 4-step
 reference); 3-step-A maps to grid [0,500,750] with the exact transition
 rule and mandatory clean pass. TAE/384/clean-KV/canonical-fallback/SDPA
 all unchanged. Target answered: action-conditioned 0.824 s -> ~0.67 s.
+
+## 2026-09-10 — viewer session quit after 5 frames (FIFO sticky-EOF)
+
+TASK: diagnose "went 5 frames and quit" (2 actions, then session exited).
+HYPOTHESIS: viewer opened+closed the key FIFO per keypress; after the 2nd
+key's writer closed, the runner's next input() saw EOF, and Python stdin
+holds EOF sticky -> EOFError -> session quit path.
+CONTROL: test_viewer.py delivery (single key) passed; code read confirmed
+os.close(fd) in send_key finally-block + bare EOFError->break in runner.
+CHANGE: view_session.py holds ONE persistent FIFO writer (retry-once on
+EPIPE); interactive_world.py treats EOF on non-tty stdin as transient
+(sleep+continue), keeps Ctrl-D-quit on real ttys. Added
+test_key_burst_no_eof (3 sequential keys, reader held open).
+RESULT: test_viewer.py 8/8 OK; py_compile OK. fix untested live (GPU left
+free for user relaunch; user's next session is the e2e proof).
+DECISION: SELECTED (pending live confirm). Relaunch with the same command;
+frames 1-5 from the quit session are intact in OUT.
+NEXT: user relaunches, presses 3+ keys; if it survives past 5 frames, mark
+CONFIRMED.
+
+## 2026-09-10 — play.sh press-and-play launcher
+
+TASK: single command to start viewer + session (user: retyping is dumb).
+CHANGE: new play.sh — boots viewer :8734 in background (reuses if up),
+then execs the forge session (TAE/decode-first/3-step-A/384x672) in the
+foreground with the forge-awakening image+prompt baked in as defaults.
+Uses <> for the key fifo so boot prints progress immediately instead of
+blocking for the first keypress. Env overrides: IMAGE/PROMPT/OUT/PORT/
+KEYFIFO. run_product.sh untouched.
+RESULT: live-tested to world-load start (viewer 200, checkpoint load
+began, boot logs immediate). Fixed IMAGE typo (awakening not wakening).
+DECISION: SELECTED. User runs ./play.sh, opens the page, presses keys.
+
+## 2026-09-10 — window-12 candidate (local_attn_size 18→12, sink 6)
+
+QUESTION: can LingBot keep a useful persistent world with 12 full-res
+historical frame-equivalents instead of 18, moving action-conditioned
+response ~0.67 s toward ~0.6 s?
+SEMANTICS (verified code + live): sink is INSIDE local_attn_size. Actual
+geometry is 368x672 / latent 46x84 / 966 tokens-per-frame (brief assumed
+1008; corrected live). Baseline 18 = 6 sink + 11 rolling + 1 current =
+17388 KV tokens; candidate 12 = 6 sink + 5 rolling + 1 current = 11592.
+Eviction flips exactly at chunk 18 (base) / 12 (cand). Live Q=966,
+attended K == allocated valid K (17388 / 11592). BF16, 30 layers x 12
+heads x 128. Backend: no flash_attn on gfx1201 -> torch SDPA fallback,
+observed only, untouched.
+LATENCY (matched 30x stay, same image/prompt/seed/schedule/TAE; P50/P95
+saturated): denoise 519.6/521.5 -> 421.4/424.7 ms (-98); clean-KV
+168.8/171.2 -> 139.2/140.8 (-30); first RGB 524.0/525.8 -> 425.7/428.9
+(-98); conditioned RGB 699.0/700.8 -> 570.7/574.4 (-128); next-ready
+700.1/702.2 -> 571.8/575.8 (-128). Peak VRAM 6.93 -> 5.94 GiB; KV cache
+2.99 -> 1.99 GiB. Equal-K controls identical (K=2898: 303 vs 307 ms;
+K=8694: 373 vs 375 ms): latency scales with actual K, not capacity.
+Self-attention/forward saturated: 82 -> 51.5 ms (ratio 0.628 vs K ratio
+0.667); 4 forwards save ~122 of the 128 ms. No fix attempted per brief.
+ROLLOUT (90 actions, matched script, adv. legs + returns at gaps <6 /
+6-12 / >12): poses identical; all 180 finite. Revisit L1 base vs cand:
+<6: 15.66 vs 14.39; 6-12: 17.98 vs 16.28; >12: 17.50 vs 16.94 (cand
+equal-or-better everywhere). Sharpness end 576.9 vs 773.0; move energy >
+stay energy both runs. Canonical sequential decode of 7 saved x0:
+bit-identical through x0_011, then bounded divergence (L1 9-16, within
+own revisit variance). Cold-cache single-latent canonical decode
+collapses (dark) — documented non-method, superseded by sequential.
+DECISION: RETAIN 12-frame mode as supported option (--local_attn_size 12).
+Default unchanged (18); no production change without update gate + approval.
+Artifacts: /ai/outputs/lingbot-window12/ (runs, probes, latents, canonical,
+harness/attn_probe.py). No repo source files modified for this experiment.
+
+## 2026-09-10 — exact-transformer reassessment (window-12 config)
+
+Groundwork for next-experiment choice. Shape-exact microbench + live hooks:
+fp32 time MLP is ~12.5 ms/forward in-path (embed ~2.2 + projection ~10.3;
+t fixed at [999,908,768,0] every action) = ~50 ms/action, largest exactly
+removable cost. fp32 GEMM path is ~50x slower than bf16 on identical shapes
+(m3 fp32 20.2 ms cold vs bf16 ~0.4 ms). Everything else measured dead for
+exact purposes: RoPE 0.06 ms, evict clone 0.04-0.09 ms, text-embed 0.14 ms,
+TunableOp/GEMM headroom ~1-2 ms (FFN already ~70 TFLOPS effective in bf16).
+torch.compile smoke works on gfx1201 (2.6 s first, single-GEMM warm nil).
+Artifacts: harness/op_breakdown.py, harness/timeprobe.py, timeprobe/ run.
+
+## 2026-09-10 — timecond_cache: RETAIN (opt-in --timecond_cache)
+
+Dims reconciled live: dim=1536, freq_dim=256, heads=12, layers=30,
+time_embedding 256->1536->1536, time_projection 1536->9216, e0 [1,966,9216]
+FP32. Earlier 2048-dim microbench estimates discarded; live hooks rule.
+Remeasured time-conditioning cost in-path: embed ~2.2 + projection ~10.3 ms
+per forward; t fixed at [999,908,768,0] every action.
+Implementation: precompute (e, e0) once with existing modules under identical
+autocast; serve via per-forward module swap keyed (timestep, seq_len); miss
+raises. No upstream edits, no dtype change, no rewritten math.
+Bit-identity (20-action off vs on, window 12): e/e0 cache-vs-live recompute
+equal all 4; x0 hashes equal all 20; KV equal all 30 layers k+v; 77/77 PNGs
+byte-identical; actions.jsonl differs only in timing fields.
+Warmed saving (30 stays, saturated P50): next-ready 575.9 -> 530.5 ms
+(-45.4); conditioned RGB -45.3; first RGB -33.6; clean -12.2. Peak VRAM
+5.94 -> 6.05 GiB (+cache). P95 tight. Retain threshold >=20 ms: PASS.
+RETAIN as opt-in flag; default unchanged. Next per roadmap: clean-pass
+KV-write-only structural. Artifacts: outputs/lingbot-window12/tc_*,
+harness/tc_validate.py + timeprobe.py.
+
+## 2026-09-10 — camcond hoist: REJECTED, code reverted
+
+Phase 0 (live, 966-token, window 12): model cam prep ~0.21 ms/forward;
+per-block injector->shift ~8.1 ms/forward (event-timed, 30 blocks); same
+plucker object+values across all 4 forwards; per-block cam_scale/shift
+bitwise equal across t=999/908/768/0 (56 forwards) — dependency proof held.
+Predicted ceiling ~25 ms/action.
+Implementation (--camcond_cache): per-action precompute with original
+modules under matching autocast + const-serve swaps. Bit-identity FULLY
+held: served-vs-live recompute 20/20, x0 20/20, KV 30 layers, 77/77 PNGs,
+trajectory identical.
+A/B/A sandwich (24 stays, saturated P50 next-ready): off1 541.4 / on 548.1
+/ off2 538.1 ms => ON +8 ms (P95 tight, off anchors reproducible). The
++365 MB persistent const footprint perturbs execution beyond the removed
+GEMM work on this box. Verdict REJECT (<20 ms bar, negative saving).
+Implementation fully reverted; code path unchanged. Profile + artifacts:
+outputs/lingbot-window12/cam_{probe,probe_proof,time,off,on,aba_*},
+harness/cam_{probe,time,validate}.py. Next: clean-pass KV-write-only.
+
+## 2026-09-10 — regional torch.compile Phase 0: STOP before implementing
+
+Fresh kineto trace (2 saturated actions, window12+timecond): 9,281 kernel
+launches/action (3.2-4.4 us API each), 478 .item()/.tolist() syncs/action
+(2-4 per block-forward: rope tolist, frame_seqlen item, eviction items,
+cross is_init), avg drain 625 us = GPU stays fed (lockstep eager:
+CPU submits ~1 ms, sync drains; almost no CPU/GPU overlap as a result).
+Per-forward composition (live SDPA + shape-exact bench, dim1536/ffn8960):
+SDPA 51.5, FFN 17.3, QKV/O 7.5, cam 7.5, cross 8.9, norms/elem 5.6 ms.
+Dynamo would fragment at every data-dependent sync (~100+ graphs/forward,
+tiny fragments, ~0 fusion benefit, 30-60 min startup, K-shape recompiles
+during fill). Only clean single-graph region is FFN (shape-stable always):
+ceiling ~4-5 ms/action < 15 ms bar. Clean-pass final tail (head+unpatchify)
+~0.03 ms, not implementable usefully. VERDICT: close compile path.
+Structural note (not a proposal): the ~478 syncs/action enforce lockstep
+(~100 ms non-overlap); removing them is upstream cache-logic surgery,
+out of scope. Artifacts: harness/compile_phase0.py, compile_phase0.log.
+
+## 2026-09-10 — static host-sync removal: REJECTED, code reverted
+
+Phase 0 exact census (instrumented wrappers on current local code, window-12 saturated):
+rolled action = 704 torch syncs (fill 644), fully reconciled: per block-forward 2x rope
+tolist + KV-index items per branch (fwd0: 141+142 in all 30 blocks, evict iff full; fwd1-3:
+141-short-circuit or else-branch), plus 4 timecond-key items, 4 unpatchify tolists,
+2 scheduler items, 4 post-sync bookkeeping items per action. Profiler's 478 ≈ GPU-side
+items only (460) + explicit syncs/presentation; CPU tolists (244) are kineto-invisible.
+
+Key correction to the experiment premise: rope `grid_sizes.tolist()` (240/action) is on a
+CPU tensor (~1 us, never a drain). `frame_seqlen` and cross `is_init` are already zero on
+the hot path. Removable static exposure totaled ~0.35 ms/action (~0.1 ms real GPU drain).
+The ~2.6 ms x120 serialized drains are the dynamic KV-index reads (stage 2, not attempted).
+
+Candidate (rope_pygrid + unpatchify-pygrid + CPU timecond keys): 704 -> 456 syncs, hot path
+left with dynamic KV items only. Bit-identity FULLY held (x0 20/20, KV 30+30 layers,
+cross 30+30+init, indices/trajectory/evict-12, 121/121 PNGs byte-identical across 3 runs).
+A/B/A sandwich rolled P50 next-ready: off1 527.4 / on 529.3 / off2 527.6 ms (P95 flat).
+Verdict REJECT (<5 ms bar): drains serialize critical-path GPU work; removing non-draining
+syncs changes nothing. Both trees reverted and verified byte-identical to pre-experiment
+state. Scratch harnesses kept in /tmp only (sync_census.py, identity.py).
+
+## 2026-09-10 — Python KV cursor (dynamic sync removal): REJECTED, code reverted
+
+Phase 0A (metric boundaries, saturated evicting action): setup 0.5 ms, denoise 386.2 ms
+(3 forwards), TAE-first 3.4 ms, first RGB on host at 390.3 ms (BEFORE clean), clean-KV
+126.6 ms, TAE-drain 2.1 ms, all-host 520.9 ms, next-ready 524.6 ms. Earlier "~526 ms
+first RGB" was latency_seconds (post-clean); true first-visible is ~390 ms. Decode-first
+does present before clean; clean is what makes next-ready ~525 ms.
+
+Phase 0B (layer cursor equivalence, 22 actions x120 block-forwards = 2640): all 30 layers
+identical on (gb, lb, cap, cs, ce, new, ga, la) for every (action, forward). Zero
+divergence. fwd0 advances/evicts; fwd1-3 + clean overwrite same slots, indices unchanged.
+Shared model-level cursor authorized (not assumed).
+
+Phase 0C (pure-Python shadow): 2640/2640 agreement on (local_end, new_global_end),
+10/10 evict-branch predictions match (acts 12-21 fwd0, evicted=966, rolled=4830).
+
+Candidate (--python_kv_cursor, since reverted): one plan/forward, all 450 dynamic KV
+.items gone (rolled 704 -> 254; only CPU tolists, 4 timecond-key items, scheduler(2) and
+post-sync bookkeeping(4) remain). Device scalars kept as fill_ mirrors, never read back;
+per-action mirror asserts passed throughout. Bit-identity FULLY held over a 51-action
+matched session crossing 39 evictions: x0 51/51, KV k/v 30/30, cross k/v/init 30/30,
+indices/trajectory/RNG progression equal; 121/121 TAE PNGs byte-identical across the
+A/B/A runs.
+
+A/B/A sandwich (31 scripted actions, saturated rolled P50): denoise 388.3/389.0/388.8,
+clean 127.9/127.6/128.2, first-frame 392.5/393.5/393.0, next-ready 525.6/528.8/527.6 ms;
+P95 flat everywhere; VRAM 6.05 GiB all lanes. Delta ≈ 0, within variance.
+
+Verdict REJECT (<10 ms bar): dynamic host syncs also serialize GPU work already on the
+critical path. Both trees reverted and verified byte-identical to pre-experiment state.
+Sync-removal work is CLOSED per the experiment gate: no further cursor rewrites. The
+compile-revisit pointer (sync topology changed nothing measurable) is moot.
+
+## 2026-09-10 — presentation-only 2x upscale: RETAIN async (commit 2dd8140)
+
+Question: 368x672 TAE RGB -> ~720p present with no world-model loop cost.
+Implementation (opt-in --upscale2 bicubic/lanczos, default off; --upscale2_sync
+for inline mode): CPU PIL resampling of host RGB only; async mode upscales on
+the archive thread, sync mode inline on the present path. Upscaled frames are
+terminal output (frames_2x/), never fed back. Scoped commit 2dd8140
+(interactive_world.py only, 142+/2-).
+
+Timing, 31-action matched runs, saturated rolled P50 (P95):
+
+- OFF: denoise 386.5, clean 126.6, first-frame 390.7, next-ready 524.8 (531.4)
+- bicubic async: per-frame upscale 7.0/8.9 ms; next-ready 524.5 (529.1)
+- lanczos async: per-frame upscale 9.0/10.7 ms; next-ready 524.3 (528.5)
+- bicubic sync: per-frame 7.6/8.7 ms inline; next-ready 555.6 (+31 ms) REJECT
+
+Async worker always caught up (max archive queue 1, all 121 frames); first
+upscaled frame ~65 ms after native-ready, well before next action. VRAM
+identical 6.05 GiB all lanes (CPU resize, zero GPU contention).
+
+State: native PNG sets byte-identical across OFF/bicA/lanA/bicS (same hash as
+all prior runs); KV indices, eviction, trajectory, latent-frame counts equal.
+Quality (identical source frames, video + contact sheets inspected):
+nearest-blocky -> smooth bicubic -> marginally crisper lanczos; no ringing or
+shimmer observed; frame-to-frame deltas match native (0.021-0.022), i.e. no
+added temporal instability. No "generated detail" claimed.
+
+Verdict RETAIN async only (both methods; default off). Sync-inline mode
+rejected (+31 ms critical path = 4x inline upscale, as predicted).
+Artifacts: /tmp/sbs_2x.mp4, /tmp/sbs_contact.png, /tmp/crop_detail.png,
+upscale2_summary.json per run dir (scratch, regenerable with one command).

@@ -59,6 +59,24 @@ removed or approximated. Research history: `research/INTERACTIVE.md` § Phase B.
   display-only, first RGB in milliseconds; generation state provably
   untouched. Approximate RGB by design.
 
+## Resolution pipeline (presentation upscale)
+
+```text
+DiT world simulation, 368×672
+  ↓ accepted x0
+TAEW2.1 → 368×672 RGB (native frames/)
+  ↓ async CPU Lanczos (--upscale2, default off)
+736×1344 presentation (frames_2x/, terminal output only)
+```
+
+The upscale adds no generated scene information: it improves presentation
+sampling/sharpness only and never feeds back into VAE, DiT, KV cache, camera
+conditioning, or world state (native PNGs are byte-identical with and without
+it). Measured: ~9.0/10.7 ms per frame P50/P95, first upscaled frame ~65 ms
+after native-ready, next-action-ready unchanged. PNG archival I/O is not
+upscale compute time. Sync-inline mode exists (`--upscale2_sync`) but was
+measured +31 ms on the loop and is not retained as a mode.
+
 `--schedule decode-first` presents the accepted latent before the clean
 commit (same final state, earlier first RGB); `clean-first` is the reference
 order. Scheduling changes are bit-identical where proven — see
@@ -68,7 +86,8 @@ order. Scheduling changes are bit-identical where proven — see
 
 `metadata.json` (resolution, latent grid, KV capacity, init timings, cache
 hit), `initial.png`, `chunk_*.mp4` (written at session end, off the critical
-path), `session.mp4`, `frames/`, `actions.jsonl` — one record per action with
-timings, `kv_global_end`/`kv_local_end`, capacity, eviction flag, seed, camera
-position, and VRAM. The three latency metrics are defined in
+path), `session.mp4`, `frames/`, `frames_2x/` + `upscale2_summary.json` (only
+with `--upscale2`), `actions.jsonl` — one record per action with timings,
+`kv_global_end`/`kv_local_end`, capacity, eviction flag, seed, camera
+position, and VRAM. The latency metrics are defined in
 [PERFORMANCE.md](PERFORMANCE.md#metrics).

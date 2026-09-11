@@ -7,8 +7,14 @@ Three separate numbers, all per action at saturated window, seed 42:
 | metric | definition (`actions.jsonl` field) | meaning |
 |---|---|---|
 | first RGB | `first_frame_latency` | keypress → first displayable frame (TAE: post-denoise, pre-clean-commit) |
+| first 2× RGB | archive `t_done` of first upscaled frame | first native frame + async Lanczos (~65 ms later; NOT a loop gate) |
 | action-conditioned RGB | `latency_seconds` | keypress → full chunk presented after the clean commit |
 | next-action-ready | `next_ready_latency` | keypress → session ready for the next action |
+
+`latency_seconds` is the full-packet post-clean number — do not quote it as
+"first RGB". (Early experiment notes repeated ~526 ms as first-RGB; live-path
+instrumentation corrected this: true first RGB is `first_frame_latency`,
+pre-clean.)
 
 Report P50/P95 over saturated-window actions. Never compare across different
 geometries or window occupancies without saying so.
@@ -22,7 +28,8 @@ Reference (runner defaults — conservative, upstream-faithful):
 --schedule clean-first      --local_attn_size 18 --sink_size 6
 ```
 
-Fast validated stack (all opt-in flags):
+Product stack (`./run_product_2x.sh`; reference without upscale:
+`./run_product.sh` — same world state, native output only):
 
 ```sh
 --size 384*672 --chunk_size 1             # actual 368x672, 966 tok/frame
@@ -30,12 +37,17 @@ Fast validated stack (all opt-in flags):
 --denoise_schedule 3-step-A               # 999 → 908 → 768 + clean t=0
 --presentation_decoder taew2_1 --schedule decode-first
 --timecond_cache                          # exact time-embedding memo
+--upscale2 lanczos                        # async CPU 2x present, 736x1344
 ```
 
-Measured fast budget (saturated P50): **first RGB 0.40 s, conditioned
-0.53 s, next-ready 0.53 s**, peak VRAM ~6.0 GiB. Reference at the same
-geometry: canonical first RGB ≈1.71 s / conditioned ≈1.84 s (INTERACTIVE.md
-TAE section — older config, retained for scale, not a controlled A/B).
+Measured product budget (saturated P50): **first native RGB 0.39 s, first
+2× RGB 0.46 s, next-ready 0.52 s**, peak VRAM ~6.1 GiB. The 2× stage runs on
+an async CPU worker: per-frame upscale 9.0/10.7 ms P50/P95, first upscaled
+frame ~65 ms after native-ready, worker always caught up (max queue 1).
+Sync-inline mode was measured at +31 ms next-ready and rejected. Reference
+at the same geometry: canonical first RGB ≈1.71 s / conditioned ≈1.84 s
+(INTERACTIVE.md TAE section — older config, retained for scale, not a
+controlled A/B).
 
 ## Latency progression
 
@@ -51,6 +63,7 @@ One line per accepted milestone; metric and workload stated each time.
 | 3-step-A sampler | 0.544 s | ~0.669 s | 0.759 s | drop t=967; 50-action rollout + pose round-trip accepted |
 | window 18 → 12 | 0.426 s | 0.571 s | 0.572 s | 6 fewer history frames; 90-action adversarial rollout, revisit L1 equal-or-better |
 | time-conditioning memo | **0.395 s** | **0.530 s** | **0.531 s** | exact; −45 ms whole-action; +0.1 GiB |
+| async 2× Lanczos present | 0.391 s native / 0.456 s 2× | 0.524 s | 0.524 s | presentation-only; loop unchanged; sync-inline rejected (+31 ms) |
 
 VRAM along the way: 18.9 → 13.5 (FP16) → 7.1 (TAE) → 5.9 (window 12) →
 6.1 GiB (timecond cache).
@@ -68,7 +81,8 @@ VRAM along the way: 18.9 → 13.5 (FP16) → 7.1 (TAE) → 5.9 (window 12) →
 input coalescing, key-repeat suppression.
 
 **Presentation-only** (generation state untouched, displayed RGB approximate):
-TAEW2.1 streaming decoder.
+TAEW2.1 streaming decoder; async 2× Lanczos upscale (native PNGs
+byte-identical with/without it, KV/trajectory unchanged, no added shimmer).
 
 **Quality/state tradeoff** (different outputs by design, accepted on evidence):
 
@@ -91,6 +105,8 @@ TAEW2.1 streaming decoder.
 | cold single-latent canonical decode as evaluator | collapses to near-black without causal cache; invalid probe (use sequential warm decode) |
 | chunk 2/3, resolution upscaling games, 14B GGUF path, Vulkan, 1.3B quantization, broad sweeps | closed; see research index |
 
-Next candidate already queued by prior analysis: clean-pass KV-write-only
-structural forward (skips everything downstream of the cache store on the
-discarded-output clean pass). Not started.
+Superseded pointer: an earlier note queued a clean-pass KV-write-only
+structural forward. The dynamic-cursor experiment then showed sync removal
+(704 → 254 syncs/action, bit-exact) moves whole-action latency ~0 ms, so
+sync-topology work is closed; no further cursor/cache-surgery campaigns are
+open. See `research/rejected/`.

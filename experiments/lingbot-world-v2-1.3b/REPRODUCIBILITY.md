@@ -32,8 +32,8 @@
   VAE (`Wan2.1_VAE.pth`) and tokenizer (`google/`) from
   `/ai/models/lingbot-world-v2-14b-assets/`
 - TAEW2.1: `/ai/models/taehv-011dfc2/` (`taehv.py` + `taew2_1.pth`); weight
-  SHA-256 `d26151e7…c469c797e` is enforced at load (see `TAEW2_1_SHA256` in
-  `interactive_world.py`)
+  SHA-256 enforced at load (see `TAEW2_1_SHA256` in `interactive_world.py`):
+  `d26151e76cdc2c9424bef988de874b33d9a53f30ef3060cd556c429c469c797e`
 - Conditioning cache `~/.cache/lingbot-world-cond/`, keyed by
   image × resolution × horizon (default 90 latent frames)
 - DiT shape (live): dim 1536, 30 layers, 12 heads, head_dim 128, BF16
@@ -45,9 +45,13 @@
 Configurable (CLI/env, all validated): image, prompt, output dir, `--size`
 area target, `--chunk_size`, `--local_attn_size`/`--sink_size`,
 `--denoise_schedule`, `--presentation_decoder`, `--schedule`,
-`--timecond_cache`, `--max_lat_frames`, `--seed`, move/turn amounts, fps.
-Pinned (do not substitute without re-running validation): upstream commit,
-checkpoint assembly, TAE weights, ROCm/Torch builds.
+`--timecond_cache`, `--upscale2 {off,bicubic,lanczos}` (presentation-only;
+world state identical under all three), `--max_lat_frames`, `--seed`,
+move/turn amounts, fps.
+Pinned (do not substitute without re-running validation): upstream commit
+(`7cf8109` + the local fast-path plumbing currently uncommitted in
+`/ai/repos/lingbot-world-v2`), checkpoint assembly, TAE weights, ROCm/Torch
+builds.
 
 ## Benchmark recipe (no new model runs needed to read this)
 
@@ -62,7 +66,8 @@ checkpoint assembly, TAE weights, ROCm/Torch builds.
    revisit gaps <6 / 6–12 / >12), all-finite check, revisit-L1 by horizon,
    sharpness trend, sequential warm canonical decode of saved `x0`.
 
-Reference command (reproduces the 0.40/0.53/0.53 budget on this hardware):
+Reference command (reproduces the product budget on this hardware —
+first native RGB ~0.39 s, next-ready ~0.52 s saturated):
 
 ```sh
 export LD_LIBRARY_PATH=/opt/rocm-7.2.1/lib HIP_VISIBLE_DEVICES=1
@@ -71,8 +76,11 @@ export WAN_VAE_CONV3D_TEMPORAL_SPLIT=1
   --image <frame> --prompt "<text>" --output <dir> \
   --size 384*672 --local_attn_size 12 --sink_size 6 \
   --denoise_schedule 3-step-A --presentation_decoder taew2_1 \
-  --schedule decode-first --timecond_cache \
+  --schedule decode-first --timecond_cache --upscale2 lanczos \
   --script "$(python3 -c "print(' '.join(['x']*30))")" --no_chunk_mp4
 ```
 
-Expect ~35 s init warm-cached, then ~0.53 s/action saturated.
+Expect ~35 s init warm-cached, then ~0.52 s/action saturated. Drop
+`--upscale2 lanczos` for the reference invocation (identical world state,
+native 368×672 output only) — this is exactly `./run_product.sh` vs
+`./run_product_2x.sh`.

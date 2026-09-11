@@ -689,3 +689,41 @@ Validate:
 - no accumulating causal drift.
 
 The final test is always the working interactive session: **did keypress → genuinely new visible world state get faster?**
+
+---
+
+## Experiment 2026-09-10 — static host-sync removal: REJECTED, code reverted
+
+Exact sync census (instrumented `.item()/.tolist()`, window-12 saturated, 3-step-A + clean, timecond ON):
+
+- Rolled action: 704 torch syncs (fill: 644). All reconciled per block-forward.
+- `causal_rope_apply` tolist 240/action is on a **CPU** tensor (~1 us each, no drain).
+- `frame_seqlen` and cross-attention `is_init` are already 0 on the hot path (existing flags).
+- Only real drains: dynamic KV-index `.item()`s (`model_fast.py:141` first-sync ~2.6 ms x120,
+  followers ~25 us) — explicitly out of scope for this experiment.
+- Removed as candidate: 240 rope tolists + 4 unpatchify tolists + 4 timecond-key items
+  (248/action, ~0.35 ms total exposure, ~0.1 ms of it real GPU drain).
+
+Bit-identity OFF vs ON (20 matched actions): x0 20/20, KV k/v 30/30 layers, cross k/v/init
+30/30, indices/trajectory/evict-at-12 equal, 121/121 TAE PNGs byte-identical (3 runs).
+
+A/B/A sandwich (31 scripted actions, rolled P50): next-ready off1 527.4 / on 529.3 / off2 527.6 ms;
+denoise 388.2/389.9/388.9; clean 127.6/128.6/127.2. P95 not improved. Delta within variance.
+
+Conclusion: sync count 704 -> 456 with no whole-action gain. The removed syncs never drained
+anything significant; the serialized ~2.6 ms/block drain lives entirely in the dynamic KV-index
+reads. VERDICT: REJECT (<5 ms bar). Code fully reverted (both trees verified byte-identical to
+pre-experiment state). No dynamic KV-mirror work started. Stage-2 pointer: the ~300 ms/action
+serialized drain is addressable only via Python-shadowed cache indices with its own proof.
+
+---
+
+## Experiment 2026-09-10 — Python KV cursor: REJECTED, code reverted
+
+Phase 0 proved a shared model-level cursor (30 layers identical, 2640/2640 shadow
+agreement). The opt-in candidate removed all 450 dynamic KV device reads
+(704 -> 254 syncs/action) with bit-exact results over 51 actions / 39 evictions.
+Whole-action effect ≈ 0 (next-ready P50 525.6/528.8/527.6 ms, P95 flat).
+Conclusion: dynamic host synchronization serializes critical-path GPU work and does
+not materially hurt whole-action latency. Implementation fully reverted (both trees
+verified byte-identical to pre-experiment state). Sync-removal work closed.

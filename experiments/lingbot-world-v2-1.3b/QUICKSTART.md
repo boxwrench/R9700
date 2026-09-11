@@ -38,10 +38,19 @@ Press-and-play (viewer + session, forge test scene):
 # open http://localhost:8734/ and press keys once the world is ready
 ```
 
-CLI equivalent with the fastest validated flags:
+Note: `play.sh` runs its own defaults (window 18, no timecond memo, no
+upscale) — great for playing, not the benchmarked product numbers below.
+
+Validated product stack (2× Lanczos presentation):
 
 ```sh
-./run_product.sh   # IMAGE= PROMPT= OUT= overrides; extra args append
+./run_product_2x.sh   # IMAGE= PROMPT= OUT= overrides; extra args append
+```
+
+Reference without upscale (same world state, native 368×672 output only):
+
+```sh
+./run_product.sh
 ```
 
 Raw form (reference defaults — conservative, slower; fast flags in
