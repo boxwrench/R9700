@@ -60,6 +60,15 @@ are stored in this repo. Absolute paths below refer to the Nautilus box.
 - Open item: hand-written SK1 kernel never loads on Linux
   (`ctypes.WinDLL` in loader). Fix + upstream PR pending; fallback kernel
   (PR #368 path) is what the gate measured.
+- 2026-10-02: Linux loader port written, validated, and proposed upstream
+  as https://github.com/IxMxAMAR/SageAttention-RDNA4/pull/1 (PR #1, one
+  file, +80/-12, branch `linux-sk1-loader` on boxwrench/SageAttention-RDNA4).
+  Evidence: 41/41 backend tests pass, handle_equal True on one HIP image,
+  strict-mode H3 render completes (fallback would raise), warm medians
+  Sage 83.5 s vs SDPA 109.4 s on neutral 124f content, same-seed PSNR
+  15.2/18.9/17.1 dB per the repo's trajectory-divergence caveat. No
+  likeness frames used anywhere in the evidence. Local notes:
+  `/ai/tools/sage-rdna4/sage-PR.md`.
 - Author's own numbers: 5-14% faster steps in real renders; VRAM savings
   unpublished, estimated low single-digit GB on our 16k-token workload.
 
