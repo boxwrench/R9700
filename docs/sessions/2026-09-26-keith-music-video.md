@@ -39,7 +39,7 @@ are stored in this repo. Absolute paths below refer to the Nautilus box.
 | Acc-8Step pruned (1.7 GB) | — | BLOCKED, Turbo node rejects its adaln entries on this base |
 | w6a8 ref2va base (14.89 GB, on disk) | — | BLOCKED, ComfyUI 0.33.2 loader predates `w6a8_int8` quant |
 
-## SageAttention RDNA4 (in flight at time of writing)
+## SageAttention RDNA4 (decided 2026-10-01: ADOPTED as standard)
 
 - Source: https://github.com/IxMxAMAR/SageAttention-RDNA4 (Windows-focused).
 - Local build: `/ai/tools/sage-rdna4/SageAttention-RDNA4`, wheel
@@ -53,6 +53,13 @@ are stored in this repo. Absolute paths below refer to the Nautilus box.
   adds `--use-sage-attention` plus the bypass env. Verified active in the
   unit log ("Using sage attention"). Remove the file + daemon-reload +
   restart to return to SDPA. A/B gate (identical clip 2) was running.
+- Gate result (warm, identical recipe, seed 777005): 400.5 s vs 629.8 s
+  SDPA, 1.57x pace. File `keith-turbo-clip2-sage_00001_.mp4` (Desktop
+  `06-sage-gate.mp4`). User verdict 2026-10-01: quality identical.
+  Standard moved to Sage; per-clip expectation drops from ~10.5 to ~6.7 min.
+- Open item: hand-written SK1 kernel never loads on Linux
+  (`ctypes.WinDLL` in loader). Fix + upstream PR pending; fallback kernel
+  (PR #368 path) is what the gate measured.
 - Author's own numbers: 5-14% faster steps in real renders; VRAM savings
   unpublished, estimated low single-digit GB on our 16k-token workload.
 
